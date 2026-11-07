@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>أميتشي للشحن والتوصيل</title>
+  <meta name="theme-color" content="#1e293b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #2563eb;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 85px; -webkit-tap-highlight-color: transparent; }
+    
+    header { background: var(--card); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .header-top h1 { font-size: 1.1rem; font-weight: bold; color: #38bdf8; }
+    .header-buttons { display: flex; gap: 8px; }
+    .btn-header { background: #334155; border: 1px solid #475569; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .btn-scan { background: #0284c7; border-color: #38bdf8; }
+
+    .search-bar-box { display: flex; gap: 8px; margin-bottom: 10px; }
+    .search-input { flex: 1; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; outline: none; }
+    .search-input:focus { border-color: #38bdf8; }
+
+    .courier-selector-box { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.25); padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); }
+    .courier-selector-box label { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; }
+    .courier-select { background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; width: 100%; outline: none; }
+
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px; }
+    .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; }
+    .kpi-card .val { font-size: 1.3rem; font-weight: 800; color: #38bdf8; }
+    .kpi-card .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 3px; }
+
+    .shipments-container { padding: 0 16px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); transition: all 0.3s ease; }
+    .card.highlighted-card { border: 2px solid #38bdf8; background: #1e3a5f; transform: scale(1.02); }
+    
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .code { font-weight: bold; font-size: 0.95rem; color: #38bdf8; }
+    .status-tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; }
+    .status-out_for_delivery { background: #1e3a8a; color: #93c5fd; }
+    .status-delivered { background: #14532d; color: #86efac; }
+    .status-rescheduled { background: #78350f; color: #fde68a; }
+    .status-returned { background: #7f1d1d; color: #fca5a5; }
+    
+    .recipient-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+    .address { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px; }
+    
+    .financials { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; }
+    .amount { font-weight: bold; color: #4ade80; }
+
+    .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 8px; text-decoration: none; text-align: center; font-size: 0.85rem; font-weight: 600; display: block; }
+    
+    .status-actions { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 6px; }
+    .btn-act { border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; color: #fff; }
+    .btn-deliver { background: var(--success); }
+    .btn-reschedule { background: var(--warning); }
+    .btn-return { background: var(--danger); }
+
+    .settlement-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 40; }
+    .btn-settle { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
+    .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 440px; padding: 18px; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .btn-close-modal { background: transparent; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; }
+
+    #scannerRegion { width: 100%; border-radius: 12px; overflow: hidden; background: #000; min-height: 250px; }
+    .scanner-tip { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 10px; }
+
+    .dropzone { border: 2px dashed #475569; border-radius: 12px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
+    .btn-submit-upload { background: var(--success); color: white; width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 0.95rem; font-weight: bold; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <h1>أميتشي إكسبريس</h1>
+      <div class="header-buttons">
+        <button class="btn-header btn-scan" onclick="openScannerModal()">📷 مسح باركود</button>
+        <button class="btn-header" onclick="openUploadModal()">📁 رفع شيت</button>
+      </div>
+    </div>
+
+    <div class="search-bar-box">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 بحث بكود الشحنة، الاسم، أو الهاتف..." oninput="handleSearch()">
+    </div>
+
+    <div class="courier-selector-box">
+      <label for="courierFilter">👤 المندوب:</label>
+      <select id="courierFilter" class="courier-select" onchange="onCourierChange()">
+        <option value="all">عرض كل المناديب (الإدارة)</option>
+        <option value="a0000000-0000-0000-0000-000000000004">مينا عبد النور</option>
+        <option value="a0000000-0000-0000-0000-000000000001">أحمد</option>
+        <option value="a0000000-0000-0000-0000-000000000002">محمد محمود (العجمي والدخيلة)</option>
+        <option value="a0000000-0000-0000-0000-000000000003">إسلام فتحي (شرق)</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="val" id="kpiDelivered">0</div>
+      <div class="lbl">شحنات مسلّمة</div>
+    </div>
+    <div class="kpi-card">
+      <div class="val" id="kpiCash">0 ج.م</div>
+      <div class="lbl">النقد المحصّل (COD)</div>
+    </div>
+  </div>
+
+  <div class="shipments-container" id="shipmentsList">
+    <p style="text-align: center; color: var(--text-muted); margin-top: 20px;">جارٍ جلب الشحنات من السيرفر...</p>
+  </div>
+
+  <div class="settlement-bar">
+    <div>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">المبلغ المعلق للوردية</div>
+      <div style="font-weight: bold; color: #4ade80;" id="settleCashBottom">0 ج.م</div>
+    </div>
+    <button class="btn-settle" onclick="requestSettlement()">تصفية الوردية 💰</button>
+  </div>
+
+  <div class="modal-overlay" id="scannerModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📷 توجيه الكاميرا نحو الباركود / QR</span>
+        <button class="btn-close-modal" onclick="closeScannerModal()">✕</button>
+      </div>
+      <div id="scannerRegion"></div>
+      <p class="scanner-tip">وجّه عدسة الكاميرا نحو باركود البوليصة وسيتم فتح الشحنة فوراً.</p>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>رفع وتوزيع شيت الشحنات</span>
+        <button class="btn-close-modal" onclick="closeUploadModal()">✕</button>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">إسناد الشحنات المرفوعة إلى:</label>
+        <select id="assignCourierSelect" class="courier-select">
+          <option value="a0000000-0000-0000-0000-000000000004">مينا عبد النور</option>
+          <option value="a0000000-0000-0000-0000-000000000002">محمد محمود (العجمي والدخيلة)</option>
+          <option value="a0000000-0000-0000-0000-000000000001">أحمد</option>
+          <option value="a0000000-0000-0000-0000-000000000003">إسلام فتحي (شرق)</option>
+        </select>
+      </div>
+
+      <div class="dropzone" onclick="document.getElementById('excelFileInput').click()">
+        <p style="font-size: 2rem; margin-bottom: 8px;">📊</p>
+        <p style="font-size: 0.9rem; font-weight: 600;" id="fileChosenText">اضغط لاختيار ملف Excel أو CSV</p>
+        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">يدعم (.xlsx / .xls / .csv)</p>
+      </div>
+      <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleFileSelect(event)">
+      <button class="btn-submit-upload" id="uploadBtn" onclick="processAndUpload()" disabled style="opacity: 0.5;">رفع وتوزيع الشحنات</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://difabkjpyypaylnofbcl.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let shipmentsData = [];
+    let filteredShipments = [];
+    let parsedRowsToUpload = [];
+    let html5QrScanner = null;
+
+    const savedCourier = localStorage.getItem('amici_selected_courier');
+    if (savedCourier) {
+      document.getElementById('courierFilter').value = savedCourier;
+    }
+
+    function onCourierChange() {
+      const selected = document.getElementById('courierFilter').value;
+      localStorage.setItem('amici_selected_courier', selected);
+      loadShipments();
+    }
+
+    async function loadShipments() {
+      const selectedCourier = document.getElementById('courierFilter').value;
+      let query = supabaseClient.from('shipments').select('*').order('created_at', { ascending: false });
+
+      if (selectedCourier !== 'all') {
+        query = query.eq('courier_id', selectedCourier);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        alert('حدث خطأ أثناء تحميل البيانات: ' + error.message);
+        return;
+      }
+
+      shipmentsData = data || [];
+      filteredShipments = shipmentsData;
+      render();
+    }
+
+    function handleSearch() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (!q) {
+        filteredShipments = shipmentsData;
+      } else {
+        filteredShipments = shipmentsData.filter(s => {
+          const code = String(s.tracking_code || '').toLowerCase();
+          const name = String(s.recipient_name || '').toLowerCase();
+          const phone = String(s.recipient_phone || '').toLowerCase();
+          const addr = String(s.delivery_address || '').toLowerCase();
+          return code.includes(q) || name.includes(q) || phone.includes(q) || addr.includes(q);
+        });
+      }
+      render();
+    }
+
+    function render(highlightId = null) {
+      const container = document.getElementById('shipmentsList');
+      container.innerHTML = '';
+
+      if (!filteredShipments || filteredShipments.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">لا توجد شحنات مطابقة.</p>';
+        document.getElementById('kpiDelivered').innerText = 0;
+        document.getElementById('kpiCash').innerText = '0 ج.م';
+        document.getElementById('settleCashBottom').innerText = '0 ج.م';
+        return;
+      }
+
+      let deliveredCount = 0;
+      let totalCash = 0;
+
+      filteredShipments.forEach(shipment => {
+        if (shipment.status === 'delivered') {
+          deliveredCount++;
+          totalCash += Number(shipment.cod_amount || 0);
+        }
+
+        const isDelivered = shipment.status === 'delivered';
+        const isHighlighted = shipment.id === highlightId;
+
+        const card = document.createElement('div');
+        card.id = `shipment-card-${shipment.id}`;
+        card.className = `card ${isHighlighted ? 'highlighted-card' : ''}`;
+        card.innerHTML = `
+          <div class="card-head">
+            <span class="code">🏷️ ${shipment.tracking_code || 'بدون كود'}</span>
+            <span class="status-tag status-${shipment.status}">
+              ${shipment.status === 'delivered' ? 'تم التسليم ✓' : (shipment.status === 'rescheduled' ? 'مؤجل' : (shipment.status === 'returned' ? 'مرتجع' : 'قيد التوصيل'))}
+            </span>
+          </div>
+          <div class="recipient-name">${shipment.recipient_name || 'بدون اسم'}</div>
+          <div class="address">${shipment.delivery_address || ''} ${shipment.delivery_zone ? '(' + shipment.delivery_zone + ')' : ''}</div>
+          
+          <div class="financials">
+            <span>المطلوب تحصيله:</span>
+            <span class="amount">${shipment.cod_amount || 0} ج.م</span>
+          </div>
+
+          <div class="quick-actions">
+            <a href="tel:${shipment.recipient_phone}" class="btn-outline">📞 اتصال</a>
+            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(shipment.delivery_address || '')}" target="_blank" class="btn-outline">🗺️ الخريطة</a>
+          </div>
+
+          ${!isDelivered ? `
+          <div class="status-actions">
+            <button class="btn-act btn-deliver" onclick="updateStatus('${shipment.id}', 'delivered')">تم التسليم ✓</button>
+            <button class="btn-act btn-reschedule" onclick="updateStatus('${shipment.id}', 'rescheduled')">تأجيل</button>
+            <button class="btn-act btn-return" onclick="updateStatus('${shipment.id}', 'returned')">رفض</button>
+          </div>
+          ` : '<div style="text-align:center; font-size:0.85rem; color:#86efac; padding-top:4px;">تم تسليم هذا الطرد واحتسابه في الوردية</div>'}
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('kpiDelivered').innerText = deliveredCount;
+      document.getElementById('kpiCash').innerText = totalCash + ' ج.م';
+      document.getElementById('settleCashBottom').innerText = totalCash + ' ج.م';
+
+      if (highlightId) {
+        setTimeout(() => {
+          const el = document.getElementById(`shipment-card-${highlightId}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 150);
+      }
+    }
+
+    async function updateStatus(id, newStatus) {
+      const { error } = await supabaseClient
+        .from('shipments')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (error) {
+        alert('خطأ أثناء التحديث: ' + error.message);
+        return;
+      }
+
+      loadShipments();
+    }
+
+    async function requestSettlement() {
+      const deliveredShipments = (shipmentsData || []).filter(s => s.status === 'delivered');
+      if (deliveredShipments.length === 0) {
+        alert('لا توجد شحنات مسلّمة لتصفيتها لهذا المندوب بعد.');
+        return;
+      }
+
+      const total = deliveredShipments.reduce((sum, s) => sum + Number(s.cod_amount || 0), 0);
+      alert(`إجمالي النقد المسلّم للخزينة: ${total} ج.م عن عدد ${deliveredShipments.length} شحنة مسلّمة.`);
+    }
+
+    function openScannerModal() {
+      document.getElementById('scannerModal').style.display = 'flex';
+      html5QrScanner = new Html5Qrcode("scannerRegion");
+      const config = { fps: 15, qrbox: { width: 280, height: 180 } };
+
+      html5QrScanner.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        () => {}
+      ).catch(err => {
+        alert("تعذر تشغيل الكاميرا، يرجى التأكد من إعطاء إذن الكاميرا للمتصفح: " + err);
+        closeScannerModal();
+      });
+    }
+
+    function closeScannerModal() {
+      if (html5QrScanner) {
+        html5QrScanner.stop().then(() => {
+          html5QrScanner.clear();
+          html5QrScanner = null;
+        }).catch(() => {
+          html5QrScanner = null;
+        });
+      }
+      document.getElementById('scannerModal').style.display = 'none';
+    }
+
+    function onScanSuccess(decodedText) {
+      if (navigator.vibrate) navigator.vibrate(100);
+      const cleanedCode = decodedText.trim().replace(/^#/, '');
+      closeScannerModal();
+
+      const found = shipmentsData.find(s => {
+        const sc = String(s.tracking_code || '').trim().replace(/^#/, '');
+        return sc.includes(cleanedCode) || cleanedCode.includes(sc);
+      });
+
+      if (found) {
+        filteredShipments = [found];
+        document.getElementById('searchInput').value = found.tracking_code;
+        render(found.id);
+      } else {
+        alert(`تم مسح الكود: (${decodedText})\nولكن لم يتم العثور على شحنة مطابقة في وردية هذا المندوب.`);
+      }
+    }
+
+    function openUploadModal() {
+      document.getElementById('uploadModal').style.display = 'flex';
+    }
+
+    function closeUploadModal() {
+      document.getElementById('uploadModal').style.display = 'none';
+      document.getElementById('fileChosenText').innerText = 'اضغط لاختيار ملف Excel أو CSV';
+      document.getElementById('uploadBtn').disabled = true;
+      document.getElementById('uploadBtn').style.opacity = '0.5';
+      document.getElementById('excelFileInput').value = '';
+      parsedRowsToUpload = [];
+    }
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      document.getElementById('fileChosenText').innerText = file.name;
+      const reader = new FileReader();
+
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet);
+
+          if (!json || json.length === 0) {
+            alert('الملف فارغ أو لا يحتوي على بيانات صحيحة.');
+            return;
+          }
+
+          const targetCourierId = document.getElementById('assignCourierSelect').value;
+
+          parsedRowsToUpload = json.map(row => ({
+            tracking_code: String(row['tracking_code'] || row['كود_الشحنة'] || row['الكود'] || 'SHP-' + Math.floor(1000 + Math.random() * 9000)),
+            recipient_name: String(row['recipient_name'] || row['اسم_العميل'] || row['الاسم'] || 'عميل بدون اسم'),
+            recipient_phone: String(row['recipient_phone'] || row['رقم_الهاتف'] || row['الموبايل'] || row['الهاتف'] || ''),
+            delivery_address: String(row['delivery_address'] || row['العنوان'] || ''),
+            delivery_zone: String(row['delivery_zone'] || row['المنطقة'] || ''),
+            cod_amount: Number(row['cod_amount'] || row['المبلغ'] || row['التحصيل'] || 0),
+            courier_id: row['courier_id'] || targetCourierId,
+            status: 'out_for_delivery'
+          }));
+
+          document.getElementById('uploadBtn').disabled = false;
+          document.getElementById('uploadBtn').style.opacity = '1';
+          document.getElementById('uploadBtn').innerText = `إسناد ورفع ${parsedRowsToUpload.length} شحنة`;
+        } catch (err) {
+          alert('خطأ في قراءة ملف الإكسيل: ' + err.message);
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    async function processAndUpload() {
+      if (parsedRowsToUpload.length === 0) return;
+
+      const uploadBtn = document.getElementById('uploadBtn');
+      uploadBtn.innerText = 'جارٍ الرفع والإسناد...';
+      uploadBtn.disabled = true;
+
+      const { data, error } = await supabaseClient
+        .from('shipments')
+        .insert(parsedRowsToUpload);
+
+      if (error) {
+        alert('حدث خطأ أثناء الرفع: ' + error.message);
+        uploadBtn.innerText = 'إعادة المحاولة';
+        uploadBtn.disabled = false;
+        return;
+      }
+
+      alert(`تم رفع وإسناد ${parsedRowsToUpload.length} شحنة بنجاح!`);
+      closeUploadModal();
+      loadShipments();
+    }
+
+    loadShipments();
+  </script>
+</body>
+</html>
