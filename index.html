@@ -1,91 +1,79 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>أميتشي للشحن والتوصيل</title>
-  <meta name="theme-color" content="#1e293b">
-
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>أميتشي للشحن</title>
   <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --border: #334155;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #2563eb;
-      --success: #16a34a;
-      --warning: #d97706;
-      --danger: #dc2626;
-      --purple: #8b5cf6;
-      --whatsapp: #25d366;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; }
-    
-    header { background: var(--card); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
-    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .header-top h1 { font-size: 1.05rem; font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 6px; }
-    .user-pill { font-size: 0.72rem; padding: 3px 7px; border-radius: 6px; background: #334155; color: #38bdf8; font-weight: normal; }
-
-    .header-buttons { display: flex; gap: 6px; }
-    .btn-header { background: #334155; border: 1px solid #475569; color: #fff; padding: 6px 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-    .btn-scan { background: #0284c7; border-color: #38bdf8; }
-    .btn-couriers { background: #475569; border-color: #64748b; }
-    .btn-logout { background: #1e293b; border-color: #475569; color: #94a3b8; }
-
-    .search-bar-box { display: flex; gap: 8px; margin-bottom: 10px; }
-    .search-input { flex: 1; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; outline: none; }
-
-    .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .selector-box { background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
-    .selector-box label { font-size: 0.75rem; color: var(--text-muted); }
-    .custom-select, .custom-date { background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 6px 8px; border-radius: 6px; font-size: 0.8rem; width: 100%; outline: none; }
-
-    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px; }
-    .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; }
-    .kpi-card .val { font-size: 1.3rem; font-weight: 800; color: #38bdf8; }
-    .kpi-card .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 3px; }
-
-    .shipments-container { padding: 0 16px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); }
-    
-    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .code-wrap { display: flex; align-items: center; gap: 8px; }
-    .order-rank { background: #334155; color: #38bdf8; font-size: 0.75rem; font-weight: bold; width: 22px; height: 22px; display: inline-flex; justify-content: center; align-items: center; border-radius: 50%; }
-    .code { font-weight: bold; font-size: 0.95rem; color: #38bdf8; }
-    
-    .status-tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
-    .status-out_for_delivery { background: #1e3a8a; color: #93c5fd; }
-    .status-delivered { background: #14532d; color: #86efac; }
-    .status-partial { background: #581c87; color: #e9d5ff; }
-    .status-shipping_only { background: #065f46; color: #a7f3d0; }
-    .status-rescheduled { background: #78350f; color: #fde68a; }
-    .status-returned { background: #7f1d1d; color: #fca5a5; }
-    
-    .recipient-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
-    .address { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 6px; }
-    
-    .financials { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.88rem; }
-    .amount { font-weight: bold; color: #4ade80; }
-    .collected-amount { color: #38bdf8; font-weight: bold; }
-
-    .quick-actions { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 6px; margin-bottom: 10px; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 7px 4px; border-radius: 8px; text-decoration: none; text-align: center; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
-    .btn-whatsapp { background: rgba(37, 211, 102, 0.15); border-color: #25d366; color: #25d366; }
-
-    .reorder-strip { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; }
-    .reorder-title { font-size: 0.72rem; color: var(--text-muted); }
-    .reorder-btns { display: flex; gap: 6px; }
-    .btn-reorder { background: #334155; border: 1px solid var(--border); color: #fff; width: 30px; height: 28px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-
-    .status-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .btn-act { border: none; padding: 8px 4px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; color: #fff; text-align: center; }
-    .btn-deliver { background: var(--success); grid-column: span 2; padding: 10px 4px; font-size: 0.85rem; }
-    .btn-partial { background: var(--purple); }
-    .btn-shipping-only { background: #0d9488; }
-    .btn-reschedule { background: var(--warning); }
-    .btn-return { background: var(--danger); }
-
-    .settlement-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 40; }
-    .btn-sett
+    :root { --bg:#0f172a; --card:#1e293b; --border:#334155; --text:#f8fafc; --muted:#94a3b8; --primary:#2563eb; --success:#16a34a; --warning:#d97706; --danger:#dc2626; --purple:#8b5cf6; }
+    * { box-sizing:border-box; margin:0; padding:0; font-family:system-ui,sans-serif; }
+    body { background:var(--bg); color:var(--text); padding-bottom:90px; }
+    header { background:var(--card); padding:10px 14px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50; }
+    .head-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+    .head-top h1 { font-size:1.05rem; color:#38bdf8; display:flex; align-items:center; gap:6px; }
+    .pill { font-size:0.75rem; padding:2px 8px; border-radius:6px; background:#334155; color:#38bdf8; }
+    .btn-h { background:#334155; border:1px solid #475569; color:#fff; padding:6px 10px; border-radius:8px; font-size:0.8rem; cursor:pointer; }
+    .search-input { width:100%; background:#0f172a; color:#fff; border:1px solid var(--border); padding:8px 12px; border-radius:8px; font-size:0.85rem; outline:none; margin-bottom:8px; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .sel-box { background:rgba(0,0,0,0.25); padding:6px 8px; border-radius:8px; border:1px solid var(--border); }
+    .sel-box label { font-size:0.72rem; color:var(--muted); display:block; margin-bottom:2px; }
+    .c-select, .c-date { width:100%; background:#0f172a; color:#fff; border:1px solid var(--border); padding:6px; border-radius:6px; font-size:0.8rem; outline:none; }
+    .kpi-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:10px 14px; }
+    .kpi-c { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px; text-align:center; }
+    .kpi-val { font-size:1.2rem; font-weight:bold; color:#38bdf8; }
+    .kpi-lbl { font-size:0.72rem; color:var(--muted); }
+    .list-c { padding:0 14px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; }
+    .c-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .code { color:#38bdf8; font-weight:bold; font-size:0.92rem; }
+    .badge { font-size:0.72rem; padding:2px 6px; border-radius:4px; font-weight:600; }
+    .b-out_for_delivery { background:#1e3a8a; color:#93c5fd; } .b-delivered { background:#14532d; color:#86efac; } .b-partial { background:#581c87; color:#e9d5ff; } .b-shipping_only { background:#065f46; color:#a7f3d0; } .b-rescheduled { background:#78350f; color:#fde68a; } .b-returned { background:#7f1d1d; color:#fca5a5; }
+    .name { font-size:1rem; font-weight:600; } .addr { font-size:0.82rem; color:var(--muted); margin:4px 0; }
+    .fin { background:rgba(0,0,0,0.25); border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; font-size:0.85rem; margin:6px 0; }
+    .acts { display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:6px; margin:8px 0; }
+    .btn-act { background:transparent; border:1px solid var(--border); color:#fff; padding:6px; border-radius:6px; text-decoration:none; text-align:center; font-size:0.8rem; font-weight:bold; }
+    .btn-wa { background:rgba(37,211,102,0.15); border-color:#25d366; color:#25d366; }
+    .status-btns { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+    .btn-s { border:none; padding:7px; border-radius:6px; font-weight:bold; font-size:0.75rem; cursor:pointer; color:#fff; }
+    .reorder { display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:6px; margin-top:8px; font-size:0.75rem; color:var(--muted); }
+    .btn-r { background:#334155; border:1px solid var(--border); color:#fff; width:28px; height:26px; border-radius:4px; cursor:pointer; }
+    .foot-bar { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; z-index:40; }
+    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; justify-content:center; align-items:center; padding:14px; }
+    .m-box { background:var(--card); border:1px solid var(--border); border-radius:12px; width:100%; max-width:400px; padding:16px; }
+    .m-title { font-weight:bold; margin-bottom:10px; display:flex; justify-content:space-between; }
+    .m-input { width:100%; background:#0f172a; color:#fff; border:1px solid var(--border); padding:8px; border-radius:6px; margin:8px 0; outline:none; }
+    .btn-m { width:100%; background:var(--primary); color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="head-top">
+      <h1>أميتشي إكسبريس <span id="uName" class="pill">👑 المدير</span></h1>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-h" id="btnAdmin" onclick="openCouriers()">👥 المناديب</button>
+        <button class="btn-h" onclick="openLogin()">🔄 الحساب</button>
+      </div>
+    </div>
+    <input type="text" id="q" class="search-input" placeholder="🔍 بحث بكود الشحنة أو الاسم..." oninput="render()">
+    <div class="grid2">
+      <div class="sel-box"><label>👤 المندوب:</label><select id="cFilter" class="c-select" onchange="loadShipments()"></select></div>
+      <div class="sel-box"><label>📅 تاريخ الوردية:</label><input type="date" id="dFilter" class="c-date" onchange="render()"></div>
+    </div>
+  </header>
+  <div class="kpi-row">
+    <div class="kpi-c"><div class="kpi-val" id="kCount">0</div><div class="kpi-lbl">شحنات منجزة</div></div>
+    <div class="kpi-c"><div class="kpi-val" id="kCash">0 ج.م</div><div class="kpi-lbl">نقدية محصلة (COD)</div></div>
+  </div>
+  <div class="list-c" id="sList"><p style="text-align:center;color:var(--muted);margin-top:20px;">جارٍ جلب الشحنات...</p></div>
+  <div class="foot-bar">
+    <div><div style="font-size:0.75rem;color:var(--muted);">العهدة المحصلة:</div><div style="color:#4ade80;font-weight:bold;" id="fCash">0 ج.م</div></div>
+    <button class="btn-s" style="background:var(--primary);padding:8px 14px;" onclick="settle()">تصفية الوردية 💰</button>
+  </div>
+  <!-- نافذة تسجيل الدخول برقم سري -->
+  <div class="modal" id="mLogin"><div class="m-box"><div class="m-title"><span>🔐 تسجيل الدخول</span><span style="cursor:pointer;" onclick="closeM('mLogin')">✕</span></div><label style="font-size:0.8rem;color:var(--muted);">اختر الحساب:</label><select id="lUser" class="c-select" style="margin:6px 0;"></select><label style="font-size:0.8rem;color:var(--muted);">الرقم السري (PIN):</label><input type="password" id="lPin" class="m-input" placeholder="****"><button class="btn-m" onclick="login()">دخول ➜</button></div></div>
+  <!-- نافذة إدارة المناديب -->
+  <div class="modal" id="mCour"><div class="m-box"><div class="m-title"><span>👥 المناديب وأرقام السر</span><span style="cursor:pointer;" onclick="closeM('mCour')">✕</span></div><input type="text" id="newCName" class="m-input" placeholder="اسم المندوب"><input type="password" id="newCPin" class="m-input" placeholder="رقم سري (PIN)"><button class="btn-m" style="background:var(--success);margin-bottom:12px;" onclick="addCour()">+ إضافة مندوب</button><div id="courList" style="max-height:160px;overflow-y:auto;"></div></div></div>
+  <!-- نافذة استلام جزئي -->
+  <div class="modal" id="mPart"><div class="m-box"><div class="m-title"><span>📦 استلام جزئي</span><span style="cursor:pointer;" onclick="closeM('mPart')">✕</span></div><input type="hidden" id="pId"><input type="number" id="pAmt" class="m-input" placeholder="المبلغ الفعلي المحصل (ج.م)"><button class="btn-m" style="background:var(--purple);" onclick="savePart()">تأكيد الاستلام الجزئي</button></div></div>
+  <!-- نافذة تأجيل -->
+  <div class="modal" id="mResched"><div class="m-box"><div class="m-title"><span>📅 تأجيل الموعد</span><span style="cursor:pointer;" onclick="closeM('mResched')">✕</span></div><input type="
+                                                                                                                                                                                 
