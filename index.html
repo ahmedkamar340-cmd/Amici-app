@@ -23,23 +23,17 @@
       --warning: #d97706;
       --danger: #dc2626;
       --purple: #8b5cf6;
-      --whatsapp: #25d366;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; -webkit-tap-highlight-color: transparent; }
     
     header { background: var(--card); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .header-top h1 { font-size: 1.05rem; font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 6px; }
-    .role-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: normal; }
-    .badge-admin { background: #b91c1c; color: #fff; }
-    .badge-courier { background: #0369a1; color: #fff; }
-
+    .header-top h1 { font-size: 1.05rem; font-weight: bold; color: #38bdf8; }
     .header-buttons { display: flex; gap: 6px; }
     .btn-header { background: #334155; border: 1px solid #475569; color: #fff; padding: 6px 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
     .btn-scan { background: #0284c7; border-color: #38bdf8; }
     .btn-couriers { background: #475569; border-color: #64748b; }
-    .btn-switch-user { background: #1e293b; border-color: #475569; color: #cbd5e1; }
 
     .search-bar-box { display: flex; gap: 8px; margin-bottom: 10px; }
     .search-input { flex: 1; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; outline: none; }
@@ -81,12 +75,9 @@
     .amount { font-weight: bold; color: #4ade80; }
     .collected-amount { color: #38bdf8; font-weight: bold; }
 
-    /* شريط الاتصال السريع (اتصال - واتساب - خريطة) */
-    .quick-actions { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 6px; margin-bottom: 10px; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 7px 4px; border-radius: 8px; text-decoration: none; text-align: center; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
-    .btn-whatsapp { background: rgba(37, 211, 102, 0.12); border-color: #25d366; color: #25d366; }
-    .btn-whatsapp:hover { background: #25d366; color: #000; }
-
+    .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 7px; border-radius: 8px; text-decoration: none; text-align: center; font-size: 0.82rem; font-weight: 600; display: block; }
+    
     .reorder-strip { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; }
     .reorder-title { font-size: 0.72rem; color: var(--text-muted); }
     .reorder-btns { display: flex; gap: 6px; }
@@ -122,27 +113,17 @@
     .courier-list-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; }
     .courier-item-name { font-size: 0.85rem; font-weight: 600; }
     .btn-del-courier { background: #7f1d1d; border: 1px solid #ef4444; color: #fff; border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; }
-
-    /* نافذة اختيار المستخدم / تسجيل الدخول */
-    .user-select-btn { width: 100%; background: #1e293b; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; cursor: pointer; text-align: right; display: flex; justify-content: space-between; align-items: center; }
-    .user-select-btn:hover { border-color: #38bdf8; background: #0f172a; }
   </style>
 </head>
 <body>
 
   <header>
     <div class="header-top">
-      <h1>
-        <span>أميتشي إكسبريس</span>
-        <span id="roleBadge" class="role-badge"></span>
-      </h1>
+      <h1>أميتشي إكسبريس</h1>
       <div class="header-buttons">
-        <!-- أزرار تظهر فقط للأدمن (أحمد) -->
-        <button class="btn-header btn-couriers" id="btnAdminCouriers" onclick="openCouriersModal()" style="display:none;">👥 المناديب</button>
-        <button class="btn-header" id="btnAdminUpload" onclick="openUploadModal()" style="display:none;">📁 رفع شيت</button>
-        
-        <button class="btn-header btn-scan" onclick="openScannerModal()">📷 باركود</button>
-        <button class="btn-header btn-switch-user" onclick="openLoginModal()" title="تبديل المستخدم">🔄 الحساب</button>
+        <button class="btn-header btn-couriers" onclick="openCouriersModal()">👥 المناديب</button>
+        <button class="btn-header btn-scan" onclick="openScannerModal()">📷 مسح باركود</button>
+        <button class="btn-header" onclick="openUploadModal()">📁 رفع شيت</button>
       </div>
     </div>
 
@@ -153,7 +134,9 @@
     <div class="filter-grid">
       <div class="selector-box">
         <label for="courierFilter">👤 المندوب:</label>
-        <select id="courierFilter" class="custom-select" onchange="onFilterChange()"></select>
+        <select id="courierFilter" class="custom-select" onchange="onFilterChange()">
+          <option value="all">عرض كل المناديب</option>
+        </select>
       </div>
 
       <div class="selector-box">
@@ -186,37 +169,11 @@
     <button class="btn-settle" onclick="requestSettlement()">تصفية الوردية 💰</button>
   </div>
 
-  <!-- نافذة تسجيل الدخول وتحديد المستخدم -->
-  <div class="modal-overlay" id="loginModal">
-    <div class="modal-box">
-      <div class="modal-title">
-        <span>🔐 تحديد هوية المستخدم</span>
-      </div>
-      <div class="badge-notice">اختر صفتك للدخول إلى النظام:</div>
-
-      <button class="user-select-btn" onclick="showAdminPinInput()" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.1);">
-        <span>👑 الإدارة العامة (المدير فقط)</span>
-        <span>🔑</span>
-      </button>
-
-      <div id="adminPinBox" style="display: none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border);">
-        <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:4px;">أدخل رمز الأمان للمدير (الافتراضي 1234):</label>
-        <div style="display:flex; gap:6px;">
-          <input type="password" id="adminPinInput" class="form-control" placeholder="****" maxlength="8">
-          <button class="btn-modal-action" style="width: auto; padding: 0 14px; background: var(--danger);" onclick="verifyAdminPin()">دخول</button>
-        </div>
-      </div>
-
-      <div style="margin: 14px 0 8px 0; font-size: 0.8rem; color: var(--text-muted);">أو اختر اسم المندوب لعرض خط سيره فقط:</div>
-      <div id="courierLoginList"></div>
-    </div>
-  </div>
-
-  <!-- نافذة إدارة المناديب للمدير فقط -->
+  <!-- نافذة إدارة المناديب -->
   <div class="modal-overlay" id="couriersModal">
     <div class="modal-box">
       <div class="modal-title">
-        <span>👥 إدارة المناديب (خاص بالمدير)</span>
+        <span>👥 إدارة المناديب وطاقم التوصيل</span>
         <button class="btn-close-modal" onclick="closeModal('couriersModal')">✕</button>
       </div>
 
@@ -228,19 +185,11 @@
       </div>
 
       <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:8px;">قائمة المناديب الحاليين:</label>
-      <div id="couriersListContainer" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
-
-      <div style="border-top: 1px solid var(--border); padding-top: 10px;">
-        <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">تغيير رمز PIN السري للمدير:</label>
-        <div style="display:flex; gap:6px;">
-          <input type="password" id="newAdminPinInput" class="form-control" placeholder="رمز PIN جديد">
-          <button class="btn-modal-action" style="width: auto; padding: 0 12px; background: #475569;" onclick="changeAdminPin()">تحديث الرمز</button>
-        </div>
-      </div>
+      <div id="couriersListContainer" style="max-height: 200px; overflow-y: auto; margin-bottom: 10px;"></div>
     </div>
   </div>
 
-  <!-- نافذة قارئ الباركود/QR -->
+  <!-- نافذة الكاميرا وقارئ الباركود/QR -->
   <div class="modal-overlay" id="scannerModal">
     <div class="modal-box">
       <div class="modal-title">
@@ -340,4 +289,68 @@
       </div>
       <div class="form-group">
         <label>📍 العنوان:</label>
-        <input type="text" id="new
+        <input type="text" id="newDeliveryAddress" class="form-control" placeholder="المنطقة - الشارع - رقم العقار">
+      </div>
+      <div class="filter-grid" style="margin-bottom:10px;">
+        <div class="form-group">
+          <label>🗺️ المنطقة:</label>
+          <input type="text" id="newDeliveryZone" class="form-control" placeholder="العجمي / البيطاش">
+        </div>
+        <div class="form-group">
+          <label>💵 التحصيل (COD):</label>
+          <input type="number" id="newCodAmount" class="form-control" placeholder="0" style="color:#4ade80; font-weight:bold;">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:15px;">
+        <label>🚴 إسناد إلى المندوب:</label>
+        <select id="newCourierId" class="form-control"></select>
+      </div>
+      <button class="btn-modal-action" style="background:var(--success);" id="saveNewShipmentBtn" onclick="saveScannedShipment()">✓ حفظ وإضافة الشحنة للوردية</button>
+    </div>
+  </div>
+
+  <!-- نافذة رفع الإكسيل -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>رفع وتوزيع شيت الشحنات</span>
+        <button class="btn-close-modal" onclick="closeModal('uploadModal')">✕</button>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">إسناد الشحنات المرفوعة إلى:</label>
+        <select id="assignCourierSelect" class="custom-select"></select>
+      </div>
+      <div class="dropzone" onclick="document.getElementById('excelFileInput').click()">
+        <p style="font-size: 2rem; margin-bottom: 8px;">📊</p>
+        <p style="font-size: 0.9rem; font-weight: 600;" id="fileChosenText">اضغط لاختيار ملف Excel أو CSV</p>
+        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">يدعم (.xlsx / .xls / .csv)</p>
+      </div>
+      <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleFileSelect(event)">
+      <button class="btn-modal-action" style="background: var(--success);" id="uploadBtn" onclick="processAndUpload()" disabled style="opacity: 0.5;">رفع وتوزيع الشحنات</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://difabkjpyypaylnofbcl.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
+    
+    let supabaseClient = null;
+    try {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch(e) {
+      console.error(e);
+    }
+
+    const DEFAULT_COURIERS = [
+      { id: "a0000000-0000-0000-0000-000000000004", name: "مينا عبد النور" },
+      { id: "a0000000-0000-0000-0000-000000000001", name: "أحمد" },
+      { id: "a0000000-0000-0000-0000-000000000002", name: "محمد محمود (العجمي والدخيلة)" },
+      { id: "a0000000-0000-0000-0000-000000000003", name: "إسلام فتحي (شرق)" }
+    ];
+
+    function getCouriers() {
+      const stored = localStorage.getItem('amici_custom_couriers');
+      if (stored) {
+        try { return JSON.parse(stored); } catch(e) {}
+      }
+      re
