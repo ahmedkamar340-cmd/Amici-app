@@ -33,10 +33,12 @@
     .btn-header { background: #334155; border: 1px solid #475569; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
     .btn-scan { background: #0284c7; border-color: #38bdf8; }
 
+    /* مربع البحث اليدوي والمسح */
     .search-bar-box { display: flex; gap: 8px; margin-bottom: 10px; }
     .search-input { flex: 1; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; outline: none; }
     .search-input:focus { border-color: #38bdf8; }
 
+    /* شريط الفلاتر: المندوب والتاريخ */
     .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .selector-box { background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
     .selector-box label { font-size: 0.75rem; color: var(--text-muted); }
@@ -79,6 +81,7 @@
     .settlement-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 40; }
     .btn-settle { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
+    /* النوافذ المنبثقة (Modal) */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
     .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 440px; padding: 18px; max-height: 90vh; overflow-y: auto; }
     .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -90,6 +93,7 @@
     .dropzone { border: 2px dashed #475569; border-radius: 12px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
     .btn-submit-upload { background: var(--success); color: white; width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 0.95rem; font-weight: bold; cursor: pointer; }
 
+    /* استمارة إضافة شحنة جديدة */
     .form-group { margin-bottom: 10px; }
     .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
     .form-control { width: 100%; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; font-size: 0.85rem; outline: none; }
@@ -108,10 +112,12 @@
       </div>
     </div>
 
+    <!-- شريط البحث السريع بالرقم أو الاسم -->
     <div class="search-bar-box">
       <input type="text" id="searchInput" class="search-input" placeholder="🔍 بحث بكود الشحنة، الاسم، أو الهاتف..." oninput="filterAndRender()">
     </div>
 
+    <!-- فلاتر المندوب والتاريخ -->
     <div class="filter-grid">
       <div class="selector-box">
         <label for="courierFilter">👤 المندوب:</label>
@@ -154,6 +160,7 @@
     <button class="btn-settle" onclick="requestSettlement()">تصفية الوردية 💰</button>
   </div>
 
+  <!-- نافذة الكاميرا وقارئ الباركود/QR -->
   <div class="modal-overlay" id="scannerModal">
     <div class="modal-box">
       <div class="modal-title">
@@ -165,6 +172,7 @@
     </div>
   </div>
 
+  <!-- نافذة إضافة شحنة جديدة بالمسح الفوري -->
   <div class="modal-overlay" id="addScannedModal">
     <div class="modal-box">
       <div class="modal-title">
@@ -220,6 +228,7 @@
     </div>
   </div>
 
+  <!-- نافذة رفع الإكسيل -->
   <div class="modal-overlay" id="uploadModal">
     <div class="modal-box">
       <div class="modal-title">
@@ -300,7 +309,7 @@
 
     function normalizeCode(str) {
       if (!str) return '';
-      return String(str).replace(/[#\\s-]/g, '').trim().toLowerCase();
+      return String(str).replace(/[#\s-]/g, '').trim().toLowerCase();
     }
 
     function filterAndRender(highlightId = null) {
@@ -387,8 +396,4 @@
             <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(shipment.delivery_address || '')}" target="_blank" class="btn-outline">🗺️ الخريطة</a>
           </div>
 
-          ${!isDelivered ? `
-          <div class="status-actions">
-            <button class="btn-act btn-deliver" onclick="updateStatus('${shipment.id}', 'delivered')">تم التسليم ✓</button>
-            <button class="btn-act btn-reschedule" onclick="updateStatus('${shipment.id}', 'rescheduled')">تأجيل</button>
-            <button class="btn-act btn-r
+     
