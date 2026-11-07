@@ -22,9 +22,10 @@
       --success: #16a34a;
       --warning: #d97706;
       --danger: #dc2626;
+      --purple: #8b5cf6;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding-bottom: 85px; -webkit-tap-highlight-color: transparent; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; -webkit-tap-highlight-color: transparent; }
     
     header { background: var(--card); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
     .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -33,12 +34,10 @@
     .btn-header { background: #334155; border: 1px solid #475569; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
     .btn-scan { background: #0284c7; border-color: #38bdf8; }
 
-    /* مربع البحث اليدوي والمسح */
     .search-bar-box { display: flex; gap: 8px; margin-bottom: 10px; }
     .search-input { flex: 1; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; outline: none; }
     .search-input:focus { border-color: #38bdf8; }
 
-    /* شريط الفلاتر: المندوب والتاريخ */
     .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .selector-box { background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
     .selector-box label { font-size: 0.75rem; color: var(--text-muted); }
@@ -51,54 +50,66 @@
     .kpi-card .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 3px; }
 
     .shipments-container { padding: 0 16px; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); transition: all 0.3s ease; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); transition: all 0.3s ease; position: relative; }
     .card.highlighted-card { border: 2px solid #38bdf8; background: #1e3a5f; transform: scale(1.02); }
     
     .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .code-wrap { display: flex; align-items: center; gap: 8px; }
+    .order-rank { background: #334155; color: #38bdf8; font-size: 0.75rem; font-weight: bold; width: 22px; height: 22px; display: inline-flex; justify-content: center; align-items: center; border-radius: 50%; }
     .code { font-weight: bold; font-size: 0.95rem; color: #38bdf8; }
-    .status-tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; }
+    
+    .status-tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
     .status-out_for_delivery { background: #1e3a8a; color: #93c5fd; }
     .status-delivered { background: #14532d; color: #86efac; }
+    .status-partial { background: #581c87; color: #e9d5ff; }
+    .status-shipping_only { background: #065f46; color: #a7f3d0; }
     .status-rescheduled { background: #78350f; color: #fde68a; }
     .status-returned { background: #7f1d1d; color: #fca5a5; }
     
     .recipient-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
-    .address { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 8px; }
-    .date-badge { font-size: 0.75rem; color: #94a3b8; margin-bottom: 10px; display: block; }
+    .address { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 6px; }
+    .notes-badge { display: block; background: rgba(217, 119, 6, 0.15); border: 1px dashed var(--warning); color: #fde68a; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; margin-bottom: 8px; }
     
-    .financials { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.9rem; }
+    .financials { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.88rem; }
     .amount { font-weight: bold; color: #4ade80; }
+    .collected-amount { color: #38bdf8; font-weight: bold; }
 
     .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 8px; text-decoration: none; text-align: center; font-size: 0.85rem; font-weight: 600; display: block; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 7px; border-radius: 8px; text-decoration: none; text-align: center; font-size: 0.82rem; font-weight: 600; display: block; }
     
-    .status-actions { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 6px; }
-    .btn-act { border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; color: #fff; }
-    .btn-deliver { background: var(--success); }
+    /* أدوات ترتيب خط سير المندوب */
+    .reorder-strip { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; }
+    .reorder-title { font-size: 0.72rem; color: var(--text-muted); }
+    .reorder-btns { display: flex; gap: 6px; }
+    .btn-reorder { background: #334155; border: 1px solid var(--border); color: #fff; width: 30px; height: 28px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    /* شبكة أزرار حالات التسليم */
+    .status-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .btn-act { border: none; padding: 8px 4px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; color: #fff; text-align: center; }
+    .btn-deliver { background: var(--success); grid-column: span 2; padding: 10px 4px; font-size: 0.85rem; }
+    .btn-partial { background: var(--purple); }
+    .btn-shipping-only { background: #0d9488; }
     .btn-reschedule { background: var(--warning); }
     .btn-return { background: var(--danger); }
 
     .settlement-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 40; }
     .btn-settle { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-    /* النوافذ المنبثقة (Modal) */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
     .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 440px; padding: 18px; max-height: 90vh; overflow-y: auto; }
-    .modal-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 1.05rem; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
     .btn-close-modal { background: transparent; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; }
 
     #scannerRegion { width: 100%; border-radius: 12px; overflow: hidden; background: #000; min-height: 250px; }
     .scanner-tip { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 10px; }
 
-    .dropzone { border: 2px dashed #475569; border-radius: 12px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
-    .btn-submit-upload { background: var(--success); color: white; width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 0.95rem; font-weight: bold; cursor: pointer; }
-
-    /* استمارة إضافة شحنة جديدة */
-    .form-group { margin-bottom: 10px; }
+    .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
     .form-control { width: 100%; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; font-size: 0.85rem; outline: none; }
     .form-control:focus { border-color: #38bdf8; }
+    .btn-modal-action { background: var(--primary); color: white; width: 100%; padding: 11px; border-radius: 10px; border: none; font-size: 0.92rem; font-weight: bold; cursor: pointer; }
     .badge-notice { background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 12px; line-height: 1.4; }
+    .dropzone { border: 2px dashed #475569; border-radius: 12px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
@@ -107,17 +118,15 @@
     <div class="header-top">
       <h1>أميتشي إكسبريس</h1>
       <div class="header-buttons">
-        <button class="btn-header btn-scan" id="btnScan" onclick="openScannerModal()">📷 مسح باركود</button>
-        <button class="btn-header" id="btnUpload" onclick="openUploadModal()">📁 رفع شيت</button>
+        <button class="btn-header btn-scan" onclick="openScannerModal()">📷 مسح باركود</button>
+        <button class="btn-header" onclick="openUploadModal()">📁 رفع شيت</button>
       </div>
     </div>
 
-    <!-- شريط البحث السريع بالرقم أو الاسم -->
     <div class="search-bar-box">
       <input type="text" id="searchInput" class="search-input" placeholder="🔍 بحث بكود الشحنة، الاسم، أو الهاتف..." oninput="filterAndRender()">
     </div>
 
-    <!-- فلاتر المندوب والتاريخ -->
     <div class="filter-grid">
       <div class="selector-box">
         <label for="courierFilter">👤 المندوب:</label>
@@ -140,11 +149,11 @@
   <div class="kpi-grid">
     <div class="kpi-card">
       <div class="val" id="kpiDelivered">0</div>
-      <div class="lbl">شحنات مسلّمة (الوردية)</div>
+      <div class="lbl">شحنات منجزة (الوردية)</div>
     </div>
     <div class="kpi-card">
       <div class="val" id="kpiCash">0 ج.م</div>
-      <div class="lbl">نقدية الوردية (COD)</div>
+      <div class="lbl">نقدية محصلة (COD)</div>
     </div>
   </div>
 
@@ -154,7 +163,7 @@
 
   <div class="settlement-bar">
     <div>
-      <div style="font-size: 0.75rem; color: var(--text-muted);">تحصيل اليوم المتبقي للتسليم</div>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">صافي النقد المحصل في العهدة</div>
       <div style="font-weight: bold; color: #4ade80;" id="settleCashBottom">0 ج.م</div>
     </div>
     <button class="btn-settle" onclick="requestSettlement()">تصفية الوردية 💰</button>
@@ -172,48 +181,106 @@
     </div>
   </div>
 
-  <!-- نافذة إضافة شحنة جديدة بالمسح الفوري -->
+  <!-- نافذة تسجيل الاستلام الجزئي -->
+  <div class="modal-overlay" id="partialModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📦 استلام جزئي للشحنة</span>
+        <button class="btn-close-modal" onclick="closeModal('partialModal')">✕</button>
+      </div>
+      <div class="badge-notice" id="partialNoticeText">أدخل المبلغ الفعلي الذي سدده العميل مقابل القطع المستلمة:</div>
+      <input type="hidden" id="partialShipmentId">
+      
+      <div class="form-group">
+        <label>💵 المبلغ المحصل الفعلي (ج.م):</label>
+        <input type="number" id="partialAmountInput" class="form-control" style="font-size: 1.1rem; color: #4ade80; font-weight: bold;">
+      </div>
+      <div class="form-group">
+        <label>📝 ملاحظات المرتجع الجزئي (القطع المتبقية):</label>
+        <input type="text" id="partialNotesInput" class="form-control" placeholder="مثال: استلم قطعة واحدة ورفض الثانية">
+      </div>
+      <button class="btn-modal-action" style="background: var(--purple);" onclick="submitPartial()">✓ تأكيد الاستلام الجزئي</button>
+    </div>
+  </div>
+
+  <!-- نافذة رفض مع دفع الشحن فقط -->
+  <div class="modal-overlay" id="shippingOnlyModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>🚚 رفض ودفع مصاريف الشحن</span>
+        <button class="btn-close-modal" onclick="closeModal('shippingOnlyModal')">✕</button>
+      </div>
+      <div class="badge-notice">رفض العميل استلام الطرد ولكنه سدد قيمة مصاريف التوصيل للمندوب:</div>
+      <input type="hidden" id="shippingOnlyId">
+      
+      <div class="form-group">
+        <label>💵 قيمة مصاريف الشحن المحصلة (ج.م):</label>
+        <input type="number" id="shippingFeeInput" class="form-control" style="font-size: 1.1rem; color: #38bdf8; font-weight: bold;">
+      </div>
+      <div class="form-group">
+        <label>سبب الرفض:</label>
+        <input type="text" id="rejectReasonInput" class="form-control" placeholder="مثال: معاينة ولم يعجبه المنتج">
+      </div>
+      <button class="btn-modal-action" style="background: #0d9488;" onclick="submitShippingOnly()">✓ تأكيد تحصيل الشحن وإرجاع الطرد</button>
+    </div>
+  </div>
+
+  <!-- نافذة تأجيل الشحنة بتاريخ محدد -->
+  <div class="modal-overlay" id="rescheduleModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📅 تأجيل موعد التسليم</span>
+        <button class="btn-close-modal" onclick="closeModal('rescheduleModal')">✕</button>
+      </div>
+      <div class="badge-notice">حدد التاريخ الجديد المتفق عليه مع العميل لتسليم الشحنة:</div>
+      <input type="hidden" id="rescheduleShipmentId">
+      
+      <div class="form-group">
+        <label>📆 تاريخ التسليم القادم:</label>
+        <input type="date" id="rescheduleDateInput" class="form-control custom-date">
+      </div>
+      <div class="form-group">
+        <label>ملاحظات التأجيل:</label>
+        <input type="text" id="rescheduleNotesInput" class="form-control" placeholder="مثال: طلب التسليم بعد الساعة 5 مساءً">
+      </div>
+      <button class="btn-modal-action" style="background: var(--warning);" onclick="submitReschedule()">✓ حفظ الموعد وتأجيل الشحنة</button>
+    </div>
+  </div>
+
+  <!-- نافذة إضافة شحنة بالمسح المباشر -->
   <div class="modal-overlay" id="addScannedModal">
     <div class="modal-box">
       <div class="modal-title">
         <span>📦 إضافة شحنة جديدة بالباركود</span>
-        <button class="btn-close-modal" onclick="closeAddScannedModal()">✕</button>
+        <button class="btn-close-modal" onclick="closeModal('addScannedModal')">✕</button>
       </div>
-      <div class="badge-notice" id="scannedNoticeText">
-        تم مسح كود جديد غير مسجل. أكمل البيانات لإضافتها فوراً للوردية:
-      </div>
-
+      <div class="badge-notice">تم مسح كود جديد غير مسجل. أكمل البيانات لإضافتها فوراً للوردية:</div>
       <div class="form-group">
-        <label>🏷️ كود الشحنة (من الباركود):</label>
+        <label>🏷️ كود الشحنة:</label>
         <input type="text" id="newTrackingCode" class="form-control" readonly style="background:#1e293b; color:#38bdf8; font-weight:bold;">
       </div>
-
       <div class="form-group">
-        <label>👤 اسم العميل / المستلم:</label>
+        <label>👤 اسم العميل:</label>
         <input type="text" id="newRecipientName" class="form-control" placeholder="اسم العميل">
       </div>
-
       <div class="form-group">
-        <label>📞 رقم هاتف العميل:</label>
+        <label>📞 رقم الهاتف:</label>
         <input type="tel" id="newRecipientPhone" class="form-control" placeholder="01xxxxxxxxx">
       </div>
-
       <div class="form-group">
-        <label>📍 العنوان بالتفصيل:</label>
+        <label>📍 العنوان:</label>
         <input type="text" id="newDeliveryAddress" class="form-control" placeholder="المنطقة - الشارع - رقم العقار">
       </div>
-
       <div class="filter-grid" style="margin-bottom:10px;">
         <div class="form-group">
           <label>🗺️ المنطقة:</label>
-          <input type="text" id="newDeliveryZone" class="form-control" placeholder="مثال: سيدي بشر / العجمي">
+          <input type="text" id="newDeliveryZone" class="form-control" placeholder="العجمي / البيطاش">
         </div>
         <div class="form-group">
-          <label>💵 مبلغ التحصيل (COD):</label>
+          <label>💵 التحصيل (COD):</label>
           <input type="number" id="newCodAmount" class="form-control" placeholder="0" style="color:#4ade80; font-weight:bold;">
         </div>
       </div>
-
       <div class="form-group" style="margin-bottom:15px;">
         <label>🚴 إسناد إلى المندوب:</label>
         <select id="newCourierId" class="form-control">
@@ -223,8 +290,7 @@
           <option value="a0000000-0000-0000-0000-000000000003">إسلام فتحي (شرق)</option>
         </select>
       </div>
-
-      <button class="btn-submit-upload" id="saveNewShipmentBtn" onclick="saveScannedShipment()">✓ حفظ وإضافة الشحنة للوردية</button>
+      <button class="btn-modal-action" style="background:var(--success);" id="saveNewShipmentBtn" onclick="saveScannedShipment()">✓ حفظ وإضافة الشحنة للوردية</button>
     </div>
   </div>
 
@@ -233,9 +299,8 @@
     <div class="modal-box">
       <div class="modal-title">
         <span>رفع وتوزيع شيت الشحنات</span>
-        <button class="btn-close-modal" onclick="closeUploadModal()">✕</button>
+        <button class="btn-close-modal" onclick="closeModal('uploadModal')">✕</button>
       </div>
-
       <div style="margin-bottom: 12px;">
         <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">إسناد الشحنات المرفوعة إلى:</label>
         <select id="assignCourierSelect" class="custom-select">
@@ -245,21 +310,19 @@
           <option value="a0000000-0000-0000-0000-000000000003">إسلام فتحي (شرق)</option>
         </select>
       </div>
-
       <div class="dropzone" onclick="document.getElementById('excelFileInput').click()">
         <p style="font-size: 2rem; margin-bottom: 8px;">📊</p>
         <p style="font-size: 0.9rem; font-weight: 600;" id="fileChosenText">اضغط لاختيار ملف Excel أو CSV</p>
         <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">يدعم (.xlsx / .xls / .csv)</p>
       </div>
       <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleFileSelect(event)">
-      <button class="btn-submit-upload" id="uploadBtn" onclick="processAndUpload()" disabled style="opacity: 0.5;">رفع وتوزيع الشحنات</button>
+      <button class="btn-modal-action" style="background: var(--success);" id="uploadBtn" onclick="processAndUpload()" disabled style="opacity: 0.5;">رفع وتوزيع الشحنات</button>
     </div>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://difabkjpyypaylnofbcl.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
-
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let rawShipmentsData = [];
@@ -269,10 +332,7 @@
 
     function getTodayLocalDate() {
       const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     }
 
     document.getElementById('dateFilter').value = getTodayLocalDate();
@@ -288,387 +348,11 @@
       loadShipments();
     }
 
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    // جلب وترتيب الشحنات
     async function loadShipments() {
       const selectedCourier = document.getElementById('courierFilter').value;
-      let query = supabaseClient.from('shipments').select('*').order('created_at', { ascending: false });
-
-      if (selectedCourier !== 'all') {
-        query = query.eq('courier_id', selectedCourier);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        alert('حدث خطأ أثناء تحميل البيانات: ' + error.message);
-        return;
-      }
-
-      rawShipmentsData = data || [];
-      filterAndRender();
-    }
-
-    function normalizeCode(str) {
-      if (!str) return '';
-      return String(str).replace(/[#\s-]/g, '').trim().toLowerCase();
-    }
-
-    function filterAndRender(highlightId = null) {
-      const selectedDate = document.getElementById('dateFilter').value;
-      const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
-
-      displayedShipments = rawShipmentsData.filter(s => {
-        const code = String(s.tracking_code || '').toLowerCase();
-        const normCode = normalizeCode(s.tracking_code);
-        const name = String(s.recipient_name || '').toLowerCase();
-        const phone = String(s.recipient_phone || '').toLowerCase();
-        const addr = String(s.delivery_address || '').toLowerCase();
-        
-        const qNorm = normalizeCode(searchQuery);
-        const matchesSearch = !searchQuery || (
-          code.includes(searchQuery) ||
-          normCode.includes(qNorm) ||
-          name.includes(searchQuery) ||
-          phone.includes(searchQuery) ||
-          addr.includes(searchQuery)
-        );
-
-        if (!matchesSearch) return false;
-
-        if (selectedDate && !searchQuery) {
-          const itemDate = s.created_at ? s.created_at.substring(0, 10) : '';
-          const isSameDay = (itemDate === selectedDate);
-          const isPendingRollover = (s.status === 'rescheduled' || s.status === 'out_for_delivery');
-          return isSameDay || isPendingRollover;
-        }
-
-        return true;
-      });
-
-      render(highlightId);
-    }
-
-    function render(highlightId = null) {
-      const container = document.getElementById('shipmentsList');
-      container.innerHTML = '';
-
-      if (!displayedShipments || displayedShipments.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:var(--text-muted); margin-top:20px;">لا توجد شحنات مطابقة لتاريخ اليوم أو البحث.</p>';
-        document.getElementById('kpiDelivered').innerText = 0;
-        document.getElementById('kpiCash').innerText = '0 ج.م';
-        document.getElementById('settleCashBottom').innerText = '0 ج.م';
-        return;
-      }
-
-      let deliveredCount = 0;
-      let totalCash = 0;
-
-      displayedShipments.forEach(shipment => {
-        if (shipment.status === 'delivered') {
-          deliveredCount++;
-          totalCash += Number(shipment.cod_amount || 0);
-        }
-
-        const isDelivered = shipment.status === 'delivered';
-        const isHighlighted = shipment.id === highlightId;
-        const creationDate = shipment.created_at ? shipment.created_at.substring(0, 10) : '';
-
-        const card = document.createElement('div');
-        card.id = `shipment-card-${shipment.id}`;
-        card.className = `card ${isHighlighted ? 'highlighted-card' : ''}`;
-        card.innerHTML = `
-          <div class="card-head">
-            <span class="code">🏷️ ${shipment.tracking_code || 'بدون كود'}</span>
-            <span class="status-tag status-${shipment.status}">
-              ${shipment.status === 'delivered' ? 'تم التسليم ✓' : (shipment.status === 'rescheduled' ? 'مؤجل' : (shipment.status === 'returned' ? 'مرتجع' : 'قيد التوصيل'))}
-            </span>
-          </div>
-          <div class="recipient-name">${shipment.recipient_name || 'بدون اسم'}</div>
-          <div class="address">${shipment.delivery_address || ''} ${shipment.delivery_zone ? '(' + shipment.delivery_zone + ')' : ''}</div>
-          <span class="date-badge">📅 تاريخ الشحنة: ${creationDate}</span>
-          
-          <div class="financials">
-            <span>المطلوب تحصيله:</span>
-            <span class="amount">${shipment.cod_amount || 0} ج.م</span>
-          </div>
-
-          <div class="quick-actions">
-            <a href="tel:${shipment.recipient_phone}" class="btn-outline">📞 اتصال</a>
-            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(shipment.delivery_address || '')}" target="_blank" class="btn-outline">🗺️ الخريطة</a>
-          </div>
-
-          ${!isDelivered ? `
-          <div class="status-actions">
-            <button class="btn-act btn-deliver" onclick="updateStatus('${shipment.id}', 'delivered')">تم التسليم ✓</button>
-            <button class="btn-act btn-reschedule" onclick="updateStatus('${shipment.id}', 'rescheduled')">تأجيل</button>
-            <button class="btn-act btn-return" onclick="updateStatus('${shipment.id}', 'returned')">رفض</button>
-          </div>
-          ` : '<div style="text-align:center; font-size:0.85rem; color:#86efac; padding-top:4px;">تم تسليم هذا الطرد واحتسابه في الوردية</div>'}
-        `;
-        container.appendChild(card);
-      });
-
-      document.getElementById('kpiDelivered').innerText = deliveredCount;
-      document.getElementById('kpiCash').innerText = totalCash + ' ج.م';
-      document.getElementById('settleCashBottom').innerText = totalCash + ' ج.م';
-
-      if (highlightId) {
-        setTimeout(() => {
-          const el = document.getElementById(`shipment-card-${highlightId}`);
-          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 150);
-      }
-    }
-
-    async function updateStatus(id, newStatus) {
-      const { error } = await supabaseClient
-        .from('shipments')
-        .update({ status: newStatus })
-        .eq('id', id);
-
-      if (error) {
-        alert('خطأ أثناء التحديث: ' + error.message);
-        return;
-      }
-
-      loadShipments();
-    }
-
-    async function requestSettlement() {
-      const deliveredShipments = (displayedShipments || []).filter(s => s.status === 'delivered');
-      if (deliveredShipments.length === 0) {
-        alert('لا توجد شحنات مسلّمة في وردية اليوم بعد لتصفيتها.');
-        return;
-      }
-
-      const total = deliveredShipments.reduce((sum, s) => sum + Number(s.cod_amount || 0), 0);
-      const selectedDate = document.getElementById('dateFilter').value;
-      alert(`إجمالي النقد المسلّم للخزينة لتاريخ (${selectedDate}):\n${total} ج.م عن عدد ${deliveredShipments.length} شحنة مسلّمة.`);
-    }
-
-    /* =================== ماسح الباركود و QR =================== */
-    function openScannerModal() {
-      const modal = document.getElementById('scannerModal');
-      modal.style.display = 'flex';
-      
-      // التخلص من أي قارئ نشط سابقاً لتفادي تداخل الكاميرا
-      if (html5QrScanner) {
-        try { html5QrScanner.clear(); } catch(e) {}
-      }
-      
-      html5QrScanner = new Html5Qrcode("scannerRegion");
-      const config = { fps: 15, qrbox: { width: 280, height: 180 } };
-
-      html5QrScanner.start(
-        { facingMode: "environment" },
-        config,
-        onScanSuccess,
-        (errorMessage) => {
-          // تجاهل الأخطاء العادية للمسح التلقائي المستمر
-        }
-      ).catch(err => {
-        alert("تعذر تشغيل الكاميرا، يرجى التأكد من إعطاء إذن الكاميرا للمتصفح: " + err);
-        closeScannerModal();
-      });
-    }
-
-    function closeScannerModal() {
-      const modal = document.getElementById('scannerModal');
-      modal.style.display = 'none';
-      if (html5QrScanner) {
-        html5QrScanner.stop().then(() => {
-          html5QrScanner.clear();
-          html5QrScanner = null;
-        }).catch(() => {
-          try { html5QrScanner.clear(); } catch(e) {}
-          html5QrScanner = null;
-        });
-      }
-    }
-
-    function onScanSuccess(decodedText) {
-      if (navigator.vibrate) navigator.vibrate(100);
-      closeScannerModal();
-
-      const rawCode = decodedText.trim();
-      const normScanned = normalizeCode(rawCode);
-
-      // البحث في الشحنات المحملة حالياً
-      const found = rawShipmentsData.find(s => {
-        const itemCode = String(s.tracking_code || '').trim();
-        const normItem = normalizeCode(itemCode);
-        return normItem === normScanned || itemCode.includes(rawCode) || rawCode.includes(itemCode);
-      });
-
-      if (found) {
-        // تم العثور عليها -> إبرازها وتصفيتها فوراً
-        document.getElementById('searchInput').value = found.tracking_code;
-        filterAndRender(found.id);
-      } else {
-        // لم يتم العثور عليها -> فتح نافذة إضافة الشحنة فوراً
-        openAddScannedModal(rawCode);
-      }
-    }
-
-    /* =================== نافذة إضافة الشحنة الممسوحة =================== */
-    function openAddScannedModal(scannedCode) {
-      document.getElementById('newTrackingCode').value = scannedCode;
-      document.getElementById('newRecipientName').value = '';
-      document.getElementById('newRecipientPhone').value = '';
-      document.getElementById('newDeliveryAddress').value = '';
-      document.getElementById('newDeliveryZone').value = '';
-      document.getElementById('newCodAmount').value = '';
-
-      // ضبط المندوب ليكون نفس المندوب المختار في الشاشة أو الافتراضي
-      const currentSelectedCourier = document.getElementById('courierFilter').value;
-      if (currentSelectedCourier && currentSelectedCourier !== 'all') {
-        document.getElementById('newCourierId').value = currentSelectedCourier;
-      }
-
-      document.getElementById('addScannedModal').style.display = 'flex';
-      setTimeout(() => {
-        document.getElementById('newRecipientName').focus();
-      }, 200);
-    }
-
-    function closeAddScannedModal() {
-      document.getElementById('addScannedModal').style.display = 'none';
-    }
-
-    async function saveScannedShipment() {
-      const tracking_code = document.getElementById('newTrackingCode').value.trim();
-      const recipient_name = document.getElementById('newRecipientName').value.trim() || 'عميل بدون اسم';
-      const recipient_phone = document.getElementById('newRecipientPhone').value.trim();
-      const delivery_address = document.getElementById('newDeliveryAddress').value.trim();
-      const delivery_zone = document.getElementById('newDeliveryZone').value.trim();
-      const cod_amount = Number(document.getElementById('newCodAmount').value.trim()) || 0;
-      const courier_id = document.getElementById('newCourierId').value;
-
-      if (!tracking_code) {
-        alert('كود الشحنة غير موجود.');
-        return;
-      }
-
-      const saveBtn = document.getElementById('saveNewShipmentBtn');
-      saveBtn.innerText = 'جارٍ الحفظ في الوردية...';
-      saveBtn.disabled = true;
-
-      const newRecord = {
-        tracking_code: tracking_code,
-        recipient_name: recipient_name,
-        recipient_phone: recipient_phone,
-        delivery_address: delivery_address,
-        delivery_zone: delivery_zone,
-        cod_amount: cod_amount,
-        courier_id: courier_id,
-        status: 'out_for_delivery'
-      };
-
-      const { data, error } = await supabaseClient
-        .from('shipments')
-        .insert([newRecord])
-        .select();
-
-      saveBtn.innerText = '✓ حفظ وإضافة الشحنة للوردية';
-      saveBtn.disabled = false;
-
-      if (error) {
-        alert('خطأ أثناء حفظ الشحنة: ' + error.message);
-        return;
-      }
-
-      alert('تمت إضافة الشحنة بنجاح إلى وردية المندوب!');
-      closeAddScannedModal();
-
-      await loadShipments();
-      const newId = data && data[0] ? data[0].id : null;
-      if (newId) {
-        document.getElementById('searchInput').value = tracking_code;
-        filterAndRender(newId);
-      }
-    }
-
-    /* =================== رفع الإكسيل =================== */
-    function openUploadModal() {
-      document.getElementById('uploadModal').style.display = 'flex';
-    }
-
-    function closeUploadModal() {
-      document.getElementById('uploadModal').style.display = 'none';
-      document.getElementById('fileChosenText').innerText = 'اضغط لاختيار ملف Excel أو CSV';
-      document.getElementById('uploadBtn').disabled = true;
-      document.getElementById('uploadBtn').style.opacity = '0.5';
-      document.getElementById('excelFileInput').value = '';
-      parsedRowsToUpload = [];
-    }
-
-    function handleFileSelect(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      document.getElementById('fileChosenText').innerText = file.name;
-      const reader = new FileReader();
-
-      reader.onload = function(evt) {
-        try {
-          const data = new Uint8Array(evt.target.result);
-          const workbook = XLSX.read(data, { type: 'array' });
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-          const json = XLSX.utils.sheet_to_json(worksheet);
-
-          if (!json || json.length === 0) {
-            alert('الملف فارغ أو لا يحتوي على بيانات صحيحة.');
-            return;
-          }
-
-          const targetCourierId = document.getElementById('assignCourierSelect').value;
-
-          parsedRowsToUpload = json.map(row => ({
-            tracking_code: String(row['tracking_code'] || row['كود_الشحنة'] || row['الكود'] || 'SHP-' + Math.floor(1000 + Math.random() * 9000)),
-            recipient_name: String(row['recipient_name'] || row['اسم_العميل'] || row['الاسم'] || 'عميل بدون اسم'),
-            recipient_phone: String(row['recipient_phone'] || row['رقم_الهاتف'] || row['الموبايل'] || row['الهاتف'] || ''),
-            delivery_address: String(row['delivery_address'] || row['العنوان'] || ''),
-            delivery_zone: String(row['delivery_zone'] || row['المنطقة'] || ''),
-            cod_amount: Number(row['cod_amount'] || row['المبلغ'] || row['التحصيل'] || 0),
-            courier_id: row['courier_id'] || targetCourierId,
-            status: 'out_for_delivery'
-          }));
-
-          document.getElementById('uploadBtn').disabled = false;
-          document.getElementById('uploadBtn').style.opacity = '1';
-          document.getElementById('uploadBtn').innerText = `إسناد ورفع ${parsedRowsToUpload.length} شحنة`;
-        } catch (err) {
-          alert('خطأ في قراءة ملف الإكسيل: ' + err.message);
-        }
-      };
-
-      reader.readAsArrayBuffer(file);
-    }
-
-    async function processAndUpload() {
-      if (parsedRowsToUpload.length === 0) return;
-
-      const uploadBtn = document.getElementById('uploadBtn');
-      uploadBtn.innerText = 'جارٍ الرفع والإسناد...';
-      uploadBtn.disabled = true;
-
-      const { data, error } = await supabaseClient
-        .from('shipments')
-        .insert(parsedRowsToUpload);
-
-      if (error) {
-        alert('حدث خطأ أثناء الرفع: ' + error.message);
-        uploadBtn.innerText = 'إعادة المحاولة';
-        uploadBtn.disabled = false;
-        return;
-      }
-
-      alert(`تم رفع وإسناد ${parsedRowsToUpload.length} شحنة بنجاح!`);
-      closeUploadModal();
-      loadShipments();
-    }
-
-    loadShipments();
-  </script>
-</body>
-</html>
+      let query = supabaseClient.from
