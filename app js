@@ -38,9 +38,9 @@ function setUser(u) { localStorage.setItem('amici_u', JSON.stringify(u)); applyU
 
 function applyUser() {
   const u = getUser();
-  const uName = document.getElementById('uName');
-  const btnAdmin = document.getElementById('btnAdmin');
-  const cf = document.getElementById('cFilter');
+  const uName = document.getElementById('uName') || document.getElementById('currentUserLabel');
+  const btnAdmin = document.getElementById('btnAdmin') || document.getElementById('btnCouriersAdmin');
+  const cf = document.getElementById('cFilter') || document.getElementById('courierFilter');
   if (uName) uName.innerText = u.role === 'admin' ? '👑 المدير' : `🚴 ${u.name}`;
   if (btnAdmin) btnAdmin.style.display = u.role === 'admin' ? 'inline-block' : 'none';
   if (cf) {
@@ -52,17 +52,17 @@ function renderC() {
   const cs = getC(), u = getUser();
   let h = u.role === 'admin' ? '<option value="all">عرض كل المناديب</option>' : '';
   cs.forEach(c => { h += `<option value="${c.id}">${c.name}</option>`; });
-  const cf = document.getElementById('cFilter');
+  const cf = document.getElementById('cFilter') || document.getElementById('courierFilter');
   if (cf) cf.innerHTML = h;
 
-  const lu = document.getElementById('lUser');
+  const lu = document.getElementById('lUser') || document.getElementById('loginAccountSelect');
   if (lu) {
     let lh = '<option value="admin">👑 المدير (رمز: 1234)</option>';
     cs.forEach(c => { lh += `<option value="${c.id}">🚴 ${c.name}</option>`; });
     lu.innerHTML = lh;
   }
 
-  const cl = document.getElementById('courList');
+  const cl = document.getElementById('courList') || document.getElementById('couriersListContainer');
   if (cl) {
     let ch = '';
     cs.forEach(c => {
@@ -73,26 +73,28 @@ function renderC() {
 }
 
 function openLogin() {
-  const lp = document.getElementById('lPin');
+  const lp = document.getElementById('lPin') || document.getElementById('loginPinInput');
   if (lp) lp.value = '';
-  const ml = document.getElementById('mLogin');
+  const ml = document.getElementById('mLogin') || document.getElementById('loginModal');
   if (ml) ml.style.display = 'flex';
 }
 
 function login() {
-  const val = document.getElementById('lUser').value;
-  const pin = (document.getElementById('lPin').value || '').trim();
+  const lu = document.getElementById('lUser') || document.getElementById('loginAccountSelect');
+  const lp = document.getElementById('lPin') || document.getElementById('loginPinInput');
+  const val = lu.value;
+  const pin = (lp.value || '').trim();
   if (val === 'admin') {
     if (pin === '1234' || pin === '') {
       setUser({ role: 'admin', name: 'المدير' });
-      closeM('mLogin');
+      closeM('mLogin'); closeM('loginModal');
       loadShipments();
     } else alert('الرمز غير صحيح!');
   } else {
     const found = getC().find(c => c.id === val);
     if (found && (found.pin === pin || pin === '1234')) {
       setUser({ role: 'courier', id: found.id, name: found.name });
-      closeM('mLogin');
+      closeM('mLogin'); closeM('loginModal');
       loadShipments();
     } else alert('الرمز السري غير صحيح للمندوب!');
   }
@@ -100,19 +102,21 @@ function login() {
 
 function openCouriers() {
   if (getUser().role !== 'admin') return alert('خاص بالمدير فقط');
-  const mc = document.getElementById('mCour');
+  const mc = document.getElementById('mCour') || document.getElementById('couriersModal');
   if (mc) mc.style.display = 'flex';
 }
 
 function addCour() {
-  const n = (document.getElementById('newCName').value || '').trim();
-  const p = (document.getElementById('newCPin').value || '').trim() || '1234';
+  const ni = document.getElementById('newCName') || document.getElementById('newCourierNameInput');
+  const pi = document.getElementById('newCPin') || document.getElementById('newCourierPinInput');
+  const n = (ni.value || '').trim();
+  const p = (pi.value || '').trim() || '1234';
   if (!n) return alert('اكتب اسم المندوب');
   const cs = getC();
   cs.push({ id: 'c-' + Date.now(), name: n, pin: p });
   saveC(cs);
-  document.getElementById('newCName').value = '';
-  document.getElementById('newCPin').value = '';
+  ni.value = '';
+  pi.value = '';
 }
 
 function delC(id) {
@@ -127,10 +131,11 @@ function closeM(id) {
 
 let raw = [];
 async function loadShipments() {
-  const sl = document.getElementById('sList');
-  if (sl) sl.innerHTML = '<p style="text-align:center;color:var(--muted);margin-top:20px;">جارٍ تحديث الشحنات...</p>';
+  const sl = document.getElementById('sList') || document.getElementById('shipmentsList');
+  if (sl) sl.innerHTML = '<p style="text-align:center;color:#94a3b8;margin-top:20px;">جارٍ تحديث الشحنات من السيرفر...</p>';
   try {
-    const u = getUser(), cf = document.getElementById('cFilter');
+    const u = getUser();
+    const cf = document.getElementById('cFilter') || document.getElementById('courierFilter');
     let ep = 'shipments?select=*&order=created_at.desc';
     const cid = u.role === 'courier' ? u.id : (cf ? cf.value : 'all');
     if (cid && cid !== 'all') ep += `&courier_id=eq.${cid}`;
@@ -139,14 +144,14 @@ async function loadShipments() {
     raw = Array.isArray(res) ? res : [];
     render();
   } catch(e) {
-    if (sl) sl.innerHTML = `<p style="text-align:center;color:#f87171;margin-top:20px;">تنبيه: ${e.message}</p>`;
+    if (sl) sl.innerHTML = `<p style="text-align:center;color:#f87171;margin-top:20px;">تنبيه: ${e.message}<br><small style="color:#94a3b8;">يرجى تعطيل RLS في Supabase أو رفع أوردرات</small></p>`;
   }
 }
 
 function render() {
-  const qEl = document.getElementById('q');
+  const qEl = document.getElementById('q') || document.getElementById('searchInput');
   const q = qEl ? (qEl.value || '').trim().toLowerCase() : '';
-  const dtEl = document.getElementById('dFilter');
+  const dtEl = document.getElementById('dFilter') || document.getElementById('dateFilter');
   const dt = dtEl ? dtEl.value : '';
 
   const list = raw.filter(s => {
@@ -155,14 +160,14 @@ function render() {
     return mQ && mD;
   });
 
-  const el = document.getElementById('sList');
+  const el = document.getElementById('sList') || document.getElementById('shipmentsList');
   if (!el) return;
   
   if (!list.length) {
-    el.innerHTML = '<p style="text-align:center;color:var(--muted);margin-top:25px;font-size:0.9rem;">📭 لا توجد شحنات حالياً في هذا القسم.<br><small style="color:#64748b;">(يمكنك إسناد شحنات جديدة أو رفع شيت)</small></p>';
-    const kc = document.getElementById('kCount'); if(kc) kc.innerText = 0;
-    const kcs = document.getElementById('kCash'); if(kcs) kcs.innerText = '0 ج.م';
-    const fc = document.getElementById('fCash'); if(fc) fc.innerText = '0 ج.م';
+    el.innerHTML = '<div style="text-align:center;color:#94a3b8;margin-top:30px;line-height:1.6;">📦 لا توجد شحنات مسجلة حالياً.<br><span style="color:#38bdf8;font-size:0.85rem;">اضغط على "📁 رفع شيت" لإضافة الأوردرات وتوزيعها فوراً.</span></div>';
+    const kc = document.getElementById('kCount') || document.getElementById('kpiDelivered'); if(kc) kc.innerText = 0;
+    const kcs = document.getElementById('kCash') || document.getElementById('kpiCash'); if(kcs) kcs.innerText = '0 ج.م';
+    const fc = document.getElementById('fCash') || document.getElementById('settleCashBottom'); if(fc) fc.innerText = '0 ج.م';
     return;
   }
 
@@ -174,43 +179,43 @@ function render() {
     const wa = cleanPhone ? `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('السلام عليكم أستاذ ' + s.recipient_name + '، بخصوص شحنتك رقم (' + s.tracking_code + ') والمبلغ (' + s.cod_amount + ' ج.م)، برجاء تأكيد ميعاد ومكان التسليم:')}` : '#';
 
     html += `
-    <div class="card">
-      <div class="c-head">
-        <span class="code">#${idx + 1} 🏷️ ${s.tracking_code || ''}</span>
-        <span class="badge b-${s.status}">${s.status}</span>
+    <div class="card" style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:12px;margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="color:#38bdf8;font-weight:bold;font-size:0.92rem;">#${idx + 1} 🏷️ ${s.tracking_code || ''}</span>
+        <span style="font-size:0.72rem;padding:2px 6px;border-radius:4px;font-weight:600;" class="b-${s.status}">${s.status}</span>
       </div>
-      <div class="name">${s.recipient_name || ''}</div>
-      <div class="addr">${s.delivery_address || ''}</div>
-      <div class="fin">
+      <div style="font-size:1rem;font-weight:600;">${s.recipient_name || ''}</div>
+      <div style="font-size:0.82rem;color:#94a3b8;margin:4px 0;">${s.delivery_address || ''}</div>
+      <div style="background:rgba(0,0,0,0.25);border-radius:6px;padding:6px 10px;display:flex;justify-content:space-between;font-size:0.85rem;margin:6px 0;">
         <span>المطلوب: <b>${s.cod_amount || 0} ج.م</b></span>
         <span>المحصل: <b style="color:#38bdf8;">${cAmt} ج.م</b></span>
       </div>
-      <div class="acts">
-        <a href="tel:${s.recipient_phone}" class="btn-act">📞 اتصال</a>
-        <a href="${wa}" target="_blank" class="btn-act btn-wa">💬 واتساب</a>
-        <a href="https://maps.google.com/?q=${encodeURIComponent(s.delivery_address || '')}" target="_blank" class="btn-act">🗺️ خريطة</a>
+      <div style="display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:6px;margin:8px 0;">
+        <a href="tel:${s.recipient_phone}" style="background:transparent;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;text-decoration:none;text-align:center;font-size:0.8rem;font-weight:bold;">📞 اتصال</a>
+        <a href="${wa}" target="_blank" style="background:rgba(37,211,102,0.15);border:1px solid #25d366;color:#25d366;padding:6px;border-radius:6px;text-decoration:none;text-align:center;font-size:0.8rem;font-weight:bold;">💬 واتساب</a>
+        <a href="https://maps.google.com/?q=${encodeURIComponent(s.delivery_address || '')}" target="_blank" style="background:transparent;border:1px solid #334155;color:#fff;padding:6px;border-radius:6px;text-decoration:none;text-align:center;font-size:0.8rem;font-weight:bold;">🗺️ خريطة</a>
       </div>
-      <div class="status-btns">
-        <button class="btn-s" style="background:var(--success);grid-column:span 2;padding:8px;" onclick="upStatus('${s.id}','delivered',${s.cod_amount})">تم التسليم كامل ✓</button>
-        <button class="btn-s" style="background:var(--purple);" onclick="openPart('${s.id}')">استلام جزئي</button>
-        <button class="btn-s" style="background:#0d9488;" onclick="upStatus('${s.id}','shipping_only',75)">دفع شحن (75ج)</button>
-        <button class="btn-s" style="background:var(--warning);" onclick="openResched('${s.id}')">تأجيل 📅</button>
-        <button class="btn-s" style="background:var(--danger);" onclick="upStatus('${s.id}','returned',0)">رفض تام ✕</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <button style="border:none;padding:8px;border-radius:6px;font-weight:bold;font-size:0.75rem;cursor:pointer;color:#fff;background:#16a34a;grid-column:span 2;" onclick="upStatus('${s.id}','delivered',${s.cod_amount})">تم التسليم كامل ✓</button>
+        <button style="border:none;padding:7px;border-radius:6px;font-weight:bold;font-size:0.75rem;cursor:pointer;color:#fff;background:#8b5cf6;" onclick="openPart('${s.id}')">استلام جزئي</button>
+        <button style="border:none;padding:7px;border-radius:6px;font-weight:bold;font-size:0.75rem;cursor:pointer;color:#fff;background:#0d9488;" onclick="upStatus('${s.id}','shipping_only',75)">دفع شحن (75ج)</button>
+        <button style="border:none;padding:7px;border-radius:6px;font-weight:bold;font-size:0.75rem;cursor:pointer;color:#fff;background:#d97706;" onclick="openResched('${s.id}')">تأجيل 📅</button>
+        <button style="border:none;padding:7px;border-radius:6px;font-weight:bold;font-size:0.75rem;cursor:pointer;color:#fff;background:#dc2626;" onclick="upStatus('${s.id}','returned',0)">رفض تام ✕</button>
       </div>
-      <div class="reorder">
+      <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #334155;padding-top:6px;margin-top:8px;font-size:0.75rem;color:#94a3b8;">
         <span>خط السير</span>
         <div>
-          <button class="btn-r" onclick="mv('${s.id}',-1)">⬆️</button>
-          <button class="btn-r" onclick="mv('${s.id}',1)">⬇️</button>
+          <button style="background:#334155;border:1px solid #334155;color:#fff;width:28px;height:26px;border-radius:4px;cursor:pointer;" onclick="mv('${s.id}',-1)">⬆️</button>
+          <button style="background:#334155;border:1px solid #334155;color:#fff;width:28px;height:26px;border-radius:4px;cursor:pointer;" onclick="mv('${s.id}',1)">⬇️</button>
         </div>
       </div>
     </div>`;
   });
 
   el.innerHTML = html;
-  const kc = document.getElementById('kCount'); if(kc) kc.innerText = cnt;
-  const kcs = document.getElementById('kCash'); if(kcs) kcs.innerText = tot + ' ج.م';
-  const fc = document.getElementById('fCash'); if(fc) fc.innerText = tot + ' ج.م';
+  const kc = document.getElementById('kCount') || document.getElementById('kpiDelivered'); if(kc) kc.innerText = cnt;
+  const kcs = document.getElementById('kCash') || document.getElementById('kpiCash'); if(kcs) kcs.innerText = tot + ' ج.م';
+  const fc = document.getElementById('fCash') || document.getElementById('settleCashBottom'); if(fc) fc.innerText = tot + ' ج.م';
 }
 
 async function upStatus(id, st, amt) {
@@ -219,29 +224,37 @@ async function upStatus(id, st, amt) {
 }
 
 function openPart(id) {
-  document.getElementById('pId').value = id;
-  document.getElementById('mPart').style.display = 'flex';
+  const pi = document.getElementById('pId') || document.getElementById('partialShipmentId');
+  if (pi) pi.value = id;
+  const mp = document.getElementById('mPart') || document.getElementById('partialModal');
+  if (mp) mp.style.display = 'flex';
 }
 
 async function savePart() {
-  const id = document.getElementById('pId').value;
-  const a = Number(document.getElementById('pAmt').value) || 0;
+  const pi = document.getElementById('pId') || document.getElementById('partialShipmentId');
+  const pa = document.getElementById('pAmt') || document.getElementById('partialAmountInput');
+  const id = pi.value;
+  const a = Number(pa.value) || 0;
   await api(`shipments?id=eq.${id}`, 'PATCH', { status: 'partial', collected_amount: a });
-  closeM('mPart');
+  closeM('mPart'); closeM('partialModal');
   loadShipments();
 }
 
 function openResched(id) {
-  document.getElementById('rId').value = id;
-  document.getElementById('mResched').style.display = 'flex';
+  const ri = document.getElementById('rId') || document.getElementById('rescheduleShipmentId');
+  if (ri) ri.value = id;
+  const mr = document.getElementById('mResched') || document.getElementById('rescheduleModal');
+  if (mr) mr.style.display = 'flex';
 }
 
 async function saveResched() {
-  const id = document.getElementById('rId').value;
-  const d = document.getElementById('rDate').value;
+  const ri = document.getElementById('rId') || document.getElementById('rescheduleShipmentId');
+  const rd = document.getElementById('rDate') || document.getElementById('rescheduleDateInput');
+  const id = ri.value;
+  const d = rd.value;
   if (!d) return alert('حدد التاريخ');
   await api(`shipments?id=eq.${id}`, 'PATCH', { status: 'rescheduled', rescheduled_date: d });
-  closeM('mResched');
+  closeM('mResched'); closeM('rescheduleModal');
   loadShipments();
 }
 
@@ -254,7 +267,8 @@ function mv(id, dir) {
 }
 
 function settle() {
-  alert(`إجمالي النقدية المحصلة: ${document.getElementById('fCash').innerText}`);
+  const fc = document.getElementById('fCash') || document.getElementById('settleCashBottom');
+  alert(`إجمالي النقدية المحصلة: ${fc ? fc.innerText : '0 ج.م'}`);
 }
 
 renderC();
