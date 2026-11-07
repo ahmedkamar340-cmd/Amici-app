@@ -33,7 +33,7 @@ function getUser() {
 function setUser(u) { localStorage.setItem('amici_u', JSON.stringify(u)); applyUser(); }
 
 function applyUser() {
-  const u = getUser();
+  const u = getUser(); 
   const uName = document.getElementById('uName');
   const btnAdmin = document.getElementById('btnAdmin');
   const cf = document.getElementById('cFilter');
@@ -241,9 +241,6 @@ function mv(id, dir) {
 function settle() {
   alert(`إجمالي النقدية المحصلة: ${document.getElementById('fCash').innerText}`);
 }
-
-window.onload = function() {
-  renderC();
-  applyUser();
-  loadShipments();
-};
+renderC();
+applyUser();
+loadShipments();
