@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>أميتشي للشحن</title>
   <style>
     :root { --bg:#0f172a; --card:#1e293b; --border:#334155; --text:#f8fafc; --muted:#94a3b8; --primary:#2563eb; --success:#16a34a; --warning:#d97706; --danger:#dc2626; --purple:#8b5cf6; }
@@ -68,12 +69,11 @@
     <div><div style="font-size:0.75rem;color:var(--muted);">العهدة المحصلة:</div><div style="color:#4ade80;font-weight:bold;" id="fCash">0 ج.م</div></div>
     <button class="btn-s" style="background:var(--primary);padding:8px 14px;" onclick="settle()">تصفية الوردية 💰</button>
   </div>
-  <!-- نافذة تسجيل الدخول برقم سري -->
   <div class="modal" id="mLogin"><div class="m-box"><div class="m-title"><span>🔐 تسجيل الدخول</span><span style="cursor:pointer;" onclick="closeM('mLogin')">✕</span></div><label style="font-size:0.8rem;color:var(--muted);">اختر الحساب:</label><select id="lUser" class="c-select" style="margin:6px 0;"></select><label style="font-size:0.8rem;color:var(--muted);">الرقم السري (PIN):</label><input type="password" id="lPin" class="m-input" placeholder="****"><button class="btn-m" onclick="login()">دخول ➜</button></div></div>
-  <!-- نافذة إدارة المناديب -->
   <div class="modal" id="mCour"><div class="m-box"><div class="m-title"><span>👥 المناديب وأرقام السر</span><span style="cursor:pointer;" onclick="closeM('mCour')">✕</span></div><input type="text" id="newCName" class="m-input" placeholder="اسم المندوب"><input type="password" id="newCPin" class="m-input" placeholder="رقم سري (PIN)"><button class="btn-m" style="background:var(--success);margin-bottom:12px;" onclick="addCour()">+ إضافة مندوب</button><div id="courList" style="max-height:160px;overflow-y:auto;"></div></div></div>
-  <!-- نافذة استلام جزئي -->
   <div class="modal" id="mPart"><div class="m-box"><div class="m-title"><span>📦 استلام جزئي</span><span style="cursor:pointer;" onclick="closeM('mPart')">✕</span></div><input type="hidden" id="pId"><input type="number" id="pAmt" class="m-input" placeholder="المبلغ الفعلي المحصل (ج.م)"><button class="btn-m" style="background:var(--purple);" onclick="savePart()">تأكيد الاستلام الجزئي</button></div></div>
-  <!-- نافذة تأجيل -->
-  <div class="modal" id="mResched"><div class="m-box"><div class="m-title"><span>📅 تأجيل الموعد</span><span style="cursor:pointer;" onclick="closeM('mResched')">✕</span></div><input type="
-                                                                                                                                                                                 
+  <div class="modal" id="mResched"><div class="m-box"><div class="m-title"><span>📅 تأجيل الموعد</span><span style="cursor:pointer;" onclick="closeM('mResched')">✕</span></div><input type="hidden" id="rId"><input type="date" id="rDate" class="m-input"><button class="btn-m" style="background:var(--warning);" onclick="saveResched()">حفظ التأجيل</button></div></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
