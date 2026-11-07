@@ -81,11 +81,9 @@
     .amount { font-weight: bold; color: #4ade80; }
     .collected-amount { color: #38bdf8; font-weight: bold; }
 
-    /* شريط الاتصال السريع (اتصال - واتساب - خريطة) */
     .quick-actions { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 6px; margin-bottom: 10px; }
     .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 7px 4px; border-radius: 8px; text-decoration: none; text-align: center; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
-    .btn-whatsapp { background: rgba(37, 211, 102, 0.12); border-color: #25d366; color: #25d366; }
-    .btn-whatsapp:hover { background: #25d366; color: #000; }
+    .btn-whatsapp { background: rgba(37, 211, 102, 0.15); border-color: #25d366; color: #25d366; }
 
     .reorder-strip { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; }
     .reorder-title { font-size: 0.72rem; color: var(--text-muted); }
@@ -123,9 +121,7 @@
     .courier-item-name { font-size: 0.85rem; font-weight: 600; }
     .btn-del-courier { background: #7f1d1d; border: 1px solid #ef4444; color: #fff; border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; }
 
-    /* نافذة اختيار المستخدم / تسجيل الدخول */
     .user-select-btn { width: 100%; background: #1e293b; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; cursor: pointer; text-align: right; display: flex; justify-content: space-between; align-items: center; }
-    .user-select-btn:hover { border-color: #38bdf8; background: #0f172a; }
   </style>
 </head>
 <body>
@@ -137,10 +133,8 @@
         <span id="roleBadge" class="role-badge"></span>
       </h1>
       <div class="header-buttons">
-        <!-- أزرار تظهر فقط للأدمن (أحمد) -->
-        <button class="btn-header btn-couriers" id="btnAdminCouriers" onclick="openCouriersModal()" style="display:none;">👥 المناديب</button>
-        <button class="btn-header" id="btnAdminUpload" onclick="openUploadModal()" style="display:none;">📁 رفع شيت</button>
-        
+        <button class="btn-header btn-couriers" id="btnAdminCouriers" onclick="openCouriersModal()">👥 المناديب</button>
+        <button class="btn-header" id="btnAdminUpload" onclick="openUploadModal()">📁 رفع شيت</button>
         <button class="btn-header btn-scan" onclick="openScannerModal()">📷 باركود</button>
         <button class="btn-header btn-switch-user" onclick="openLoginModal()" title="تبديل المستخدم">🔄 الحساب</button>
       </div>
@@ -186,11 +180,12 @@
     <button class="btn-settle" onclick="requestSettlement()">تصفية الوردية 💰</button>
   </div>
 
-  <!-- نافذة تسجيل الدخول وتحديد المستخدم -->
+  <!-- نافذة تحديد المستخدم -->
   <div class="modal-overlay" id="loginModal">
     <div class="modal-box">
       <div class="modal-title">
         <span>🔐 تحديد هوية المستخدم</span>
+        <button class="btn-close-modal" onclick="closeModal('loginModal')">✕</button>
       </div>
       <div class="badge-notice">اختر صفتك للدخول إلى النظام:</div>
 
@@ -212,7 +207,7 @@
     </div>
   </div>
 
-  <!-- نافذة إدارة المناديب للمدير فقط -->
+  <!-- نافذة إدارة المناديب -->
   <div class="modal-overlay" id="couriersModal">
     <div class="modal-box">
       <div class="modal-title">
@@ -220,7 +215,7 @@
         <button class="btn-close-modal" onclick="closeModal('couriersModal')">✕</button>
       </div>
 
-      <div class="badge-notice">أضف مندوباً جديداً أو احذف مناديب غير نشطين لتحديث القوائم:</div>
+      <div class="badge-notice">أضف مندوباً جديداً أو احذف مناديب لتحديث القوائم:</div>
 
       <div style="display:flex; gap:6px; margin-bottom:15px;">
         <input type="text" id="newCourierNameInput" class="form-control" placeholder="اسم المندوب ومناطقه">
@@ -240,7 +235,7 @@
     </div>
   </div>
 
-  <!-- نافذة قارئ الباركود/QR -->
+  <!-- نافذة الكاميرا للباركود -->
   <div class="modal-overlay" id="scannerModal">
     <div class="modal-box">
       <div class="modal-title">
@@ -252,7 +247,7 @@
     </div>
   </div>
 
-  <!-- نافذة الاستلام الجزئي -->
+  <!-- استلام جزئي -->
   <div class="modal-overlay" id="partialModal">
     <div class="modal-box">
       <div class="modal-title">
@@ -274,9 +269,364 @@
     </div>
   </div>
 
-  <!-- نافذة دفع الشحن فقط -->
+  <!-- دفع الشحن فقط -->
   <div class="modal-overlay" id="shippingOnlyModal">
     <div class="modal-box">
       <div class="modal-title">
         <span>🚚 رفض ودفع مصاريف الشحن</span>
-        
+        <button class="btn-close-modal" onclick="closeModal('shippingOnlyModal')">✕</button>
+      </div>
+      <div class="badge-notice">رفض العميل استلام الطرد ولكنه سدد قيمة مصاريف التوصيل للمندوب:</div>
+      <input type="hidden" id="shippingOnlyId">
+      
+      <div class="form-group">
+        <label>💵 قيمة مصاريف الشحن المحصلة (ج.م):</label>
+        <input type="number" id="shippingFeeInput" class="form-control" style="font-size: 1.1rem; color: #38bdf8; font-weight: bold;">
+      </div>
+      <div class="form-group">
+        <label>سبب الرفض:</label>
+        <input type="text" id="rejectReasonInput" class="form-control" placeholder="مثال: معاينة ولم يعجبه المنتج">
+      </div>
+      <button class="btn-modal-action" style="background: #0d9488;" onclick="submitShippingOnly()">✓ تأكيد تحصيل الشحن وإرجاع الطرد</button>
+    </div>
+  </div>
+
+  <!-- تأجيل بموعد -->
+  <div class="modal-overlay" id="rescheduleModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📅 تأجيل موعد التسليم</span>
+        <button class="btn-close-modal" onclick="closeModal('rescheduleModal')">✕</button>
+      </div>
+      <div class="badge-notice">حدد التاريخ الجديد المتفق عليه مع العميل لتسليم الشحنة:</div>
+      <input type="hidden" id="rescheduleShipmentId">
+      
+      <div class="form-group">
+        <label>📆 تاريخ التسليم القادم:</label>
+        <input type="date" id="rescheduleDateInput" class="form-control custom-date">
+      </div>
+      <div class="form-group">
+        <label>ملاحظات التأجيل:</label>
+        <input type="text" id="rescheduleNotesInput" class="form-control" placeholder="مثال: طلب التسليم بعد الساعة 5 مساءً">
+      </div>
+      <button class="btn-modal-action" style="background: var(--warning);" onclick="submitReschedule()">✓ حفظ الموعد وتأجيل الشحنة</button>
+    </div>
+  </div>
+
+  <!-- إضافة شحنة بالمسح المباشر -->
+  <div class="modal-overlay" id="addScannedModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📦 إضافة شحنة جديدة بالباركود</span>
+        <button class="btn-close-modal" onclick="closeModal('addScannedModal')">✕</button>
+      </div>
+      <div class="badge-notice">تم مسح كود جديد غير مسجل. أكمل البيانات لإضافتها فوراً للوردية:</div>
+      <div class="form-group">
+        <label>🏷️ كود الشحنة:</label>
+        <input type="text" id="newTrackingCode" class="form-control" readonly style="background:#1e293b; color:#38bdf8; font-weight:bold;">
+      </div>
+      <div class="form-group">
+        <label>👤 اسم العميل:</label>
+        <input type="text" id="newRecipientName" class="form-control" placeholder="اسم العميل">
+      </div>
+      <div class="form-group">
+        <label>📞 رقم الهاتف:</label>
+        <input type="tel" id="newRecipientPhone" class="form-control" placeholder="01xxxxxxxxx">
+      </div>
+      <div class="form-group">
+        <label>📍 العنوان:</label>
+        <input type="text" id="newDeliveryAddress" class="form-control" placeholder="المنطقة - الشارع - رقم العقار">
+      </div>
+      <div class="filter-grid" style="margin-bottom:10px;">
+        <div class="form-group">
+          <label>🗺️ المنطقة:</label>
+          <input type="text" id="newDeliveryZone" class="form-control" placeholder="العجمي / البيطاش">
+        </div>
+        <div class="form-group">
+          <label>💵 التحصيل (COD):</label>
+          <input type="number" id="newCodAmount" class="form-control" placeholder="0" style="color:#4ade80; font-weight:bold;">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:15px;">
+        <label>🚴 إسناد إلى المندوب:</label>
+        <select id="newCourierId" class="form-control"></select>
+      </div>
+      <button class="btn-modal-action" style="background:var(--success);" id="saveNewShipmentBtn" onclick="saveScannedShipment()">✓ حفظ وإضافة الشحنة للوردية</button>
+    </div>
+  </div>
+
+  <!-- رفع شيت الإكسيل -->
+  <div class="modal-overlay" id="uploadModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>رفع وتوزيع شيت الشحنات</span>
+        <button class="btn-close-modal" onclick="closeModal('uploadModal')">✕</button>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">إسناد الشحنات المرفوعة إلى:</label>
+        <select id="assignCourierSelect" class="custom-select"></select>
+      </div>
+      <div class="dropzone" onclick="document.getElementById('excelFileInput').click()">
+        <p style="font-size: 2rem; margin-bottom: 8px;">📊</p>
+        <p style="font-size: 0.9rem; font-weight: 600;" id="fileChosenText">اضغط لاختيار ملف Excel أو CSV</p>
+        <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">يدعم (.xlsx / .xls / .csv)</p>
+      </div>
+      <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleFileSelect(event)">
+      <button class="btn-modal-action" style="background: var(--success);" id="uploadBtn" onclick="processAndUpload()" disabled style="opacity: 0.5;">رفع وتوزيع الشحنات</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://difabkjpyypaylnofbcl.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
+    
+    let supabaseClient = null;
+    try {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    } catch(e) {
+      console.error(e);
+    }
+
+    const DEFAULT_COURIERS = [
+      { id: "a0000000-0000-0000-0000-000000000004", name: "مينا عبد النور" },
+      { id: "a0000000-0000-0000-0000-000000000001", name: "أحمد" },
+      { id: "a0000000-0000-0000-0000-000000000002", name: "محمد محمود (العجمي والدخيلة)" },
+      { id: "a0000000-0000-0000-0000-000000000003", name: "إسلام فتحي (شرق)" }
+    ];
+
+    function getCouriers() {
+      const stored = localStorage.getItem('amici_custom_couriers');
+      if (stored) {
+        try { return JSON.parse(stored); } catch(e) {}
+      }
+      return DEFAULT_COURIERS;
+    }
+
+    function saveCouriers(list) {
+      localStorage.setItem('amici_custom_couriers', JSON.stringify(list));
+      populateCouriersSelects();
+    }
+
+    function getAdminPin() {
+      return localStorage.getItem('amici_admin_pin') || '1234';
+    }
+
+    function changeAdminPin() {
+      const newPin = document.getElementById('newAdminPinInput').value.trim();
+      if (!newPin || newPin.length < 4) return alert('يرجى إدخال رمز PIN لا يقل عن 4 أرقام.');
+      localStorage.setItem('amici_admin_pin', newPin);
+      document.getElementById('newAdminPinInput').value = '';
+      alert('تم تحديث رمز PIN للمدير بنجاح!');
+    }
+
+    function getCurrentUser() {
+      const stored = localStorage.getItem('amici_current_user');
+      if (stored) {
+        try { return JSON.parse(stored); } catch(e) {}
+      }
+      // الوضع الافتراضي عند أول تشغيل هو المدير العام (أحمد)
+      return { role: 'admin', name: 'أحمد (المدير)' };
+    }
+
+    function setCurrentUser(userObj) {
+      localStorage.setItem('amici_current_user', JSON.stringify(userObj));
+      applyUserPermissions();
+    }
+
+    function openLoginModal() {
+      const couriers = getCouriers();
+      const listEl = document.getElementById('courierLoginList');
+      listEl.innerHTML = '';
+      couriers.forEach(c => {
+        listEl.innerHTML += `
+          <button class="user-select-btn" onclick="loginAsCourier('${c.id}', '${c.name}')">
+            <span>🚴 ${c.name}</span>
+            <span style="font-size:0.8rem; color:var(--text-muted);">دخول مندوب ➜</span>
+          </button>
+        `;
+      });
+      document.getElementById('adminPinBox').style.display = 'none';
+      document.getElementById('adminPinInput').value = '';
+      document.getElementById('loginModal').style.display = 'flex';
+    }
+
+    function showAdminPinInput() {
+      const box = document.getElementById('adminPinBox');
+      box.style.display = 'block';
+      document.getElementById('adminPinInput').focus();
+    }
+
+    function verifyAdminPin() {
+      const input = document.getElementById('adminPinInput').value.trim();
+      if (input === getAdminPin()) {
+        setCurrentUser({ role: 'admin', name: 'أحمد (المدير)' });
+        closeModal('loginModal');
+        populateCouriersSelects();
+        loadShipments();
+      } else {
+        alert('رمز الأمان غير صحيح!');
+      }
+    }
+
+    function loginAsCourier(courierId, courierName) {
+      setCurrentUser({ role: 'courier', id: courierId, name: courierName });
+      closeModal('loginModal');
+      populateCouriersSelects();
+      loadShipments();
+    }
+
+    function applyUserPermissions() {
+      const user = getCurrentUser();
+      const roleBadge = document.getElementById('roleBadge');
+      const btnAdminCouriers = document.getElementById('btnAdminCouriers');
+      const btnAdminUpload = document.getElementById('btnAdminUpload');
+      const courierFilter = document.getElementById('courierFilter');
+
+      if (!user || user.role === 'admin') {
+        if (roleBadge) {
+          roleBadge.className = 'role-badge badge-admin';
+          roleBadge.innerText = '👑 المدير';
+        }
+        if (btnAdminCouriers) btnAdminCouriers.style.display = 'flex';
+        if (btnAdminUpload) btnAdminUpload.style.display = 'flex';
+        if (courierFilter) courierFilter.disabled = false;
+      } else {
+        if (roleBadge) {
+          roleBadge.className = 'role-badge badge-courier';
+          roleBadge.innerText = `🚴 ${user.name}`;
+        }
+        if (btnAdminCouriers) btnAdminCouriers.style.display = 'none';
+        if (btnAdminUpload) btnAdminUpload.style.display = 'none';
+        if (courierFilter) {
+          courierFilter.value = user.id;
+          courierFilter.disabled = true;
+        }
+      }
+    }
+
+    function populateCouriersSelects() {
+      const couriers = getCouriers();
+      const user = getCurrentUser();
+
+      const filterSelect = document.getElementById('courierFilter');
+      if (filterSelect) {
+        let html = '';
+        if (!user || user.role === 'admin') {
+          html += '<option value="all">عرض كل المناديب</option>';
+        }
+        couriers.forEach(c => {
+          html += `<option value="${c.id}">${c.name}</option>`;
+        });
+        filterSelect.innerHTML = html;
+
+        if (user && user.role === 'courier') {
+          filterSelect.value = user.id;
+        } else {
+          const current = localStorage.getItem('amici_selected_courier') || 'all';
+          filterSelect.value = (couriers.some(c => c.id === current) || current === 'all') ? current : 'all';
+        }
+      }
+
+      const assignSelect = document.getElementById('assignCourierSelect');
+      if (assignSelect) {
+        let html = '';
+        couriers.forEach(c => {
+          html += `<option value="${c.id}">${c.name}</option>`;
+        });
+        assignSelect.innerHTML = html;
+      }
+
+      const newShipSelect = document.getElementById('newCourierId');
+      if (newShipSelect) {
+        let html = '';
+        couriers.forEach(c => {
+          html += `<option value="${c.id}">${c.name}</option>`;
+        });
+        newShipSelect.innerHTML = html;
+      }
+
+      const listContainer = document.getElementById('couriersListContainer');
+      if (listContainer) {
+        let html = '';
+        couriers.forEach(c => {
+          listContainer.innerHTML += `
+            <div class="courier-list-item">
+              <span class="courier-item-name">👤 ${c.name}</span>
+              <button class="btn-del-courier" onclick="deleteCourier('${c.id}')">حذف 🗑️</button>
+            </div>
+          `;
+        });
+        listContainer.innerHTML = html;
+      }
+    }
+
+    function openCouriersModal() {
+      const user = getCurrentUser();
+      if (!user || user.role !== 'admin') {
+        return alert('عفواً، هذه الشاشة مخصصة للمدير العام فقط.');
+      }
+      populateCouriersSelects();
+      document.getElementById('couriersModal').style.display = 'flex';
+      document.getElementById('newCourierNameInput').value = '';
+    }
+
+    function addNewCourier() {
+      const nameInput = document.getElementById('newCourierNameInput');
+      const name = nameInput.value.trim();
+      if (!name) return alert('يرجى كتابة اسم المندوب.');
+
+      const couriers = getCouriers();
+      const newId = 'c-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+      couriers.push({ id: newId, name: name });
+      saveCouriers(couriers);
+      nameInput.value = '';
+      alert(`تمت إضافة المندوب (${name}) بنجاح!`);
+    }
+
+    function deleteCourier(id) {
+      let couriers = getCouriers();
+      const target = couriers.find(c => c.id === id);
+      const name = target ? target.name : 'هذا المندوب';
+
+      if (!confirm(`هل أنت متأكد من حذف ${name}؟ لن يتم مسح شحناته السابقة من السيرفر ولكن سيتم إزالته من القوائم.`)) return;
+
+      couriers = couriers.filter(c => c.id !== id);
+      saveCouriers(couriers);
+    }
+
+    let rawShipmentsData = [];
+    let displayedShipments = [];
+    let parsedRowsToUpload = [];
+    let html5QrScanner = null;
+
+    function getTodayLocalDate() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    }
+
+    function onFilterChange() {
+      const filterSelect = document.getElementById('courierFilter');
+      if (filterSelect) {
+        localStorage.setItem('amici_selected_courier', filterSelect.value);
+      }
+      loadShipments();
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    }
+
+    function formatPhoneForWhatsApp(phone) {
+      if (!phone) return '';
+      let clean = phone.replace(/[^0-9]/g, '');
+      if (clean.startsWith('01')) {
+        clean = '2' + clean;
+      } else if (clean.startsWith('1') && clean.length === 10) {
+        clean = '20' + clean;
+      }
+      return clean;
+    }
+
+    async function loadShipments() {
+      const container = document.getElementById('
