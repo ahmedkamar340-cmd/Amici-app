@@ -3,77 +3,345 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>أميتشي للشحن</title>
+  <title>أميتشي للشحن والتوصيل</title>
+  <meta name="theme-color" content="#1e293b">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
   <style>
-    :root { --bg:#0f172a; --card:#1e293b; --border:#334155; --text:#f8fafc; --muted:#94a3b8; --primary:#2563eb; --success:#16a34a; --warning:#d97706; --danger:#dc2626; --purple:#8b5cf6; }
-    * { box-sizing:border-box; margin:0; padding:0; font-family:system-ui,sans-serif; }
-    body { background:var(--bg); color:var(--text); padding-bottom:90px; }
-    header { background:var(--card); padding:10px 14px; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50; }
-    .head-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-    .head-top h1 { font-size:1.05rem; color:#38bdf8; display:flex; align-items:center; gap:6px; }
-    .pill { font-size:0.75rem; padding:2px 8px; border-radius:6px; background:#334155; color:#38bdf8; }
-    .btn-h { background:#334155; border:1px solid #475569; color:#fff; padding:6px 10px; border-radius:8px; font-size:0.8rem; cursor:pointer; }
-    .search-input { width:100%; background:#0f172a; color:#fff; border:1px solid var(--border); padding:8px 12px; border-radius:8px; font-size:0.85rem; outline:none; margin-bottom:8px; }
-    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .sel-box { background:rgba(0,0,0,0.25); padding:6px 8px; border-radius:8px; border:1px solid var(--border); }
-    .sel-box label { font-size:0.72rem; color:var(--muted); display:block; margin-bottom:2px; }
-    .c-select, .c-date { width:100%; background:#0f172a; color:#fff; border:1px solid var(--border); padding:6px; border-radius:6px; font-size:0.8rem; outline:none; }
-    .kpi-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:10px 14px; }
-    .kpi-c { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:8px; text-align:center; }
-    .kpi-val { font-size:1.2rem; font-weight:bold; color:#38bdf8; }
-    .kpi-lbl { font-size:0.72rem; color:var(--muted); }
-    .list-c { padding:0 14px; }
-    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:10px; }
-    .c-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-    .code { color:#38bdf8; font-weight:bold; font-size:0.92rem; }
-    .badge { font-size:0.72rem; padding:2px 6px; border-radius:4px; font-weight:600; }
-    .b-out_for_delivery { background:#1e3a8a; color:#93c5fd; } .b-delivered { background:#14532d; color:#86efac; } .b-partial { background:#581c87; color:#e9d5ff; } .b-shipping_only { background:#065f46; color:#a7f3d0; } .b-rescheduled { background:#78350f; color:#fde68a; } .b-returned { background:#7f1d1d; color:#fca5a5; }
-    .name { font-size:1rem; font-weight:600; } .addr { font-size:0.82rem; color:var(--muted); margin:4px 0; }
-    .fin { background:rgba(0,0,0,0.25); border-radius:6px; padding:6px 10px; display:flex; justify-content:space-between; font-size:0.85rem; margin:6px 0; }
-    .acts { display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:6px; margin:8px 0; }
-    .btn-act { background:transparent; border:1px solid var(--border); color:#fff; padding:6px; border-radius:6px; text-decoration:none; text-align:center; font-size:0.8rem; font-weight:bold; }
-    .btn-wa { background:rgba(37,211,102,0.15); border-color:#25d366; color:#25d366; }
-    .status-btns { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-    .btn-s { border:none; padding:7px; border-radius:6px; font-weight:bold; font-size:0.75rem; cursor:pointer; color:#fff; }
-    .reorder { display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:6px; margin-top:8px; font-size:0.75rem; color:var(--muted); }
-    .btn-r { background:#334155; border:1px solid var(--border); color:#fff; width:28px; height:26px; border-radius:4px; cursor:pointer; }
-    .foot-bar { position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border); padding:10px 14px; display:flex; justify-content:space-between; align-items:center; z-index:40; }
-    .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; justify-content:center; align-items:center; padding:14px; }
-    .m-box { background:var(--card); border:1px solid var(--border); border-radius:12px; width:100%; max-width:400px; padding:16px; }
-    .m-title { font-weight:bold; margin-bottom:10px; display:flex; justify-content:space-between; }
-    .m-input { width:100%; background:#0f172a; color:#fff; border:1px solid var(--border); padding:8px; border-radius:6px; margin:8px 0; outline:none; }
-    .btn-m { width:100%; background:var(--primary); color:#fff; border:none; padding:10px; border-radius:6px; font-weight:bold; cursor:pointer; }
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #2563eb;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --purple: #8b5cf6;
+      --whatsapp: #25d366;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; }
+    
+    header { background: var(--card); padding: 12px 16px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+    .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .header-top h1 { font-size: 1.05rem; font-weight: bold; color: #38bdf8; display: flex; align-items: center; gap: 6px; }
+    .role-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: normal; }
+    .badge-admin { background: #b91c1c; color: #fff; }
+    .badge-courier { background: #0369a1; color: #fff; }
+
+    .header-buttons { display: flex; gap: 6px; }
+    .btn-header { background: #334155; border: 1px solid #475569; color: #fff; padding: 6px 9px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+    .btn-scan { background: #0284c7; border-color: #38bdf8; }
+    .btn-couriers { background: #475569; border-color: #64748b; }
+    .btn-switch-user { background: #1e293b; border-color: #475569; color: #cbd5e1; }
+
+    .search-bar-box { display: flex; gap: 8px; margin-bottom: 10px; }
+    .search-input { flex: 1; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; outline: none; }
+    .search-input:focus { border-color: #38bdf8; }
+
+    .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .selector-box { background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 10px; border: 1px solid var(--border); display: flex; flex-direction: column; gap: 4px; }
+    .selector-box label { font-size: 0.75rem; color: var(--text-muted); }
+    .custom-select, .custom-date { background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 6px 8px; border-radius: 6px; font-size: 0.8rem; width: 100%; outline: none; }
+    .custom-date::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+
+    .kpi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px; }
+    .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 10px; text-align: center; }
+    .kpi-card .val { font-size: 1.3rem; font-weight: 800; color: #38bdf8; }
+    .kpi-card .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 3px; }
+
+    .shipments-container { padding: 0 16px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); position: relative; }
+    .card.highlighted-card { border: 2px solid #38bdf8; background: #1e3a5f; }
+    
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .code-wrap { display: flex; align-items: center; gap: 8px; }
+    .order-rank { background: #334155; color: #38bdf8; font-size: 0.75rem; font-weight: bold; width: 22px; height: 22px; display: inline-flex; justify-content: center; align-items: center; border-radius: 50%; }
+    .code { font-weight: bold; font-size: 0.95rem; color: #38bdf8; }
+    
+    .status-tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
+    .status-out_for_delivery { background: #1e3a8a; color: #93c5fd; }
+    .status-delivered { background: #14532d; color: #86efac; }
+    .status-partial { background: #581c87; color: #e9d5ff; }
+    .status-shipping_only { background: #065f46; color: #a7f3d0; }
+    .status-rescheduled { background: #78350f; color: #fde68a; }
+    .status-returned { background: #7f1d1d; color: #fca5a5; }
+    
+    .recipient-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+    .address { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 6px; }
+    .notes-badge { display: block; background: rgba(217, 119, 6, 0.15); border: 1px dashed var(--warning); color: #fde68a; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; margin-bottom: 8px; }
+    
+    .financials { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.88rem; }
+    .amount { font-weight: bold; color: #4ade80; }
+    .collected-amount { color: #38bdf8; font-weight: bold; }
+
+    .quick-actions { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 6px; margin-bottom: 10px; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 7px 4px; border-radius: 8px; text-decoration: none; text-align: center; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .btn-whatsapp { background: rgba(37, 211, 102, 0.15); border-color: #25d366; color: #25d366; }
+
+    .reorder-strip { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; }
+    .reorder-title { font-size: 0.72rem; color: var(--text-muted); }
+    .reorder-btns { display: flex; gap: 6px; }
+    .btn-reorder { background: #334155; border: 1px solid var(--border); color: #fff; width: 30px; height: 28px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    .status-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .btn-act { border: none; padding: 8px 4px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; color: #fff; text-align: center; }
+    .btn-deliver { background: var(--success); grid-column: span 2; padding: 10px 4px; font-size: 0.85rem; }
+    .btn-partial { background: var(--purple); }
+    .btn-shipping-only { background: #0d9488; }
+    .btn-reschedule { background: var(--warning); }
+    .btn-return { background: var(--danger); }
+
+    .settlement-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 40; }
+    .btn-settle { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(4px); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
+    .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 440px; padding: 18px; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 1.05rem; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .btn-close-modal { background: transparent; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; }
+
+    #scannerRegion { width: 100%; border-radius: 12px; overflow: hidden; background: #000; min-height: 250px; }
+    .scanner-tip { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 10px; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+    .form-control { width: 100%; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; font-size: 0.85rem; outline: none; }
+    .form-control:focus { border-color: #38bdf8; }
+    .btn-modal-action { background: var(--primary); color: white; width: 100%; padding: 11px; border-radius: 10px; border: none; font-size: 0.92rem; font-weight: bold; cursor: pointer; }
+    .badge-notice { background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 12px; line-height: 1.4; }
+    .dropzone { border: 2px dashed #475569; border-radius: 12px; padding: 25px 15px; text-align: center; cursor: pointer; margin-bottom: 15px; background: rgba(0,0,0,0.2); }
+
+    .courier-list-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; }
+    .courier-item-name { font-size: 0.85rem; font-weight: 600; }
+    .btn-del-courier { background: #7f1d1d; border: 1px solid #ef4444; color: #fff; border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; }
+
+    .user-select-btn { width: 100%; background: #1e293b; border: 1px solid var(--border); color: #fff; padding: 12px; border-radius: 10px; font-size: 0.95rem; font-weight: 600; margin-bottom: 8px; cursor: pointer; text-align: right; display: flex; justify-content: space-between; align-items: center; }
   </style>
 </head>
 <body>
+
   <header>
-    <div class="head-top">
-      <h1>أميتشي إكسبريس <span id="uName" class="pill">👑 المدير</span></h1>
-      <div style="display:flex; gap:6px;">
-        <button class="btn-h" id="btnAdmin" onclick="openCouriers()">👥 المناديب</button>
-        <button class="btn-h" onclick="openLogin()">🔄 الحساب</button>
+    <div class="header-top">
+      <h1>
+        <span>أميتشي إكسبريس</span>
+        <span id="roleBadge" class="role-badge badge-admin">👑 المدير</span>
+      </h1>
+      <div class="header-buttons">
+        <button class="btn-header btn-couriers" id="btnAdminCouriers" onclick="openCouriersModal()">👥 المناديب</button>
+        <button class="btn-header" id="btnAdminUpload" onclick="openUploadModal()">📁 رفع شيت</button>
+        <button class="btn-header btn-scan" onclick="openScannerModal()">📷 باركود</button>
+        <button class="btn-header btn-switch-user" onclick="openLoginModal()" title="تبديل المستخدم">🔄 الحساب</button>
       </div>
     </div>
-    <input type="text" id="q" class="search-input" placeholder="🔍 بحث بكود الشحنة أو الاسم..." oninput="render()">
-    <div class="grid2">
-      <div class="sel-box"><label>👤 المندوب:</label><select id="cFilter" class="c-select" onchange="loadShipments()"></select></div>
-      <div class="sel-box"><label>📅 تاريخ الوردية:</label><input type="date" id="dFilter" class="c-date" onchange="render()"></div>
+
+    <div class="search-bar-box">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 بحث بكود الشحنة، الاسم، أو الهاتف..." oninput="filterAndRender()">
+    </div>
+
+    <div class="filter-grid">
+      <div class="selector-box">
+        <label for="courierFilter">👤 المندوب:</label>
+        <select id="courierFilter" class="custom-select" onchange="onFilterChange()">
+          <option value="all">عرض كل المناديب</option>
+        </select>
+      </div>
+
+      <div class="selector-box">
+        <label for="dateFilter">📅 تاريخ الوردية:</label>
+        <input type="date" id="dateFilter" class="custom-date" onchange="filterAndRender()">
+      </div>
     </div>
   </header>
-  <div class="kpi-row">
-    <div class="kpi-c"><div class="kpi-val" id="kCount">0</div><div class="kpi-lbl">شحنات منجزة</div></div>
-    <div class="kpi-c"><div class="kpi-val" id="kCash">0 ج.م</div><div class="kpi-lbl">نقدية محصلة (COD)</div></div>
-  </div>
-  <div class="list-c" id="sList"><p style="text-align:center;color:var(--muted);margin-top:20px;">جارٍ جلب الشحنات...</p></div>
-  <div class="foot-bar">
-    <div><div style="font-size:0.75rem;color:var(--muted);">العهدة المحصلة:</div><div style="color:#4ade80;font-weight:bold;" id="fCash">0 ج.م</div></div>
-    <button class="btn-s" style="background:var(--primary);padding:8px 14px;" onclick="settle()">تصفية الوردية 💰</button>
-  </div>
-  <div class="modal" id="mLogin"><div class="m-box"><div class="m-title"><span>🔐 تسجيل الدخول</span><span style="cursor:pointer;" onclick="closeM('mLogin')">✕</span></div><label style="font-size:0.8rem;color:var(--muted);">اختر الحساب:</label><select id="lUser" class="c-select" style="margin:6px 0;"></select><label style="font-size:0.8rem;color:var(--muted);">الرقم السري (PIN):</label><input type="password" id="lPin" class="m-input" placeholder="****"><button class="btn-m" onclick="login()">دخول ➜</button></div></div>
-  <div class="modal" id="mCour"><div class="m-box"><div class="m-title"><span>👥 المناديب وأرقام السر</span><span style="cursor:pointer;" onclick="closeM('mCour')">✕</span></div><input type="text" id="newCName" class="m-input" placeholder="اسم المندوب"><input type="password" id="newCPin" class="m-input" placeholder="رقم سري (PIN)"><button class="btn-m" style="background:var(--success);margin-bottom:12px;" onclick="addCour()">+ إضافة مندوب</button><div id="courList" style="max-height:160px;overflow-y:auto;"></div></div></div>
-  <div class="modal" id="mPart"><div class="m-box"><div class="m-title"><span>📦 استلام جزئي</span><span style="cursor:pointer;" onclick="closeM('mPart')">✕</span></div><input type="hidden" id="pId"><input type="number" id="pAmt" class="m-input" placeholder="المبلغ الفعلي المحصل (ج.م)"><button class="btn-m" style="background:var(--purple);" onclick="savePart()">تأكيد الاستلام الجزئي</button></div></div>
-  <div class="modal" id="mResched"><div class="m-box"><div class="m-title"><span>📅 تأجيل الموعد</span><span style="cursor:pointer;" onclick="closeM('mResched')">✕</span></div><input type="hidden" id="rId"><input type="date" id="rDate" class="m-input"><button class="btn-m" style="background:var(--warning);" onclick="saveResched()">حفظ التأجيل</button></div></div>
 
-  <script src="app.js"></script>
-</body>
-</html>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="val" id="kpiDelivered">0</div>
+      <div class="lbl">شحنات منجزة (الوردية)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="val" id="kpiCash">0 ج.م</div>
+      <div class="lbl">نقدية محصلة (COD)</div>
+    </div>
+  </div>
+
+  <div class="shipments-container" id="shipmentsList">
+    <p style="text-align: center; color: var(--text-muted); margin-top: 20px;">جارٍ جلب الشحنات من السيرفر...</p>
+  </div>
+
+  <div class="settlement-bar">
+    <div>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">صافي النقد المحصل في العهدة</div>
+      <div style="font-weight: bold; color: #4ade80;" id="settleCashBottom">0 ج.م</div>
+    </div>
+    <button class="btn-settle" onclick="requestSettlement()">تصفية الوردية 💰</button>
+  </div>
+
+  <!-- نافذة تحديد المستخدم -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>🔐 تحديد هوية المستخدم</span>
+        <button class="btn-close-modal" onclick="closeModal('loginModal')">✕</button>
+      </div>
+      <div class="badge-notice">اختر صفتك للدخول إلى النظام:</div>
+
+      <button class="user-select-btn" onclick="showAdminPinInput()" style="border-color: #ef4444; background: rgba(239, 68, 68, 0.1);">
+        <span>👑 الإدارة العامة (المدير فقط)</span>
+        <span>🔑</span>
+      </button>
+
+      <div id="adminPinBox" style="display: none; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--border);">
+        <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:4px;">أدخل رمز الأمان للمدير (الافتراضي 1234):</label>
+        <div style="display:flex; gap:6px;">
+          <input type="password" id="adminPinInput" class="form-control" placeholder="****" maxlength="8">
+          <button class="btn-modal-action" style="width: auto; padding: 0 14px; background: var(--danger);" onclick="verifyAdminPin()">دخول</button>
+        </div>
+      </div>
+
+      <div style="margin: 14px 0 8px 0; font-size: 0.8rem; color: var(--text-muted);">أو اختر اسم المندوب لعرض خط سيره فقط:</div>
+      <div id="courierLoginList"></div>
+    </div>
+  </div>
+
+  <!-- نافذة إدارة المناديب -->
+  <div class="modal-overlay" id="couriersModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>👥 إدارة المناديب (خاص بالمدير)</span>
+        <button class="btn-close-modal" onclick="closeModal('couriersModal')">✕</button>
+      </div>
+
+      <div class="badge-notice">أضف مندوباً جديداً أو احذف مناديب لتحديث القوائم:</div>
+
+      <div style="display:flex; gap:6px; margin-bottom:15px;">
+        <input type="text" id="newCourierNameInput" class="form-control" placeholder="اسم المندوب ومناطقه">
+        <button class="btn-modal-action" style="width: auto; padding: 0 14px; white-space: nowrap; background: var(--success);" onclick="addNewCourier()">+ إضافة</button>
+      </div>
+
+      <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:8px;">قائمة المناديب الحاليين:</label>
+      <div id="couriersListContainer" style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;"></div>
+
+      <div style="border-top: 1px solid var(--border); padding-top: 10px;">
+        <label style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 4px;">تغيير رمز PIN السري للمدير:</label>
+        <div style="display:flex; gap:6px;">
+          <input type="password" id="newAdminPinInput" class="form-control" placeholder="رمز PIN جديد">
+          <button class="btn-modal-action" style="width: auto; padding: 0 12px; background: #475569;" onclick="changeAdminPin()">تحديث الرمز</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة الكاميرا للباركود -->
+  <div class="modal-overlay" id="scannerModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📷 توجيه الكاميرا نحو الباركود / QR</span>
+        <button class="btn-close-modal" onclick="closeScannerModal()">✕</button>
+      </div>
+      <div id="scannerRegion"></div>
+      <p class="scanner-tip">وجّه عدسة الكاميرا نحو باركود البوليصة وسيتم فتح الشحنة فوراً.</p>
+    </div>
+  </div>
+
+  <!-- استلام جزئي -->
+  <div class="modal-overlay" id="partialModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📦 استلام جزئي للشحنة</span>
+        <button class="btn-close-modal" onclick="closeModal('partialModal')">✕</button>
+      </div>
+      <div class="badge-notice">أدخل المبلغ الفعلي الذي سدده العميل مقابل القطع المستلمة:</div>
+      <input type="hidden" id="partialShipmentId">
+      
+      <div class="form-group">
+        <label>💵 المبلغ المحصل الفعلي (ج.م):</label>
+        <input type="number" id="partialAmountInput" class="form-control" style="font-size: 1.1rem; color: #4ade80; font-weight: bold;">
+      </div>
+      <div class="form-group">
+        <label>📝 ملاحظات المرتجع الجزئي:</label>
+        <input type="text" id="partialNotesInput" class="form-control" placeholder="مثال: استلم قطعة واحدة ورفض الثانية">
+      </div>
+      <button class="btn-modal-action" style="background: var(--purple);" onclick="submitPartial()">✓ تأكيد الاستلام الجزئي</button>
+    </div>
+  </div>
+
+  <!-- دفع الشحن فقط -->
+  <div class="modal-overlay" id="shippingOnlyModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>🚚 رفض ودفع مصاريف الشحن</span>
+        <button class="btn-close-modal" onclick="closeModal('shippingOnlyModal')">✕</button>
+      </div>
+      <div class="badge-notice">رفض العميل استلام الطرد ولكنه سدد قيمة مصاريف التوصيل للمندوب:</div>
+      <input type="hidden" id="shippingOnlyId">
+      
+      <div class="form-group">
+        <label>💵 قيمة مصاريف الشحن المحصلة (ج.م):</label>
+        <input type="number" id="shippingFeeInput" class="form-control" style="font-size: 1.1rem; color: #38bdf8; font-weight: bold;">
+      </div>
+      <div class="form-group">
+        <label>سبب الرفض:</label>
+        <input type="text" id="rejectReasonInput" class="form-control" placeholder="مثال: معاينة ولم يعجبه المنتج">
+      </div>
+      <button class="btn-modal-action" style="background: #0d9488;" onclick="submitShippingOnly()">✓ تأكيد تحصيل الشحن وإرجاع الطرد</button>
+    </div>
+  </div>
+
+  <!-- تأجيل بموعد -->
+  <div class="modal-overlay" id="rescheduleModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📅 تأجيل موعد التسليم</span>
+        <button class="btn-close-modal" onclick="closeModal('rescheduleModal')">✕</button>
+      </div>
+      <div class="badge-notice">حدد التاريخ الجديد المتفق عليه مع العميل لتسليم الشحنة:</div>
+      <input type="hidden" id="rescheduleShipmentId">
+      
+      <div class="form-group">
+        <label>📆 تاريخ التسليم القادم:</label>
+        <input type="date" id="rescheduleDateInput" class="form-control custom-date">
+      </div>
+      <div class="form-group">
+        <label>ملاحظات التأجيل:</label>
+        <input type="text" id="rescheduleNotesInput" class="form-control" placeholder="مثال: طلب التسليم بعد الساعة 5 مساءً">
+      </div>
+      <button class="btn-modal-action" style="background: var(--warning);" onclick="submitReschedule()">✓ حفظ الموعد وتأجيل الشحنة</button>
+    </div>
+  </div>
+
+  <!-- إضافة شحنة بالمسح المباشر -->
+  <div class="modal-overlay" id="addScannedModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📦 إضافة شحنة جديدة بالباركود</span>
+        <button class="btn-close-modal" onclick="closeModal('addScannedModal')">✕</button>
+      </div>
+      <div class="badge-notice">تم مسح كود جديد غير مسجل. أكمل البيانات لإضافتها فوراً للوردية:</div>
+      <div class="form-group">
+        <label>🏷️ كود الشحنة:</label>
+        <input type="text" id="newTrackingCode" class="form-control" readonly style="background:#1e293b; color:#38bdf8; font-weight:bold;">
+      </div>
+      <div class="form-group">
+        <label>👤 اسم العميل:</label>
+        <input type="text" id="newRecipientName" class="form-control" placeholder="اسم العميل">
+      </div>
+      <div class="form-group">
+        <label>📞 رقم الهاتف:</label>
+        <input type="tel" id="newRecipientPhone" class="form-control" placeholder="01xxxxxxxxx">
+      </div>
+      <div class="form-group">
+        <label>📍 العنوان:</label>
+        <input type="text" id="newDeliveryAddress" class="form-control" placeholder="المنطقة - الشارع - رقم العقار">
+      </div>
+      <div class="filter-grid" style="margin-bottom:10px;">
+        <div class="form-group">
+          <label>🗺️ المنطقة:</label>
+          <input type="text" id="newDeliveryZone" class="form-control" placeholder="العجمي / البيطاش">
+        </div>
+        <div class="form-group">
+     
