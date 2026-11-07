@@ -5,10 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>أميتشي للشحن والتوصيل</title>
   <meta name="theme-color" content="#1e293b">
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
     :root {
@@ -67,5 +63,253 @@
     .status-rescheduled { background: #78350f; color: #fde68a; }
     .status-returned { background: #7f1d1d; color: #fca5a5; }
     
-    .recipient-name {
+    .recipient-name { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+    .address { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 6px; }
     
+    .financials { background: rgba(0,0,0,0.25); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.88rem; }
+    .amount { font-weight: bold; color: #4ade80; }
+    .collected-amount { color: #38bdf8; font-weight: bold; }
+
+    .quick-actions { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 6px; margin-bottom: 10px; }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); padding: 7px 4px; border-radius: 8px; text-decoration: none; text-align: center; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
+    .btn-whatsapp { background: rgba(37, 211, 102, 0.15); border-color: #25d366; color: #25d366; }
+
+    .reorder-strip { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; }
+    .reorder-title { font-size: 0.72rem; color: var(--text-muted); }
+    .reorder-btns { display: flex; gap: 6px; }
+    .btn-reorder { background: #334155; border: 1px solid var(--border); color: #fff; width: 30px; height: 28px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    .status-actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .btn-act { border: none; padding: 8px 4px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer; color: #fff; text-align: center; }
+    .btn-deliver { background: var(--success); grid-column: span 2; padding: 10px 4px; font-size: 0.85rem; }
+    .btn-partial { background: var(--purple); }
+    .btn-shipping-only { background: #0d9488; }
+    .btn-reschedule { background: var(--warning); }
+    .btn-return { background: var(--danger); }
+
+    .settlement-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 40; }
+    .btn-settle { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
+    .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 440px; padding: 18px; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 1.05rem; font-weight: bold; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+    .btn-close-modal { background: transparent; border: none; color: var(--text-muted); font-size: 1.3rem; cursor: pointer; }
+
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; }
+    .form-control { width: 100%; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; font-size: 0.85rem; outline: none; }
+    .btn-modal-action { background: var(--primary); color: white; width: 100%; padding: 11px; border-radius: 10px; border: none; font-size: 0.92rem; font-weight: bold; cursor: pointer; }
+    .badge-notice { background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 12px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 12px; line-height: 1.4; }
+    .courier-list-item { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; margin-bottom: 8px; }
+    .btn-del-courier { background: #7f1d1d; border: 1px solid #ef4444; color: #fff; border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <h1>
+        <span>أميتشي إكسبريس</span>
+        <span id="currentUserLabel" class="user-pill">👑 المدير العام</span>
+      </h1>
+      <div class="header-buttons">
+        <button class="btn-header btn-couriers" id="btnCouriersAdmin" onclick="openCouriersModal()">👥 المناديب</button>
+        <button class="btn-header btn-logout" onclick="openLoginModal()" title="تبديل المستخدم">🔄 الحساب</button>
+      </div>
+    </div>
+
+    <div class="search-bar-box">
+      <input type="text" id="searchInput" class="search-input" placeholder="🔍 بحث بكود الشحنة، الاسم، أو الهاتف..." oninput="filterAndRender()">
+    </div>
+
+    <div class="filter-grid">
+      <div class="selector-box">
+        <label for="courierFilter">👤 المندوب:</label>
+        <select id="courierFilter" class="custom-select" onchange="onCourierFilterChange()"></select>
+      </div>
+
+      <div class="selector-box">
+        <label for="dateFilter">📅 تصفية بالتاريخ (اختياري):</label>
+        <input type="date" id="dateFilter" class="custom-date" onchange="filterAndRender()">
+      </div>
+    </div>
+  </header>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="val" id="kpiDelivered">0</div>
+      <div class="lbl">شحنات منجزة</div>
+    </div>
+    <div class="kpi-card">
+      <div class="val" id="kpiCash">0 ج.م</div>
+      <div class="lbl">نقدية محصلة (COD)</div>
+    </div>
+  </div>
+
+  <div class="shipments-container" id="shipmentsList">
+    <p style="text-align: center; color: var(--text-muted); margin-top: 20px;">جارٍ جلب الشحنات من السيرفر...</p>
+  </div>
+
+  <div class="settlement-bar">
+    <div>
+      <div style="font-size: 0.75rem; color: var(--text-muted);">صافي النقد المحصل في العهدة</div>
+      <div style="font-weight: bold; color: #4ade80;" id="settleCashBottom">0 ج.م</div>
+    </div>
+    <button class="btn-settle" onclick="requestSettlement()">تصفية الوردية 💰</button>
+  </div>
+
+  <!-- نافذة تسجيل الدخول برمز PIN -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>🔐 تحديد هوية المستخدم</span>
+        <button class="btn-close-modal" onclick="closeModal('loginModal')">✕</button>
+      </div>
+      <div class="badge-notice">اختر الحساب وأدخل الرمز السري للدخول:</div>
+
+      <div class="form-group">
+        <label>👤 اختر الحساب:</label>
+        <select id="loginAccountSelect" class="form-control"></select>
+      </div>
+
+      <div class="form-group">
+        <label>🔑 الرقم السري (PIN):</label>
+        <input type="password" id="loginPinInput" class="form-control" placeholder="أدخل الرقم السري" maxlength="8">
+      </div>
+
+      <button class="btn-modal-action" onclick="performLogin()">دخول ➜</button>
+    </div>
+  </div>
+
+  <!-- نافذة إدارة المناديب والرموز للمدير -->
+  <div class="modal-overlay" id="couriersModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>👥 إدارة المناديب والرموز السرية</span>
+        <button class="btn-close-modal" onclick="closeModal('couriersModal')">✕</button>
+      </div>
+      
+      <div class="badge-notice">أضف مندوباً جديداً مع تحديد رقمه السري:</div>
+
+      <div class="form-group">
+        <input type="text" id="newCourierNameInput" class="form-control" placeholder="اسم المندوب ومناطقه">
+      </div>
+      <div style="display:flex; gap:6px; margin-bottom:15px;">
+        <input type="password" id="newCourierPinInput" class="form-control" placeholder="رمز PIN للمندوب (مثال: 5555)" maxlength="8">
+        <button class="btn-modal-action" style="width: auto; padding: 0 14px; background: var(--success);" onclick="addNewCourier()">+ إضافة</button>
+      </div>
+
+      <label style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:8px;">طاقم العمل والرموز:</label>
+      <div id="couriersListContainer" style="max-height: 180px; overflow-y: auto; margin-bottom: 12px;"></div>
+
+      <div style="border-top:1px dashed var(--border); padding-top:10px;">
+        <label style="font-size:0.75rem; color:var(--text-muted); display:block; margin-bottom:4px;">تغيير الرقم السري للمدير:</label>
+        <div style="display:flex; gap:6px;">
+          <input type="password" id="changeAdminPinInput" class="form-control" placeholder="رمز جديد للمدير">
+          <button class="btn-modal-action" style="width: auto; padding: 0 12px; background: #475569;" onclick="saveNewAdminPin()">تحديث</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- نافذة الاستلام الجزئي -->
+  <div class="modal-overlay" id="partialModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📦 استلام جزئي للشحنة</span>
+        <button class="btn-close-modal" onclick="closeModal('partialModal')">✕</button>
+      </div>
+      <input type="hidden" id="partialShipmentId">
+      <div class="form-group">
+        <label>💵 المبلغ المحصل الفعلي (ج.م):</label>
+        <input type="number" id="partialAmountInput" class="form-control" style="font-size: 1.1rem; color: #4ade80; font-weight: bold;">
+      </div>
+      <button class="btn-modal-action" style="background: var(--purple);" onclick="submitPartial()">✓ تأكيد الاستلام الجزئي</button>
+    </div>
+  </div>
+
+  <!-- نافذة دفع الشحن فقط -->
+  <div class="modal-overlay" id="shippingOnlyModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>🚚 رفض ودفع مصاريف الشحن</span>
+        <button class="btn-close-modal" onclick="closeModal('shippingOnlyModal')">✕</button>
+      </div>
+      <input type="hidden" id="shippingOnlyId">
+      <div class="form-group">
+        <label>💵 قيمة مصاريف الشحن المحصلة (ج.م):</label>
+        <input type="number" id="shippingFeeInput" class="form-control" style="font-size: 1.1rem; color: #38bdf8; font-weight: bold;">
+      </div>
+      <button class="btn-modal-action" style="background: #0d9488;" onclick="submitShippingOnly()">✓ تأكيد تحصيل الشحن</button>
+    </div>
+  </div>
+
+  <!-- نافذة تأجيل بموعد -->
+  <div class="modal-overlay" id="rescheduleModal">
+    <div class="modal-box">
+      <div class="modal-title">
+        <span>📅 تأجيل موعد التسليم</span>
+        <button class="btn-close-modal" onclick="closeModal('rescheduleModal')">✕</button>
+      </div>
+      <input type="hidden" id="rescheduleShipmentId">
+      <div class="form-group">
+        <label>📆 تاريخ التسليم الجديد:</label>
+        <input type="date" id="rescheduleDateInput" class="form-control custom-date">
+      </div>
+      <button class="btn-modal-action" style="background: var(--warning);" onclick="submitReschedule()">✓ حفظ التأجيل</button>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://difabkjpyypaylnofbcl.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
+
+    async function dbFetch(endpoint, method = 'GET', body = null) {
+      const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+      const headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      };
+      const options = { method, headers };
+      if (body) options.body = JSON.stringify(body);
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || res.statusText);
+      }
+      return await res.json();
+    }
+
+    const DEFAULT_COURIERS = [
+      { id: "a0000000-0000-0000-0000-000000000004", name: "مينا عبد النور", pin: "1111" },
+      { id: "a0000000-0000-0000-0000-000000000001", name: "أحمد", pin: "1234" },
+      { id: "a0000000-0000-0000-0000-000000000002", name: "محمد محمود (العجمي)", pin: "2222" },
+      { id: "a0000000-0000-0000-0000-000000000003", name: "إسلام فتحي (شرق)", pin: "3333" }
+    ];
+
+    function getCouriers() {
+      try {
+        const stored = localStorage.getItem('amici_couriers_with_pin');
+        if (stored) return JSON.parse(stored);
+      } catch(e) {}
+      return DEFAULT_COURIERS;
+    }
+
+    function saveCouriers(list) {
+      localStorage.setItem('amici_couriers_with_pin', JSON.stringify(list));
+      populateCouriersSelects();
+    }
+
+    function getAdminPin() {
+      return localStorage.getItem('amici_admin_master_pin') || '1234';
+    }
+
+    function saveNewAdminPin() {
+      const pin = document.getElementById('changeAdminPinInput').value.trim();
+      if (!pin || pin.length < 4) return alert('الرمز يجب ألا يقل عن 4 أرقام.');
+      localStorage.setItem('amici_admin_master_pin', pin);
+      document.getElementById('changeAdminPinInput').value = '';
+      alert('تم تحديث رمز المدير
+          
