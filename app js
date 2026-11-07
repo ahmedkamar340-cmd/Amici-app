@@ -239,8 +239,14 @@ function mv(id, dir) {
 }
 
 function settle() {
-  alert(`إجمالي النقدية المحصلة: ${document.getElementById('fCash').innerText}`);
+  alert(`إجمالي النقدية المحصلة: ${document.getElementById('fCash').innerText}`);if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    renderC();
+    applyUser();
+    loadShipments();
+  });
+} else {
+  renderC();
+  applyUser();
+  loadShipments();
 }
-renderC();
-applyUser();
-loadShipments();
