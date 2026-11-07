@@ -107,8 +107,8 @@
     <div class="header-top">
       <h1>أميتشي إكسبريس</h1>
       <div class="header-buttons">
-        <button class="btn-header btn-scan" onclick="openScannerModal()">📷 مسح باركود</button>
-        <button class="btn-header" onclick="openUploadModal()">📁 رفع شيت</button>
+        <button class="btn-header btn-scan" id="btnScan" onclick="openScannerModal()">📷 مسح باركود</button>
+        <button class="btn-header" id="btnUpload" onclick="openUploadModal()">📁 رفع شيت</button>
       </div>
     </div>
 
@@ -396,4 +396,279 @@
             <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(shipment.delivery_address || '')}" target="_blank" class="btn-outline">🗺️ الخريطة</a>
           </div>
 
-     
+          ${!isDelivered ? `
+          <div class="status-actions">
+            <button class="btn-act btn-deliver" onclick="updateStatus('${shipment.id}', 'delivered')">تم التسليم ✓</button>
+            <button class="btn-act btn-reschedule" onclick="updateStatus('${shipment.id}', 'rescheduled')">تأجيل</button>
+            <button class="btn-act btn-return" onclick="updateStatus('${shipment.id}', 'returned')">رفض</button>
+          </div>
+          ` : '<div style="text-align:center; font-size:0.85rem; color:#86efac; padding-top:4px;">تم تسليم هذا الطرد واحتسابه في الوردية</div>'}
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('kpiDelivered').innerText = deliveredCount;
+      document.getElementById('kpiCash').innerText = totalCash + ' ج.م';
+      document.getElementById('settleCashBottom').innerText = totalCash + ' ج.م';
+
+      if (highlightId) {
+        setTimeout(() => {
+          const el = document.getElementById(`shipment-card-${highlightId}`);
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 150);
+      }
+    }
+
+    async function updateStatus(id, newStatus) {
+      const { error } = await supabaseClient
+        .from('shipments')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (error) {
+        alert('خطأ أثناء التحديث: ' + error.message);
+        return;
+      }
+
+      loadShipments();
+    }
+
+    async function requestSettlement() {
+      const deliveredShipments = (displayedShipments || []).filter(s => s.status === 'delivered');
+      if (deliveredShipments.length === 0) {
+        alert('لا توجد شحنات مسلّمة في وردية اليوم بعد لتصفيتها.');
+        return;
+      }
+
+      const total = deliveredShipments.reduce((sum, s) => sum + Number(s.cod_amount || 0), 0);
+      const selectedDate = document.getElementById('dateFilter').value;
+      alert(`إجمالي النقد المسلّم للخزينة لتاريخ (${selectedDate}):\n${total} ج.م عن عدد ${deliveredShipments.length} شحنة مسلّمة.`);
+    }
+
+    /* =================== ماسح الباركود و QR =================== */
+    function openScannerModal() {
+      const modal = document.getElementById('scannerModal');
+      modal.style.display = 'flex';
+      
+      // التخلص من أي قارئ نشط سابقاً لتفادي تداخل الكاميرا
+      if (html5QrScanner) {
+        try { html5QrScanner.clear(); } catch(e) {}
+      }
+      
+      html5QrScanner = new Html5Qrcode("scannerRegion");
+      const config = { fps: 15, qrbox: { width: 280, height: 180 } };
+
+      html5QrScanner.start(
+        { facingMode: "environment" },
+        config,
+        onScanSuccess,
+        (errorMessage) => {
+          // تجاهل الأخطاء العادية للمسح التلقائي المستمر
+        }
+      ).catch(err => {
+        alert("تعذر تشغيل الكاميرا، يرجى التأكد من إعطاء إذن الكاميرا للمتصفح: " + err);
+        closeScannerModal();
+      });
+    }
+
+    function closeScannerModal() {
+      const modal = document.getElementById('scannerModal');
+      modal.style.display = 'none';
+      if (html5QrScanner) {
+        html5QrScanner.stop().then(() => {
+          html5QrScanner.clear();
+          html5QrScanner = null;
+        }).catch(() => {
+          try { html5QrScanner.clear(); } catch(e) {}
+          html5QrScanner = null;
+        });
+      }
+    }
+
+    function onScanSuccess(decodedText) {
+      if (navigator.vibrate) navigator.vibrate(100);
+      closeScannerModal();
+
+      const rawCode = decodedText.trim();
+      const normScanned = normalizeCode(rawCode);
+
+      // البحث في الشحنات المحملة حالياً
+      const found = rawShipmentsData.find(s => {
+        const itemCode = String(s.tracking_code || '').trim();
+        const normItem = normalizeCode(itemCode);
+        return normItem === normScanned || itemCode.includes(rawCode) || rawCode.includes(itemCode);
+      });
+
+      if (found) {
+        // تم العثور عليها -> إبرازها وتصفيتها فوراً
+        document.getElementById('searchInput').value = found.tracking_code;
+        filterAndRender(found.id);
+      } else {
+        // لم يتم العثور عليها -> فتح نافذة إضافة الشحنة فوراً
+        openAddScannedModal(rawCode);
+      }
+    }
+
+    /* =================== نافذة إضافة الشحنة الممسوحة =================== */
+    function openAddScannedModal(scannedCode) {
+      document.getElementById('newTrackingCode').value = scannedCode;
+      document.getElementById('newRecipientName').value = '';
+      document.getElementById('newRecipientPhone').value = '';
+      document.getElementById('newDeliveryAddress').value = '';
+      document.getElementById('newDeliveryZone').value = '';
+      document.getElementById('newCodAmount').value = '';
+
+      // ضبط المندوب ليكون نفس المندوب المختار في الشاشة أو الافتراضي
+      const currentSelectedCourier = document.getElementById('courierFilter').value;
+      if (currentSelectedCourier && currentSelectedCourier !== 'all') {
+        document.getElementById('newCourierId').value = currentSelectedCourier;
+      }
+
+      document.getElementById('addScannedModal').style.display = 'flex';
+      setTimeout(() => {
+        document.getElementById('newRecipientName').focus();
+      }, 200);
+    }
+
+    function closeAddScannedModal() {
+      document.getElementById('addScannedModal').style.display = 'none';
+    }
+
+    async function saveScannedShipment() {
+      const tracking_code = document.getElementById('newTrackingCode').value.trim();
+      const recipient_name = document.getElementById('newRecipientName').value.trim() || 'عميل بدون اسم';
+      const recipient_phone = document.getElementById('newRecipientPhone').value.trim();
+      const delivery_address = document.getElementById('newDeliveryAddress').value.trim();
+      const delivery_zone = document.getElementById('newDeliveryZone').value.trim();
+      const cod_amount = Number(document.getElementById('newCodAmount').value.trim()) || 0;
+      const courier_id = document.getElementById('newCourierId').value;
+
+      if (!tracking_code) {
+        alert('كود الشحنة غير موجود.');
+        return;
+      }
+
+      const saveBtn = document.getElementById('saveNewShipmentBtn');
+      saveBtn.innerText = 'جارٍ الحفظ في الوردية...';
+      saveBtn.disabled = true;
+
+      const newRecord = {
+        tracking_code: tracking_code,
+        recipient_name: recipient_name,
+        recipient_phone: recipient_phone,
+        delivery_address: delivery_address,
+        delivery_zone: delivery_zone,
+        cod_amount: cod_amount,
+        courier_id: courier_id,
+        status: 'out_for_delivery'
+      };
+
+      const { data, error } = await supabaseClient
+        .from('shipments')
+        .insert([newRecord])
+        .select();
+
+      saveBtn.innerText = '✓ حفظ وإضافة الشحنة للوردية';
+      saveBtn.disabled = false;
+
+      if (error) {
+        alert('خطأ أثناء حفظ الشحنة: ' + error.message);
+        return;
+      }
+
+      alert('تمت إضافة الشحنة بنجاح إلى وردية المندوب!');
+      closeAddScannedModal();
+
+      await loadShipments();
+      const newId = data && data[0] ? data[0].id : null;
+      if (newId) {
+        document.getElementById('searchInput').value = tracking_code;
+        filterAndRender(newId);
+      }
+    }
+
+    /* =================== رفع الإكسيل =================== */
+    function openUploadModal() {
+      document.getElementById('uploadModal').style.display = 'flex';
+    }
+
+    function closeUploadModal() {
+      document.getElementById('uploadModal').style.display = 'none';
+      document.getElementById('fileChosenText').innerText = 'اضغط لاختيار ملف Excel أو CSV';
+      document.getElementById('uploadBtn').disabled = true;
+      document.getElementById('uploadBtn').style.opacity = '0.5';
+      document.getElementById('excelFileInput').value = '';
+      parsedRowsToUpload = [];
+    }
+
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      document.getElementById('fileChosenText').innerText = file.name;
+      const reader = new FileReader();
+
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet);
+
+          if (!json || json.length === 0) {
+            alert('الملف فارغ أو لا يحتوي على بيانات صحيحة.');
+            return;
+          }
+
+          const targetCourierId = document.getElementById('assignCourierSelect').value;
+
+          parsedRowsToUpload = json.map(row => ({
+            tracking_code: String(row['tracking_code'] || row['كود_الشحنة'] || row['الكود'] || 'SHP-' + Math.floor(1000 + Math.random() * 9000)),
+            recipient_name: String(row['recipient_name'] || row['اسم_العميل'] || row['الاسم'] || 'عميل بدون اسم'),
+            recipient_phone: String(row['recipient_phone'] || row['رقم_الهاتف'] || row['الموبايل'] || row['الهاتف'] || ''),
+            delivery_address: String(row['delivery_address'] || row['العنوان'] || ''),
+            delivery_zone: String(row['delivery_zone'] || row['المنطقة'] || ''),
+            cod_amount: Number(row['cod_amount'] || row['المبلغ'] || row['التحصيل'] || 0),
+            courier_id: row['courier_id'] || targetCourierId,
+            status: 'out_for_delivery'
+          }));
+
+          document.getElementById('uploadBtn').disabled = false;
+          document.getElementById('uploadBtn').style.opacity = '1';
+          document.getElementById('uploadBtn').innerText = `إسناد ورفع ${parsedRowsToUpload.length} شحنة`;
+        } catch (err) {
+          alert('خطأ في قراءة ملف الإكسيل: ' + err.message);
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    async function processAndUpload() {
+      if (parsedRowsToUpload.length === 0) return;
+
+      const uploadBtn = document.getElementById('uploadBtn');
+      uploadBtn.innerText = 'جارٍ الرفع والإسناد...';
+      uploadBtn.disabled = true;
+
+      const { data, error } = await supabaseClient
+        .from('shipments')
+        .insert(parsedRowsToUpload);
+
+      if (error) {
+        alert('حدث خطأ أثناء الرفع: ' + error.message);
+        uploadBtn.innerText = 'إعادة المحاولة';
+        uploadBtn.disabled = false;
+        return;
+      }
+
+      alert(`تم رفع وإسناد ${parsedRowsToUpload.length} شحنة بنجاح!`);
+      closeUploadModal();
+      loadShipments();
+    }
+
+    loadShipments();
+  </script>
+</body>
+</html>
