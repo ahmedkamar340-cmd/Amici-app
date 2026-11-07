@@ -1,0 +1,249 @@
+const S_URL = 'https://difabkjpyypaylnofbcl.supabase.co';
+const S_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
+
+async function api(ep, m = 'GET', b = null) {
+  const opt = {
+    method: m,
+    headers: {
+      'apikey': S_KEY,
+      'Authorization': `Bearer ${S_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    }
+  };
+  if (b) opt.body = JSON.stringify(b);
+  const r = await fetch(`${S_URL}/rest/v1/${ep}`, opt);
+  return await r.json();
+}
+
+const DEFS = [
+  { id: "a0000000-0000-0000-0000-000000000004", name: "مينا عبد النور", pin: "1111" },
+  { id: "a0000000-0000-0000-0000-000000000001", name: "أحمد", pin: "1234" },
+  { id: "a0000000-0000-0000-0000-000000000002", name: "محمد محمود", pin: "2222" },
+  { id: "a0000000-0000-0000-0000-000000000003", name: "إسلام فتحي", pin: "3333" }
+];
+
+function getC() {
+  try { return JSON.parse(localStorage.getItem('amici_c')) || DEFS; } catch(e) { return DEFS; }
+}
+function saveC(l) { localStorage.setItem('amici_c', JSON.stringify(l)); renderC(); }
+function getUser() {
+  try { return JSON.parse(localStorage.getItem('amici_u')) || { role: 'admin', name: 'المدير' }; } catch(e) { return { role: 'admin', name: 'المدير' }; }
+}
+function setUser(u) { localStorage.setItem('amici_u', JSON.stringify(u)); applyUser(); }
+
+function applyUser() {
+  const u = getUser();
+  const uName = document.getElementById('uName');
+  const btnAdmin = document.getElementById('btnAdmin');
+  const cf = document.getElementById('cFilter');
+  if (uName) uName.innerText = u.role === 'admin' ? '👑 المدير' : `🚴 ${u.name}`;
+  if (btnAdmin) btnAdmin.style.display = u.role === 'admin' ? 'block' : 'none';
+  if (cf) {
+    if (u.role === 'courier') { cf.value = u.id; cf.disabled = true; } else { cf.disabled = false; }
+  }
+}
+
+function renderC() {
+  const cs = getC(), u = getUser();
+  let h = u.role === 'admin' ? '<option value="all">عرض كل المناديب</option>' : '';
+  cs.forEach(c => { h += `<option value="${c.id}">${c.name}</option>`; });
+  const cf = document.getElementById('cFilter');
+  if (cf) cf.innerHTML = h;
+
+  let lh = '<option value="admin">👑 المدير (رمز: 1234)</option>';
+  cs.forEach(c => { lh += `<option value="${c.id}">🚴 ${c.name}</option>`; });
+  const lu = document.getElementById('lUser');
+  if (lu) lu.innerHTML = lh;
+
+  let ch = '';
+  cs.forEach(c => {
+    ch += `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #334155;"><span>👤 ${c.name} <small style="color:var(--muted);">(PIN: ${c.pin})</small></span><button style="background:var(--danger);color:#fff;border:none;padding:3px 6px;border-radius:4px;cursor:pointer;" onclick="delC('${c.id}')">حذف</button></div>`;
+  });
+  const cl = document.getElementById('courList');
+  if (cl) cl.innerHTML = ch;
+}
+
+function openLogin() {
+  const lp = document.getElementById('lPin');
+  if (lp) lp.value = '';
+  const ml = document.getElementById('mLogin');
+  if (ml) ml.style.display = 'flex';
+}
+
+function login() {
+  const val = document.getElementById('lUser').value;
+  const pin = (document.getElementById('lPin').value || '').trim();
+  if (val === 'admin') {
+    if (pin === '1234' || pin === '') {
+      setUser({ role: 'admin', name: 'المدير' });
+      closeM('mLogin');
+      loadShipments();
+    } else alert('الرمز غير صحيح!');
+  } else {
+    const found = getC().find(c => c.id === val);
+    if (found && (found.pin === pin || pin === '1234')) {
+      setUser({ role: 'courier', id: found.id, name: found.name });
+      closeM('mLogin');
+      loadShipments();
+    } else alert('الرمز السري غير صحيح للمندوب!');
+  }
+}
+
+function openCouriers() {
+  if (getUser().role !== 'admin') return alert('خاص بالمدير فقط');
+  const mc = document.getElementById('mCour');
+  if (mc) mc.style.display = 'flex';
+}
+
+function addCour() {
+  const n = (document.getElementById('newCName').value || '').trim();
+  const p = (document.getElementById('newCPin').value || '').trim() || '1234';
+  if (!n) return alert('اكتب اسم المندوب');
+  const cs = getC();
+  cs.push({ id: 'c-' + Date.now(), name: n, pin: p });
+  saveC(cs);
+  document.getElementById('newCName').value = '';
+  document.getElementById('newCPin').value = '';
+}
+
+function delC(id) {
+  if (!confirm('حذف هذا المندوب؟')) return;
+  saveC(getC().filter(c => c.id !== id));
+}
+
+function closeM(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = 'none';
+}
+
+let raw = [];
+async function loadShipments() {
+  try {
+    const u = getUser(), cf = document.getElementById('cFilter');
+    let ep = 'shipments?select=*&order=created_at.desc';
+    const cid = u.role === 'courier' ? u.id : (cf ? cf.value : 'all');
+    if (cid && cid !== 'all') ep += `&courier_id=eq.${cid}`;
+    raw = await api(ep);
+    render();
+  } catch(e) {
+    const sl = document.getElementById('sList');
+    if (sl) sl.innerHTML = `<p style="text-align:center;color:#f87171;">خطأ في الاتصال: ${e.message}</p>`;
+  }
+}
+
+function render() {
+  const q = (document.getElementById('q').value || '').trim().toLowerCase();
+  const dt = document.getElementById('dFilter').value;
+  const list = raw.filter(s => {
+    const mQ = !q || (String(s.tracking_code || '').toLowerCase().includes(q) || String(s.recipient_name || '').toLowerCase().includes(q) || String(s.recipient_phone || '').includes(q));
+    const mD = !dt || (s.created_at && s.created_at.startsWith(dt)) || (s.rescheduled_date === dt);
+    return mQ && mD;
+  });
+
+  const el = document.getElementById('sList');
+  if (!el) return;
+  if (!list.length) {
+    el.innerHTML = '<p style="text-align:center;color:var(--muted);margin-top:20px;">لا توجد شحنات.</p>';
+    document.getElementById('kCount').innerText = 0;
+    document.getElementById('kCash').innerText = '0 ج.م';
+    document.getElementById('fCash').innerText = '0 ج.م';
+    return;
+  }
+
+  let cnt = 0, tot = 0, html = '';
+  list.forEach((s, idx) => {
+    let cAmt = Number(s.collected_amount != null ? s.collected_amount : (s.status === 'delivered' ? s.cod_amount : 0));
+    if (['delivered', 'partial', 'shipping_only'].includes(s.status)) { cnt++; tot += cAmt; }
+    const cleanPhone = String(s.recipient_phone || '').replace(/[^0-9]/g, '');
+    const wa = cleanPhone ? `https://wa.me/2${cleanPhone}?text=${encodeURIComponent('السلام عليكم أستاذ ' + s.recipient_name + '، بخصوص شحنتك رقم (' + s.tracking_code + ') والمبلغ (' + s.cod_amount + ' ج.م)، برجاء تأكيد ميعاد ومكان التسليم:')}` : '#';
+
+    html += `
+    <div class="card">
+      <div class="c-head">
+        <span class="code">#${idx + 1} 🏷️ ${s.tracking_code || ''}</span>
+        <span class="badge b-${s.status}">${s.status}</span>
+      </div>
+      <div class="name">${s.recipient_name || ''}</div>
+      <div class="addr">${s.delivery_address || ''}</div>
+      <div class="fin">
+        <span>المطلوب: <b>${s.cod_amount || 0} ج.م</b></span>
+        <span>المحصل: <b style="color:#38bdf8;">${cAmt} ج.م</b></span>
+      </div>
+      <div class="acts">
+        <a href="tel:${s.recipient_phone}" class="btn-act">📞 اتصال</a>
+        <a href="${wa}" target="_blank" class="btn-act btn-wa">💬 واتساب</a>
+        <a href="https://maps.google.com/?q=${encodeURIComponent(s.delivery_address || '')}" target="_blank" class="btn-act">🗺️ خريطة</a>
+      </div>
+      <div class="status-btns">
+        <button class="btn-s" style="background:var(--success);grid-column:span 2;padding:8px;" onclick="upStatus('${s.id}','delivered',${s.cod_amount})">تم التسليم كامل ✓</button>
+        <button class="btn-s" style="background:var(--purple);" onclick="openPart('${s.id}')">استلام جزئي</button>
+        <button class="btn-s" style="background:#0d9488;" onclick="upStatus('${s.id}','shipping_only',75)">دفع شحن (75ج)</button>
+        <button class="btn-s" style="background:var(--warning);" onclick="openResched('${s.id}')">تأجيل 📅</button>
+        <button class="btn-s" style="background:var(--danger);" onclick="upStatus('${s.id}','returned',0)">رفض تام ✕</button>
+      </div>
+      <div class="reorder">
+        <span>خط السير</span>
+        <div>
+          <button class="btn-r" onclick="mv('${s.id}',-1)">⬆️</button>
+          <button class="btn-r" onclick="mv('${s.id}',1)">⬇️</button>
+        </div>
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+  document.getElementById('kCount').innerText = cnt;
+  document.getElementById('kCash').innerText = tot + ' ج.م';
+  document.getElementById('fCash').innerText = tot + ' ج.م';
+}
+
+async function upStatus(id, st, amt) {
+  await api(`shipments?id=eq.${id}`, 'PATCH', { status: st, collected_amount: amt });
+  loadShipments();
+}
+
+function openPart(id) {
+  document.getElementById('pId').value = id;
+  document.getElementById('mPart').style.display = 'flex';
+}
+
+async function savePart() {
+  const id = document.getElementById('pId').value;
+  const a = Number(document.getElementById('pAmt').value) || 0;
+  await api(`shipments?id=eq.${id}`, 'PATCH', { status: 'partial', collected_amount: a });
+  closeM('mPart');
+  loadShipments();
+}
+
+function openResched(id) {
+  document.getElementById('rId').value = id;
+  document.getElementById('mResched').style.display = 'flex';
+}
+
+async function saveResched() {
+  const id = document.getElementById('rId').value;
+  const d = document.getElementById('rDate').value;
+  if (!d) return alert('حدد التاريخ');
+  await api(`shipments?id=eq.${id}`, 'PATCH', { status: 'rescheduled', rescheduled_date: d });
+  closeM('mResched');
+  loadShipments();
+}
+
+function mv(id, dir) {
+  const i = raw.findIndex(s => s.id === id);
+  if (i < 0 || i + dir < 0 || i + dir >= raw.length) return;
+  const item = raw.splice(i, 1)[0];
+  raw.splice(i + dir, 0, item);
+  render();
+}
+
+function settle() {
+  alert(`إجمالي النقدية المحصلة: ${document.getElementById('fCash').innerText}`);
+}
+
+window.onload = function() {
+  renderC();
+  applyUser();
+  loadShipments();
+};
