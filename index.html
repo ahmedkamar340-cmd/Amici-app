@@ -42,8 +42,8 @@
   <div id="lst"><p style="text-align:center;color:var(--m);margin-top:20px;">جارٍ جلب الشحنات...</p></div>
   <div class="modal" id="mLog"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mLog')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"></select><input type="password" id="lP" class="c-in" placeholder="الرمز السري (PIN)"><button class="btn-s" style="background:var(--p);width:100%;margin-top:8px;padding:8px;" onclick="lgn()">دخول ➜</button></div></div>
   <div class="modal" id="mCr"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 المناديب</b><span style="cursor:pointer;" onclick="clsM('mCr')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="الاسم" style="margin-bottom:4px;"><input type="password" id="ncP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
-  <div class="modal" id="mPt"><div class="m-box"><b>📦 استلام جزئي</b><input type="hidden" id="pI"><input type="number" id="pA" class="c-in" placeholder="المبلغ الفعلي المحصل" style="margin:8px 0;"><button class="btn-s" style="background:#8b5cf6;width:100%;" onclick="svPt()">تأكيد الاستلام الجزئي</button></div></div>
-  <div class="modal" id="mRs"><div class="m-box"><b>📅 تأجيل الشحنة</b><input type="hidden" id="rI"><input type="date" id="rD" class="c-in" style="margin:8px 0;"><button class="btn-s" style="background:var(--w);width:100%;" onclick="svRs()">حفظ التأجيل</button></div></div>
+  <div class="modal" id="mPt"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📦 استلام جزئي</b><span style="cursor:pointer;" onclick="clsM('mPt')">✕</span></div><input type="hidden" id="pI"><input type="number" id="pA" class="c-in" placeholder="المبلغ الفعلي المحصل" style="margin:8px 0;"><button class="btn-s" style="background:#8b5cf6;width:100%;" onclick="svPt()">تأكيد الاستلام الجزئي</button></div></div>
+  <div class="modal" id="mRs"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📅 تأجيل الشحنة ليوم محدد</b><span style="cursor:pointer;" onclick="clsM('mRs')">✕</span></div><input type="hidden" id="rI"><input type="date" id="rD" class="c-in" style="margin:8px 0;"><button class="btn-s" style="background:var(--w);width:100%;" onclick="svRs()">حفظ التأجيل ونقل الشحنة</button></div></div>
   <script>
     const S_U='https://difabkjpyypaylnofbcl.supabase.co',S_K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
     async function api(ep,m='GET',b=null){const o={method:m,headers:{'apikey':S_K,'Authorization':`Bearer ${S_K}`,'Content-Type':'application/json','Prefer':'return=representation'}};if(b)o.body=JSON.stringify(b);try{const r=await fetch(`${S_U}/rest/v1/${ep}`,o);return r.ok?await r.json():[];}catch(e){return [];}}
@@ -62,13 +62,115 @@
     function clsM(id){document.getElementById(id).style.display='none';}
     let raw=[];
     async function ld(){const el=document.getElementById('lst');el.innerHTML='<p style="text-align:center;color:var(--m);margin-top:20px;">جارٍ التحديث...</p>';try{const u=gu(),cf=document.getElementById('cF');let ep='shipments?select=*&order=created_at.desc';const cid=u.role==='courier'?u.id:(cf?cf.value:'all');if(cid&&cid!=='all')ep+=`&courier_id=eq.${cid}`;const res=await api(ep);raw=Array.isArray(res)?res:[];rnd();}catch(e){el.innerHTML=`<p style="text-align:center;color:#f87171;">خطأ: ${e.message}</p>`;}}
-    function rnd(){const q=(document.getElementById('q').value||'').trim().toLowerCase(),df=document.getElementById('dF').value;const arr=raw.filter(s=>{const mQ=!q||(String(s.tracking_code||'').toLowerCase().includes(q)||String(s.recipient_name||'').toLowerCase().includes(q)||String(s.recipient_phone||'').includes(q)||String(s.delivery_address||'').toLowerCase().includes(q));const mD=!df||(s.created_at&&s.created_at.startsWith(df))||(s.rescheduled_date===df);return mQ&&mD;});const el=document.getElementById('lst');if(!arr.length){el.innerHTML='<p style="text-align:center;color:var(--m);margin-top:25px;">لا توجد شحنات.</p>';document.getElementById('kC').innerText=0;document.getElementById('kM').innerText='0 ج.م';return;}let c=0,m=0,h='';arr.forEach((s,i)=>{let am=Number(s.collected_amount!=null?s.collected_amount:(s.status==='delivered'?s.cod_amount:0));if(['delivered','partial','shipping_only'].includes(s.status)){c++;m+=am;}const ph=String(s.recipient_phone||'').replace(/[^0-9]/g,'');const wa=ph?`https://wa.me/2${ph}?text=${encodeURIComponent('السلام عليكم أستاذ '+s.recipient_name+'، بخصوص شحنتك رقم ('+s.tracking_code+') والمبلغ المطلوب ('+s.cod_amount+' ج.م)')}`:'#';h+=`<div class="card"><div class="card-t"><span style="color:#38bdf8;">#${i+1} 🏷️ ${s.tracking_code||''}</span><span style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:#334155;">${s.status}</span></div><div style="font-weight:600;font-size:0.95rem;">${s.recipient_name||''}</div><div style="font-size:0.75rem;color:var(--m);margin:2px 0;">${s.delivery_address||''}</div><div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.25);padding:4px 8px;border-radius:4px;margin:6px 0;font-size:0.8rem;"><span>المطلوب: <b>${s.cod_amount||0}ج</b></span><span>المحصل: <b style="color:#38bdf8;">${am}ج</b></span></div><div class="acts"><a href="tel:${s.recipient_phone}" class="btn-a">📞 اتصال</a><a href="${wa}" target="_blank" class="btn-a btn-wa">💬 واتساب</a><a href="https://maps.google.com/?q=${encodeURIComponent(s.delivery_address||'')}" target="_blank" class="btn-a">🗺️ خريطة</a></div><div class="status-g"><button class="btn-s" style="background:var(--s);grid-column:span 2;" onclick="upS('${s.id}','delivered',${s.cod_amount})">تم التسليم كامل ✓</button><button class="btn-s" style="background:#8b5cf6;" onclick="opP('${s.id}')">استلام جزئي</button><button class="btn-s" style="background:#0d9488;" onclick="upS('${s.id}','shipping_only',75)">شحن فقط (75)</button><button class="btn-s" style="background:var(--w);" onclick="opR('${s.id}')">تأجيل 📅</button><button class="btn-s" style="background:var(--d);" onclick="upS('${s.id}','returned',0)">مرتجع ✕</button></div><div class="reorder"><span>خط السير (ترتيب الأوردر)</span><div><button class="btn-r" onclick="mv('${s.id}',-1)">⬆️</button> <button class="btn-r" onclick="mv('${s.id}',1)">⬇️</button></div></div></div>`;});el.innerHTML=h;document.getElementById('kC').innerText=c;document.getElementById('kM').innerText=m+' ج.م';}
-    async function upS(id,st,amt){const itm=raw.find(x=>x.id===id);if(itm){itm.status=st;itm.collected_amount=amt;rnd();}api(`shipments?id=eq.${id}`,'PATCH',{status:st,collected_amount:amt});}
-    function opP(id){document.getElementById('pI').value=id;document.getElementById('pA').value='';document.getElementById('mPt').style.display='flex';}
-    async function svPt(){const id=document.getElementById('pI').value,a=Number(document.getElementById('pA').value)||0;clsM('mPt');upS(id,'partial',a);}
-    function opR(id){document.getElementById('rI').value=id;document.getElementById('rD').value='';document.getElementById('mRs').style.display='flex';}
-    async function svRs(){const id=document.getElementById('rI').value,d=document.getElementById('rD').value;if(!d)return alert('حدد التاريخ');clsM('mRs');const itm=raw.find(x=>x.id===id);if(itm){itm.status='rescheduled';itm.rescheduled_date=d;rnd();}api(`shipments?id=eq.${id}`,'PATCH',{status:'rescheduled',rescheduled_date:d});}
-    function mv(id,dir){const i=raw.findIndex(s=>s.id===id);if(i<0||i+dir<0||i+dir>=raw.length)return;const item=raw.splice(i,1)[0];raw.splice(i+dir,0,item);rnd();}
+    function getActiveDate(s){return s.rescheduled_date || (s.created_at ? s.created_at.split('T')[0] : '');}
+    function rnd(){
+      const q=(document.getElementById('q').value||'').trim().toLowerCase();
+      const df=document.getElementById('dF').value;
+      const arr=raw.filter(s=>{
+        const mQ=!q||(String(s.tracking_code||'').toLowerCase().includes(q)||String(s.recipient_name||'').toLowerCase().includes(q)||String(s.recipient_phone||'').includes(q)||String(s.delivery_address||'').toLowerCase().includes(q));
+        const sDate = getActiveDate(s);
+        const mD=!df || (sDate === df);
+        return mQ && mD;
+      });
+      const el=document.getElementById('lst');
+      if(!arr.length){
+        el.innerHTML='<p style="text-align:center;color:var(--m);margin-top:25px;">لا توجد شحنات لهذا اليوم أو البحث المحدد.</p>';
+        document.getElementById('kC').innerText=0;
+        document.getElementById('kM').innerText='0 ج.م';
+        return;
+      }
+      let c=0,m=0,h='';
+      arr.forEach((s,i)=>{
+        let am = 0;
+        if(s.status === 'delivered') am = Number(s.collected_amount != null ? s.collected_amount : s.cod_amount);
+        else if(s.status === 'shipping_only') am = Number(s.collected_amount != null ? s.collected_amount : 75);
+        else if(s.status === 'partial') am = Number(s.collected_amount || 0);
+        else am = Number(s.collected_amount || 0);
+
+        if(['delivered','partial','shipping_only'].includes(s.status)){
+          c++;
+          m += am;
+        }
+        const ph=String(s.recipient_phone||'').replace(/[^0-9]/g,'');
+        const wa=ph?`https://wa.me/2${ph}?text=${encodeURIComponent('السلام عليكم أستاذ '+s.recipient_name+'، بخصوص شحنتك رقم ('+s.tracking_code+') والمبلغ المطلوب ('+s.cod_amount+' ج.م)')}`:'#';
+        h+=`<div class="card">
+          <div class="card-t"><span style="color:#38bdf8;">#${i+1} 🏷️ ${s.tracking_code||''}</span><span style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:#334155;">${s.status}${s.rescheduled_date?' (مؤجل: '+s.rescheduled_date+')':''}</span></div>
+          <div style="font-weight:600;font-size:0.95rem;">${s.recipient_name||''}</div>
+          <div style="font-size:0.75rem;color:var(--m);margin:2px 0;">${s.delivery_address||''}</div>
+          <div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.25);padding:4px 8px;border-radius:4px;margin:6px 0;font-size:0.8rem;">
+            <span>المطلوب: <b>${s.cod_amount||0}ج</b></span>
+            <span>المحصل: <b style="color:#38bdf8;">${am}ج</b></span>
+          </div>
+          <div class="acts">
+            <a href="tel:${s.recipient_phone}" class="btn-a">📞 اتصال</a>
+            <a href="${wa}" target="_blank" class="btn-a btn-wa">💬 واتساب</a>
+            <a href="https://maps.google.com/?q=${encodeURIComponent(s.delivery_address||'')}" target="_blank" class="btn-a">🗺️ خريطة</a>
+          </div>
+          <div class="status-g">
+            <button class="btn-s" style="background:var(--s);grid-column:span 2;" onclick="upS('${s.id}','delivered',${s.cod_amount})">تم التسليم كامل ✓</button>
+            <button class="btn-s" style="background:#8b5cf6;" onclick="opP('${s.id}')">استلام جزئي</button>
+            <button class="btn-s" style="background:#0d9488;" onclick="upS('${s.id}','shipping_only',75)">شحن فقط (75)</button>
+            <button class="btn-s" style="background:var(--w);" onclick="opR('${s.id}')">تأجيل 📅</button>
+            <button class="btn-s" style="background:var(--d);" onclick="upS('${s.id}','returned',0)">مرتجع ✕</button>
+          </div>
+          <div class="reorder">
+            <span>خط السير (ترتيب الأوردر)</span>
+            <div>
+              <button class="btn-r" onclick="mv('${s.id}',-1)">⬆️</button>
+              <button class="btn-r" onclick="mv('${s.id}',1)">⬇️</button>
+            </div>
+          </div>
+        </div>`;
+      });
+      el.innerHTML=h;
+      document.getElementById('kC').innerText=c;
+      document.getElementById('kM').innerText=m+' ج.م';
+    }
+    async function upS(id,st,amt,extra={}){
+      const itm=raw.find(x=>x.id===id);
+      if(itm){
+        itm.status=st;
+        itm.collected_amount=amt;
+        if(extra.rescheduled_date !== undefined) itm.rescheduled_date = extra.rescheduled_date;
+        rnd();
+      }
+      const payload = {status:st, collected_amount:amt, ...extra};
+      api(`shipments?id=eq.${id}`,'PATCH',payload);
+    }
+    function opP(id){
+      document.getElementById('pI').value=id;
+      document.getElementById('pA').value='';
+      document.getElementById('mPt').style.display='flex';
+    }
+    function svPt(){
+      const id=document.getElementById('pI').value;
+      const a=Number(document.getElementById('pA').value);
+      if(isNaN(a) || a < 0) return alert('برجاء إدخال مبلغ صحيح');
+      clsM('mPt');
+      upS(id,'partial',a);
+    }
+    function opR(id){
+      document.getElementById('rI').value=id;
+      document.getElementById('rD').value='';
+      document.getElementById('mRs').style.display='flex';
+    }
+    function svRs(){
+      const id=document.getElementById('rI').value;
+      const d=document.getElementById('rD').value;
+      if(!d) return alert('حدد التاريخ المؤجل إليه');
+      clsM('mRs');
+      upS(id,'rescheduled',0,{rescheduled_date:d});
+    }
+    function mv(id,dir){
+      const i=raw.findIndex(s=>s.id===id);
+      if(i<0||i+dir<0||i+dir>=raw.length)return;
+      const item=raw.splice(i,1)[0];
+      raw.splice(i+dir,0,item);
+      rnd();
+    }
+    // ضبط تاريخ اليوم تلقائياً
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('dF').value = today;
     rc();au();ld();
   </script>
 </body>
