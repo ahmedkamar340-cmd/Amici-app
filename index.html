@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <title>أميتشي إكسبريس</title>
+  <!-- مكتبات الباركود والإكسل -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <style>
     :root{--bg:#0f172a;--c:#1e293b;--b:#334155;--t:#f8fafc;--m:#94a3b8;--p:#2563eb;--s:#16a34a;--w:#d97706;--d:#dc2626;}
     *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif;}
@@ -10,7 +13,10 @@
     header{background:var(--c);padding:10px 14px;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:50;}
     .h-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
     .h-top h1{font-size:1rem;color:#38bdf8;}
-    .btn-h{background:#334155;border:1px solid #475569;color:#fff;padding:5px 9px;border-radius:6px;font-size:0.75rem;cursor:pointer;}
+    .btn-bar{display:flex;gap:4px;overflow-x:auto;}
+    .btn-h{background:#334155;border:1px solid #475569;color:#fff;padding:5px 8px;border-radius:6px;font-size:0.75rem;cursor:pointer;white-space:nowrap;}
+    .btn-scan{background:#0284c7;border-color:#0ea5e9;}
+    .btn-excel{background:#059669;border-color:#10b981;}
     .s-in{width:100%;background:#0f172a;color:#fff;border:1px solid var(--b);padding:7px;border-radius:6px;font-size:0.8rem;outline:none;margin-bottom:8px;}
     .g2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
     .sel-b{background:rgba(0,0,0,0.25);padding:6px;border-radius:6px;border:1px solid var(--b);}
@@ -34,16 +40,34 @@
 </head>
 <body>
   <header>
-    <div class="h-top"><h1>أميتشي إكسبريس <span id="uN" style="font-size:0.75rem;color:#38bdf8;">👑 المدير</span></h1><div><button class="btn-h" id="bAdm" onclick="opCour()">👥 المناديب</button> <button class="btn-h" onclick="opLog()">🔄 الحساب</button></div></div>
+    <div class="h-top">
+      <h1>أميتشي إكسبريس <span id="uN" style="font-size:0.75rem;color:#38bdf8;">👑 المدير</span></h1>
+      <div class="btn-bar">
+        <button class="btn-h btn-scan" onclick="startScanner()">📷 باركود</button>
+        <button class="btn-h btn-excel" id="bXls" onclick="opExcel()">📁 رفع شيت</button>
+        <button class="btn-h" id="bAdm" onclick="opCour()">👥 المناديب</button>
+        <button class="btn-h" onclick="opLog()">🔄 الحساب</button>
+      </div>
+    </div>
     <input type="text" id="q" class="s-in" placeholder="🔍 بحث بالشحنة أو الاسم أو العنوان..." oninput="rnd()">
     <div class="g2"><div class="sel-b"><label>👤 المندوب:</label><select id="cF" class="c-in" onchange="ld()"></select></div><div class="sel-b"><label>📅 الوردية:</label><input type="date" id="dF" class="c-in" onchange="rnd()"></div></div>
   </header>
   <div class="kpi-r"><div class="kpi-b"><div class="kpi-v" id="kC">0</div><div style="font-size:0.7rem;color:var(--m);">منجزة</div></div><div class="kpi-b"><div class="kpi-v" id="kM">0 ج.م</div><div style="font-size:0.7rem;color:var(--m);">محصل (COD)</div></div></div>
   <div id="lst"><p style="text-align:center;color:var(--m);margin-top:20px;">جارٍ جلب الشحنات...</p></div>
+
+  <!-- نوافذ منبثقة -->
+  <div class="modal" id="mScan"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📷 مسح باركود الشحنة</b><span style="cursor:pointer;" onclick="stopScanner()">✕</span></div><div id="reader" style="width:100%;min-height:220px;background:#000;"></div></div></div>
+
+  <div class="modal" id="mXls"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت إكسل</b><span style="cursor:pointer;" onclick="clsM('mXls')">✕</span></div><input type="file" id="xlsFile" accept=".xlsx, .xls, .csv" class="c-in" style="margin:10px 0;"><div id="xlsMsg" style="font-size:0.75rem;color:var(--m);margin-bottom:8px;"></div><button class="btn-s" style="background:var(--s);width:100%;padding:9px;" onclick="uploadExcel()">تأكيد ورفع البيانات ⬆️</button></div></div>
+
   <div class="modal" id="mLog"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mLog')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"></select><input type="password" id="lP" class="c-in" placeholder="الرمز السري (PIN)"><button class="btn-s" style="background:var(--p);width:100%;margin-top:8px;padding:8px;" onclick="lgn()">دخول ➜</button></div></div>
+
   <div class="modal" id="mCr"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 المناديب</b><span style="cursor:pointer;" onclick="clsM('mCr')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="الاسم" style="margin-bottom:4px;"><input type="password" id="ncP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
+
   <div class="modal" id="mPt"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📦 استلام جزئي</b><span style="cursor:pointer;" onclick="clsM('mPt')">✕</span></div><input type="hidden" id="pI"><input type="number" id="pA" class="c-in" placeholder="المبلغ الفعلي المحصل" style="margin:8px 0;"><button class="btn-s" style="background:#8b5cf6;width:100%;" onclick="svPt()">تأكيد الاستلام الجزئي</button></div></div>
+
   <div class="modal" id="mRs"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📅 تأجيل الشحنة ليوم محدد</b><span style="cursor:pointer;" onclick="clsM('mRs')">✕</span></div><input type="hidden" id="rI"><input type="date" id="rD" class="c-in" style="margin:8px 0;"><button class="btn-s" style="background:var(--w);width:100%;" onclick="svRs()">حفظ التأجيل ونقل الشحنة</button></div></div>
+
   <script>
     const S_U='https://difabkjpyypaylnofbcl.supabase.co',S_K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
     async function api(ep,m='GET',b=null){const o={method:m,headers:{'apikey':S_K,'Authorization':`Bearer ${S_K}`,'Content-Type':'application/json','Prefer':'return=representation'}};if(b)o.body=JSON.stringify(b);try{const r=await fetch(`${S_U}/rest/v1/${ep}`,o);return r.ok?await r.json():[];}catch(e){return [];}}
@@ -52,7 +76,14 @@
     function sc(l){localStorage.setItem('am_c',JSON.stringify(l));rc();}
     function gu(){try{return JSON.parse(localStorage.getItem('am_u'))||{role:'admin',name:'المدير'};}catch{return {role:'admin',name:'المدير'};}}
     function su(u){localStorage.setItem('am_u',JSON.stringify(u));au();}
-    function au(){const u=gu();document.getElementById('uN').innerText=u.role==='admin'?'👑 المدير':`🚴 ${u.name}`;document.getElementById('bAdm').style.display=u.role==='admin'?'inline':'none';const f=document.getElementById('cF');if(u.role==='courier'){f.value=u.id;f.disabled=true;}else{f.disabled=false;}}
+    function au(){
+      const u=gu();
+      document.getElementById('uN').innerText=u.role==='admin'?'👑 المدير':`🚴 ${u.name}`;
+      document.getElementById('bAdm').style.display=u.role==='admin'?'inline':'none';
+      document.getElementById('bXls').style.display=u.role==='admin'?'inline':'none';
+      const f=document.getElementById('cF');
+      if(u.role==='courier'){f.value=u.id;f.disabled=true;}else{f.disabled=false;}
+    }
     function rc(){const cs=gc(),u=gu();let h=u.role==='admin'?'<option value="all">عرض كل المناديب</option>':'';cs.forEach(c=>{h+=`<option value="${c.id}">${c.name}</option>`;});document.getElementById('cF').innerHTML=h;let lh='<option value="admin">👑 المدير (PIN: 1234)</option>';cs.forEach(c=>{lh+=`<option value="${c.id}">🚴 ${c.name}</option>`;});document.getElementById('lU').innerHTML=lh;let ch='';cs.forEach(c=>{ch+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #334155;"><span>${c.name} (${c.pin})</span><button onclick="dlC('${c.id}')" style="color:#f87171;background:none;border:none;">حذف</button></div>`;});document.getElementById('cL').innerHTML=ch;}
     function opLog(){document.getElementById('lP').value='';document.getElementById('mLog').style.display='flex';}
     function lgn(){const v=document.getElementById('lU').value,p=(document.getElementById('lP').value||'').trim();if(v==='admin'){if(p==='1234'||!p){su({role:'admin',name:'المدير'});clsM('mLog');ld();}else alert('رمز خطأ');}else{const c=gc().find(x=>x.id===v);if(c&&(c.pin===p||p==='1234')){su({role:'courier',id:c.id,name:c.name});clsM('mLog');ld();}else alert('رمز المندوب خطأ');}}
@@ -60,6 +91,7 @@
     function addC(){const n=document.getElementById('ncN').value.trim(),p=document.getElementById('ncP').value.trim()||'1234';if(!n)return;const cs=gc();cs.push({id:'c-'+Date.now(),name:n,pin:p});sc(cs);document.getElementById('ncN').value='';document.getElementById('ncP').value='';}
     function dlC(id){sc(gc().filter(x=>x.id!==id));}
     function clsM(id){document.getElementById(id).style.display='none';}
+
     let raw=[];
     async function ld(){const el=document.getElementById('lst');el.innerHTML='<p style="text-align:center;color:var(--m);margin-top:20px;">جارٍ التحديث...</p>';try{const u=gu(),cf=document.getElementById('cF');let ep='shipments?select=*&order=created_at.desc';const cid=u.role==='courier'?u.id:(cf?cf.value:'all');if(cid&&cid!=='all')ep+=`&courier_id=eq.${cid}`;const res=await api(ep);raw=Array.isArray(res)?res:[];rnd();}catch(e){el.innerHTML=`<p style="text-align:center;color:#f87171;">خطأ: ${e.message}</p>`;}}
     function getActiveDate(s){return s.rescheduled_date || (s.created_at ? s.created_at.split('T')[0] : '');}
@@ -168,7 +200,83 @@
       raw.splice(i+dir,0,item);
       rnd();
     }
-    // ضبط تاريخ اليوم تلقائياً
+
+    // تشغيل وإيقاف قارئ الباركود بالكاميرا
+    let html5QrCode = null;
+    function startScanner(){
+      document.getElementById('mScan').style.display = 'flex';
+      html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          stopScanner();
+          document.getElementById('q').value = decodedText.trim();
+          rnd();
+        },
+        (errorMessage) => {}
+      ).catch(err => {
+        alert("تعذر فتح الكاميرا: " + err);
+        stopScanner();
+      });
+    }
+    function stopScanner(){
+      if(html5QrCode){
+        html5QrCode.stop().then(() => {
+          html5QrCode.clear();
+          document.getElementById('mScan').style.display = 'none';
+        }).catch(() => {
+          document.getElementById('mScan').style.display = 'none';
+        });
+      } else {
+        document.getElementById('mScan').style.display = 'none';
+      }
+    }
+
+    // إدارة رفع شيت الإكسل
+    function opExcel(){
+      if(gu().role !== 'admin') return alert('خاص بالمدير فقط');
+      document.getElementById('xlsMsg').innerText = '';
+      document.getElementById('xlsFile').value = '';
+      document.getElementById('mXls').style.display = 'flex';
+    }
+    async function uploadExcel(){
+      const fi = document.getElementById('xlsFile');
+      if(!fi.files.length) return alert('برجاء اختيار ملف إكسل أولاً');
+      const file = fi.files[0];
+      const msg = document.getElementById('xlsMsg');
+      msg.innerText = 'جارٍ معالجة ورفع البيانات...';
+
+      const reader = new FileReader();
+      reader.onload = async function(e){
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, {type: 'array'});
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const rows = XLSX.utils.sheet_to_json(sheet);
+          
+          if(!rows.length) return alert('الملف فارغ!');
+
+          const toUpload = rows.map(r => ({
+            tracking_code: String(r['كود'] || r['كود الشحنة'] || r['tracking_code'] || r['Code'] || Date.now()),
+            recipient_name: String(r['الاسم'] || r['اسم العميل'] || r['recipient_name'] || 'عميل'),
+            recipient_phone: String(r['الهاتف'] || r['الموبايل'] || r['recipient_phone'] || ''),
+            delivery_address: String(r['العنوان'] || r['delivery_address'] || ''),
+            cod_amount: Number(r['المبلغ'] || r['المطلوب'] || r['cod_amount'] || 0),
+            status: 'out_for_delivery'
+          }));
+
+          const res = await api('shipments', 'POST', toUpload);
+          alert(`تم رفع ${toUpload.length} شحنة بنجاح!`);
+          clsM('mXls');
+          ld();
+        } catch(err){
+          alert('حدث خطأ أثناء قراءة الملف: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('dF').value = today;
     rc();au();ld();
