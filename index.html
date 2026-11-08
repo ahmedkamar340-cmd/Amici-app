@@ -70,7 +70,7 @@
   </div>
   <div id="lst"></div>
 
-  <!-- نافذة تقرير الوردية وتقفيل الحساب -->
+  <!-- تقرير الوردية -->
   <div class="modal" id="mRep">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
@@ -79,13 +79,13 @@
       </div>
       <div id="repBody"></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;">
-        <button class="btn-s" style="background:#25d366;" onclick="shareRepWA()">📲 إرسال واتساب</button>
+        <button class="btn-s" style="background:#2563eb;" onclick="shareRepWA()">📲 إرسال واتساب</button>
         <button class="btn-s" style="background:#0284c7;" onclick="window.print()">🖨️ طباعة / PDF</button>
       </div>
     </div>
   </div>
 
-  <!-- النوافذ الأخرى -->
+  <!-- النوافذ -->
   <div class="modal" id="mLoc"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📍 مواقع المناديب الحالية</b><span style="cursor:pointer;" onclick="clsM('mLoc')">✕</span></div><div id="locList" style="max-height:260px;overflow-y:auto;font-size:0.8rem;"></div></div></div>
   <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"><option value="admin">👑 المدير (PIN: 1234)</option><option value="c-biko-01">🚴 بيكو</option><option value="a0000000-0000-0000-0000-000000000004">🚴 مينا عبد النور</option><option value="a0000000-0000-0000-0000-000000000001">🚴 أحمد</option></select><input type="password" id="lP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول ➜</button></div></div>
   <div class="modal" id="mC"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 المناديب</b><span style="cursor:pointer;" onclick="clsM('mC')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="اسم المندوب" style="margin-bottom:4px;"><input type="password" id="ncP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
@@ -125,4 +125,4 @@
     function mv(id,dir){const i=raw.findIndex(s=>s.id===id);if(i<0||i+dir<0||i+dir>=raw.length)return;const item=raw.splice(i,1)[0];raw.splice(i+dir,0,item);rnd();}
     function opScan(){const code=prompt('امسح الباركود أو اكتب الكود:');if(code){document.getElementById('q').value=code.trim();rnd();}}
     function opTr(id){document.getElementById('trId').value=id;document.getElementById('mTr').style.display='flex';}
-    async function svTr(){const id=document.getElementById('trId').value,tCid=document.getElementById('trCourier').value;clsM('mTr');const it=raw.find(x=>x.id===id);if(it)it.courier_id=tCid;sP(id,{courier_id:t
+    async function svTr(){const id=document.getElementById('trId').value,tCid=document.getElementById('trCourier').value;clsM('mTr');const it=raw.find(x=>x.id===id);if(it)it.courier_id=tCid;sP(id,{courier_id:tCid});await api(`shipments?
