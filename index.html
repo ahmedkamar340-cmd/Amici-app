@@ -25,7 +25,11 @@
     .adm-bar{display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--b);}
     .btn-adm{flex:1;background:#334155;border:1px solid var(--b);color:#fff;padding:5px;border-radius:4px;font-size:0.72rem;cursor:pointer;}
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;justify-content:center;align-items:center;padding:12px;}
-    .m-box{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:360px;padding:12px;}
+    .m-box{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:380px;padding:12px;max-height:90vh;overflow-y:auto;}
+    .rep-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed var(--b);font-size:0.8rem;}
+    .rep-tb{width:100%;border-collapse:collapse;font-size:0.75rem;margin:10px 0;}
+    .rep-tb th,.rep-tb td{border:1px solid var(--b);padding:5px;text-align:center;}
+    .rep-tb th{background:#0f172a;}
   </style>
 </head>
 <body>
@@ -33,10 +37,10 @@
     <div class="top">
       <h1 style="font-size:0.95rem;color:#38bdf8;">أميتشي <span id="uN" style="font-size:0.72rem;color:#fff;">👑 المدير</span></h1>
       <div class="btns">
+        <button class="btn-h" style="background:#059669;" onclick="opRep()">📑 تقرير الوردية</button>
         <button class="btn-h" style="background:#0284c7;" onclick="opScan()">📷 باركود</button>
-        <button class="btn-h" style="background:#059669;" id="bXls" onclick="opX()">📁 شيت</button>
-        <button class="btn-h" style="background:#8b5cf6;" id="bDemo" onclick="addSampleOrders()">⚡ بوالص</button>
         <button class="btn-h" style="background:#0284c7;" id="bLoc" onclick="opLoc()">📍 المناديب</button>
+        <button class="btn-h" style="background:#8b5cf6;" id="bDemo" onclick="addSampleOrders()">⚡ بوالص</button>
         <button class="btn-h" id="bAdm" onclick="opC()">👥 مناديب</button>
         <button class="btn-h" onclick="opL()">🔄 حساب</button>
       </div>
@@ -66,8 +70,23 @@
   </div>
   <div id="lst"></div>
 
+  <!-- نافذة تقرير الوردية وتقفيل الحساب -->
+  <div class="modal" id="mRep">
+    <div class="m-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <b style="color:#38bdf8;font-size:0.95rem;">📑 تقرير تقفيل الوردية</b>
+        <span style="cursor:pointer;font-size:1.1rem;" onclick="clsM('mRep')">✕</span>
+      </div>
+      <div id="repBody"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;">
+        <button class="btn-s" style="background:#25d366;" onclick="shareRepWA()">📲 إرسال واتساب</button>
+        <button class="btn-s" style="background:#0284c7;" onclick="window.print()">🖨️ طباعة / PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- النوافذ الأخرى -->
   <div class="modal" id="mLoc"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📍 مواقع المناديب الحالية</b><span style="cursor:pointer;" onclick="clsM('mLoc')">✕</span></div><div id="locList" style="max-height:260px;overflow-y:auto;font-size:0.8rem;"></div></div></div>
-  <div class="modal" id="mX"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع وتخصيص شيت</b><span style="cursor:pointer;" onclick="clsM('mX')">✕</span></div><label style="font-size:0.7rem;color:var(--m);">المندوب:</label><select id="xCr" class="c-in" style="margin-bottom:6px;"><option value="c-biko-01">بيكو</option><option value="a0000000-0000-0000-0000-000000000004">مينا عبد النور</option><option value="a0000000-0000-0000-0000-000000000001">أحمد</option></select><input type="file" id="xf" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;"><button class="btn-s" style="background:var(--s);width:100%;" onclick="upX()">رفع الشحنات ⬆️</button></div></div>
   <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"><option value="admin">👑 المدير (PIN: 1234)</option><option value="c-biko-01">🚴 بيكو</option><option value="a0000000-0000-0000-0000-000000000004">🚴 مينا عبد النور</option><option value="a0000000-0000-0000-0000-000000000001">🚴 أحمد</option></select><input type="password" id="lP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول ➜</button></div></div>
   <div class="modal" id="mC"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 المناديب</b><span style="cursor:pointer;" onclick="clsM('mC')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="اسم المندوب" style="margin-bottom:4px;"><input type="password" id="ncP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
   <div class="modal" id="mP"><div class="m-box"><b>📦 استلام جزئي</b><input type="hidden" id="pI"><input type="number" id="pA" class="c-in" placeholder="المبلغ الفعلي" style="margin:8px 0;"><button class="btn-s" style="background:#8b5cf6;width:100%;" onclick="svP()">تأكيد</button></div></div>
@@ -83,8 +102,8 @@
     function su(u){localStorage.setItem('am_u',JSON.stringify(u));au();}
     function gP(){try{return JSON.parse(localStorage.getItem('am_p'))||{};}catch{return{};}}
     function sP(id,d){const p=gP();p[id]={...(p[id]||{}),...d};localStorage.setItem('am_p',JSON.stringify(p));}
-    function rc(){const cs=gc(),u=gu();let h='<option value="all">عرض كل المناديب</option>';cs.forEach(c=>{h+=`<option value="${c.id}">${c.name}</option>`;});document.getElementById('cF').innerHTML=h;let xh='';cs.forEach(c=>{xh+=`<option value="${c.id}">${c.name}</option>`;});document.getElementById('xCr').innerHTML=xh;document.getElementById('trCourier').innerHTML=xh;let lh='<option value="admin">👑 المدير (PIN: 1234)</option>';cs.forEach(c=>{lh+=`<option value="${c.id}">🚴 ${c.name}</option>`;});document.getElementById('lU').innerHTML=lh;let ch='';cs.forEach(c=>{ch+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #334155;"><span>${c.name} (${c.pin})</span><button onclick="dlC('${c.id}')" style="color:#f87171;background:none;border:none;">حذف</button></div>`;});document.getElementById('cL').innerHTML=ch;}
-    function au(){const u=gu();document.getElementById('uN').innerText=(u.role==='admin'?'👑 المدير':'🚴 '+u.name);const isA=(u.role==='admin');document.getElementById('bAdm').style.display=isA?'inline-block':'none';document.getElementById('bDemo').style.display=isA?'inline-block':'none';document.getElementById('bXls').style.display=isA?'inline-block':'none';document.getElementById('bLoc').style.display=isA?'inline-block':'none';const f=document.getElementById('cF');if(u.role==='courier'){f.value=u.id;f.disabled=true;trackMe(u);}else{f.disabled=false;}}
+    function rc(){const cs=gc(),u=gu();let h='<option value="all">عرض كل المناديب</option>';cs.forEach(c=>{h+=`<option value="${c.id}">${c.name}</option>`;});document.getElementById('cF').innerHTML=h;let xh='';cs.forEach(c=>{xh+=`<option value="${c.id}">${c.name}</option>`;});document.getElementById('trCourier').innerHTML=xh;let lh='<option value="admin">👑 المدير (PIN: 1234)</option>';cs.forEach(c=>{lh+=`<option value="${c.id}">🚴 ${c.name}</option>`;});document.getElementById('lU').innerHTML=lh;let ch='';cs.forEach(c=>{ch+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #334155;"><span>${c.name} (${c.pin})</span><button onclick="dlC('${c.id}')" style="color:#f87171;background:none;border:none;">حذف</button></div>`;});document.getElementById('cL').innerHTML=ch;}
+    function au(){const u=gu();document.getElementById('uN').innerText=(u.role==='admin'?'👑 المدير':'🚴 '+u.name);const isA=(u.role==='admin');document.getElementById('bAdm').style.display=isA?'inline-block':'none';document.getElementById('bDemo').style.display=isA?'inline-block':'none';document.getElementById('bLoc').style.display=isA?'inline-block':'none';const f=document.getElementById('cF');if(u.role==='courier'){f.value=u.id;f.disabled=true;trackMe(u);}else{f.disabled=false;}}
     function trackMe(u){if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(pos=>{const locs=JSON.parse(localStorage.getItem('am_locs')||'{}');locs[u.id]={name:u.name,lat:pos.coords.latitude,lng:pos.coords.longitude,t:new Date().toLocaleTimeString('ar-EG')};localStorage.setItem('am_locs',JSON.stringify(locs));},null,{enableHighAccuracy:true});}
     function opLoc(){document.getElementById('mLoc').style.display='flex';const locs=JSON.parse(localStorage.getItem('am_locs')||'{}');let h='';gc().forEach(c=>{const l=locs[c.id];if(l){h+=`<div style="background:#0f172a;padding:8px;border-radius:6px;margin-bottom:6px;border:1px solid #334155;"><div style="font-weight:bold;color:#38bdf8;">🚴 ${c.name}</div><div style="font-size:0.7rem;color:var(--m);">آخر تحديث: ${l.t}</div><a href="https://maps.google.com/?q=${l.lat},${l.lng}" target="_blank" style="color:#25d366;font-size:0.75rem;">🗺️ فتح الموقع على الخريطة</a></div>`;}else{h+=`<div style="background:#0f172a;padding:6px;border-radius:6px;margin-bottom:4px;color:var(--m);">🚴 ${c.name}: لم يسجل موقعه بعد</div>`;}});document.getElementById('locList').innerHTML=h||'لا توجد مواقع مسجلة.';}
     async function api(ep,m='GET',b=null){const o={method:m,headers:{'apikey':S_K,'Authorization':'Bearer '+S_K,'Content-Type':'application/json','Prefer':'return=representation'}};if(b)o.body=JSON.stringify(b);try{const r=await fetch(S_U+'/rest/v1/'+ep,o);return r.ok?await r.json():null;}catch{return null;}}
@@ -105,14 +124,5 @@
     function svR(){const id=document.getElementById('rI').value,d=document.getElementById('rD').value;if(!d)return alert('حدد التاريخ');clsM('mR');upS(id,'rescheduled',0,{rescheduled_date:d});}
     function mv(id,dir){const i=raw.findIndex(s=>s.id===id);if(i<0||i+dir<0||i+dir>=raw.length)return;const item=raw.splice(i,1)[0];raw.splice(i+dir,0,item);rnd();}
     function opScan(){const code=prompt('امسح الباركود أو اكتب الكود:');if(code){document.getElementById('q').value=code.trim();rnd();}}
-    function opX(){if(gu().role!=='admin')return alert('خاص بالمدير');document.getElementById('xf').value='';document.getElementById('mX').style.display='flex';}
-    async function upX(){const fi=document.getElementById('xf');if(!fi.files.length)return alert('اختر ملف CSV أولاً');const f=fi.files[0],cid=document.getElementById('xCr').value,today=document.getElementById('dF').value;const rd=new FileReader();rd.onload=async function(e){const rows=e.target.result.split(/\r?\n/).filter(r=>r.trim()),ups=[];for(let i=1;i<rows.length;i++){const c=rows[i].split(',');if(c.length>=4){ups.push({tracking_code:c[0].replace(/["']/g,'').trim(),recipient_name:c[1].replace(/["']/g,'').trim(),recipient_phone:c[2].replace(/["']/g,'').trim(),delivery_address:c[3].replace(/["']/g,'').trim(),cod_amount:Number(c[4])||0,courier_id:cid,status:'out_for_delivery',created_at:today});}}if(ups.length){await api('shipments','POST',ups);alert('تم رفع وتخصيص '+ups.length+' شحنة بنجاح!');clsM('mX');ld();}};rd.readAsText(f);}
     function opTr(id){document.getElementById('trId').value=id;document.getElementById('mTr').style.display='flex';}
-    async function svTr(){const id=document.getElementById('trId').value,tCid=document.getElementById('trCourier').value;clsM('mTr');const it=raw.find(x=>x.id===id);if(it)it.courier_id=tCid;sP(id,{courier_id:tCid});await api(`shipments?id=eq.${id}`,'PATCH',{courier_id:tCid});alert('تم تحويل الشحنة بنجاح!');rnd();}
-    async function delS(id){if(!confirm('هل تريد حذف هذه الشحنة نهائياً؟'))return;raw=raw.filter(s=>s.id!==id);rnd();await api(`shipments?id=eq.${id}`,'DELETE');}
-    async function addSampleOrders(){const cf=document.getElementById('cF').value;const target=(cf&&cf!=='all')?cf:"c-biko-01";const today=document.getElementById('dF').value;const sample=[{tracking_code:"12258",recipient_name:"شروق",recipient_phone:"01059947327",delivery_address:"شارع العوامي خلف مدرسة العجمي النموذجية عمارة سنتر الفيروز",cod_amount:610,courier_id:target,status:"out_for_delivery",created_at:today},{tracking_code:"12282",recipient_name:"فيلوباتير",recipient_phone:"01507992457",delivery_address:"105 ش المكس القباري - اسكندرية",cod_amount:610,courier_id:target,status:"out_for_delivery",created_at:today},{tracking_code:"7791",recipient_name:"Demyana Botros Zachary",recipient_phone:"01001232790",delivery_address:"الاسكندرية العجمي البيطاش ش مسجد الهدي الاندلس والحجاز عمارة 2 الدور الثاني",cod_amount:190,courier_id:target,status:"out_for_delivery",created_at:today}];await api('shipments','POST',sample);alert('تم إدخال الشحنات الثلاث بنجاح!');ld();}
-    document.getElementById('dF').value=new Date().toISOString().split('T')[0];
-    rc();au();ld();
-  </script>
-</body>
-</html>
+    async function svTr(){const id=document.getElementById('trId').value,tCid=document.getElementById('trCourier').value;clsM('mTr');const it=raw.find(x=>x.id===id);if(it)it.courier_id=tCid;sP(id,{courier_id:t
