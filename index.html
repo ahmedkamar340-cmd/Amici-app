@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
   <title>أميتشي إكسبريس</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root{--bg:#0f172a;--c:#1e293b;--b:#334155;--m:#94a3b8;--s:#16a34a;--w:#d97706;--d:#dc2626;}
     *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif;}
@@ -31,8 +30,7 @@
     <div class="top">
       <h1 style="font-size:0.95rem;color:#38bdf8;">أميتشي <span id="uN" style="font-size:0.72rem;color:#fff;">👑 المدير</span></h1>
       <div style="display:flex;gap:4px;">
-        <button class="btn-h" style="background:#0284c7;" onclick="opScan()">📷 باركود</button>
-        <button class="btn-h" style="background:#059669;" id="bXls" onclick="opX()">📁 شيت</button>
+        <button class="btn-h" style="background:#8b5cf6;" id="bDemo" onclick="addSampleOrders()">⚡ إضافة الـ 3 بوالص</button>
         <button class="btn-h" id="bAdm" onclick="opC()">👥 مناديب</button>
         <button class="btn-h" onclick="opL()">🔄 حساب</button>
       </div>
@@ -48,34 +46,6 @@
     <div class="kpi-b"><div id="kM" style="font-size:1.1rem;font-weight:bold;color:#38bdf8;">0 ج.م</div><div style="font-size:0.7rem;color:var(--m);">محصل</div></div>
   </div>
   <div id="lst"></div>
-
-  <!-- قارئ الكاميرا -->
-  <div class="modal" id="mSc">
-    <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <b>📷 مسح باركود الشحنة</b>
-        <span style="cursor:pointer;font-size:1.1rem;padding:0 5px;" onclick="clScan()">✕</span>
-      </div>
-      <div id="reader" style="width:100%;min-height:250px;background:#000;border-radius:6px;overflow:hidden;"></div>
-      <div id="scanMsg" style="font-size:0.75rem;color:var(--m);text-align:center;margin-top:6px;">وجّه الكاميرا نحو باركود الشحنة</div>
-    </div>
-  </div>
-
-  <!-- رفع الشيت وتخصيصه -->
-  <div class="modal" id="mX">
-    <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <b>📁 رفع شيت وتخصيصه لمندوب</b>
-        <span style="cursor:pointer;font-size:1.1rem;padding:0 5px;" onclick="clsM('mX')">✕</span>
-      </div>
-      <label style="font-size:0.75rem;color:var(--m);display:block;margin-bottom:3px;">اختيار المندوب المسند إليه:</label>
-      <select id="xCr" class="c-in" style="margin-bottom:8px;"></select>
-      <label style="font-size:0.75rem;color:var(--m);display:block;margin-bottom:3px;">ملف الشيت (CSV):</label>
-      <input type="file" id="xf" accept=".csv,.txt" class="c-in" style="margin-bottom:10px;">
-      <div id="upInfo" style="font-size:0.75rem;color:#38bdf8;margin-bottom:6px;"></div>
-      <button class="btn-s" style="background:var(--s);width:100%;padding:8px;" onclick="upX()">تأكيد الرفع والتخصيص ⬆️</button>
-    </div>
-  </div>
 
   <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"></select><input type="password" id="lP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول ➜</button></div></div>
   <div class="modal" id="mC"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 المناديب</b><span style="cursor:pointer;" onclick="clsM('mC')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="اسم المندوب" style="margin-bottom:4px;"><input type="password" id="ncP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
@@ -96,7 +66,7 @@
       const u=gu();
       document.getElementById('uN').innerText=(u.role==='admin'?'👑 المدير':'🚴 '+u.name);
       document.getElementById('bAdm').style.display=(u.role==='admin'?'inline-block':'none');
-      document.getElementById('bXls').style.display=(u.role==='admin'?'inline-block':'none');
+      document.getElementById('bDemo').style.display=(u.role==='admin'?'inline-block':'none');
       const f=document.getElementById('cF');
       if(u.role==='courier'){f.value=u.id;f.disabled=true;}else{f.disabled=false;}
     }
@@ -106,11 +76,6 @@
       let h=(u.role==='admin'?'<option value="all">عرض كل المناديب</option>':'');
       cs.forEach(c=>{h+=`<option value="${c.id}">${c.name}</option>`;});
       document.getElementById('cF').innerHTML=h;
-      
-      let xh='';
-      cs.forEach(c=>{xh+=`<option value="${c.id}">${c.name}</option>`;});
-      const xe=document.getElementById('xCr');
-      if(xe) xe.innerHTML=xh;
 
       let lh='<option value="admin">👑 المدير (PIN: 1234)</option>';
       cs.forEach(c=>{lh+=`<option value="${c.id}">🚴 ${c.name}</option>`;});
@@ -179,89 +144,28 @@
     function svR(){const id=document.getElementById('rI').value,d=document.getElementById('rD').value;if(!d)return alert('حدد التاريخ');clsM('mR');upS(id,'rescheduled',0,{rescheduled_date:d});}
     function mv(id,dir){const i=raw.findIndex(s=>s.id===id);if(i<0||i+dir<0||i+dir>=raw.length)return;const item=raw.splice(i,1)[0];raw.splice(i+dir,0,item);rnd();}
 
-    // تشغيل الكاميرا الخلفية للباركود
-    let qr = null;
-    function opScan(){
-      document.getElementById('mSc').style.display='flex';
-      document.getElementById('scanMsg').innerText = 'جارٍ تشغيل الكاميرا...';
-      try {
-        qr = new Html5Qrcode("reader");
-        qr.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 240, height: 180 } }, (txt) => {
-          clScan();
-          document.getElementById('q').value = txt.trim();
-          rnd();
-        }).catch(err => {
-          document.getElementById('scanMsg').innerText = 'تعذر تشغيل الكاميرا: ' + err;
-        });
-      } catch(e) {
-        document.getElementById('scanMsg').innerText = 'خطأ في تشغيل القارئ';
-      }
-    }
-    function clScan(){
-      if(qr){
-        qr.stop().then(()=>{ qr.clear(); document.getElementById('mSc').style.display='none'; }).catch(()=>{ document.getElementById('mSc').style.display='none'; });
-      } else {
-        document.getElementById('mSc').style.display='none';
-      }
-    }
-
-    // رفع الشيت مع ربط المندوب وتاريخ اليوم بدقة
-    function opX(){
-      if(gu().role!=='admin') return alert('خاص بالمدير فقط');
-      document.getElementById('xf').value='';
-      document.getElementById('upInfo').innerText='';
-      document.getElementById('mX').style.display='flex';
-    }
-
-    async function upX(){
-      const fi = document.getElementById('xf');
-      if(!fi.files.length) return alert('يرجى اختيار ملف CSV أولاً');
-      const f = fi.files[0], cid = document.getElementById('xCr').value;
+    // زر إدخال الشحنات الثلاث بضغطة زر واحدة
+    async function addSampleOrders(){
+      const cf = document.getElementById('cF').value;
+      const targetCourier = (cf && cf !== 'all') ? cf : "a0000000-0000-0000-0000-000000000004"; // إسناد لمينا عبد النور افتراضياً أو المندوب المختار
       const today = document.getElementById('dF').value || new Date().toISOString().split('T')[0];
-      const rd = new FileReader();
 
-      document.getElementById('upInfo').innerText = 'جارٍ قراءة البيانات...';
+      const sampleData = [
+        { tracking_code: "12258", recipient_name: "شروق", recipient_phone: "01059947327", delivery_address: "شارع العوامي خلف مدرسة العجمي النموذجية عمارة سنتر الفيروز", cod_amount: 610, courier_id: targetCourier, status: "out_for_delivery", created_at: today },
+        { tracking_code: "12282", recipient_name: "فيلوباتير", recipient_phone: "01507992457", delivery_address: "105 ش المكس القباري - اسكندرية", cod_amount: 610, courier_id: targetCourier, status: "out_for_delivery", created_at: today },
+        { tracking_code: "7791", recipient_name: "Demyana Botros Zachary", recipient_phone: "01001232790", delivery_address: "الاسكندرية العجمي البيطاش ش مسجد الهدي الاندلس والحجاز عمارة 2 الدور الثاني", cod_amount: 190, courier_id: targetCourier, status: "out_for_delivery", created_at: today }
+      ];
 
-      rd.onload = async function(e){
-        const rows = e.target.result.split(/\r?\n/).filter(r => r.trim());
-        const ups = [];
-        for(let i=1; i<rows.length; i++){
-          const c = rows[i].split(',');
-          if(c.length >= 4){
-            ups.push({
-              tracking_code: c[0].replace(/["']/g,'').trim(),
-              recipient_name: c[1].replace(/["']/g,'').trim(),
-              recipient_phone: c[2].replace(/["']/g,'').trim(),
-              delivery_address: c[3].replace(/["']/g,'').trim(),
-              cod_amount: Number(c[4]) || 0,
-              courier_id: cid,
-              status: 'out_for_delivery',
-              created_at: today
-            });
-          }
-        }
-        if(ups.length){
-          document.getElementById('upInfo').innerText = 'جارٍ الحفظ في قاعدة البيانات...';
-          await api('shipments', 'POST', ups);
-          alert('تم رفع وتخصيص ' + ups.length + ' شحنة للمندوب بنجاح!');
-          clsM('mX');
-          ld();
-        } else {
-          alert('تأكد من احتواء الملف على أعمدة: الكود، الاسم، الهاتف، العنوان، المبلغ');
-          document.getElementById('upInfo').innerText = '';
-        }
-      };
-      rd.readAsText(f);
+      await api('shipments', 'POST', sampleData);
+      alert('تم إدخال الشحنات الثلاث وإسنادها بنجاح!');
+      ld();
     }
 
-    // تعيين التاريخ المحلي تلقائياً
     const tzOffset = (new Date()).getTimezoneOffset() * 60000;
     const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, 10);
     document.getElementById('dF').value = localISOTime;
 
-    rc();
-    au();
-    ld();
+    rc();au();ld();
   </script>
 </body>
 </html>
