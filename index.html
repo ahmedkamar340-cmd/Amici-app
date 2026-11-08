@@ -49,11 +49,33 @@
   </div>
   <div id="lst"></div>
 
-  <!-- قارئ الكاميرا المباشر -->
-  <div class="modal" id="mSc"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📷 مسح باركود الشحنة</b><span style="cursor:pointer;" onclick="clScan()">✕</span></div><div id="reader" style="width:100%;height:230px;background:#000;border-radius:6px;overflow:hidden;"></div></div></div>
+  <!-- قارئ الكاميرا -->
+  <div class="modal" id="mSc">
+    <div class="m-box">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <b>📷 مسح باركود الشحنة</b>
+        <span style="cursor:pointer;font-size:1.1rem;padding:0 5px;" onclick="clScan()">✕</span>
+      </div>
+      <div id="reader" style="width:100%;min-height:250px;background:#000;border-radius:6px;overflow:hidden;"></div>
+      <div id="scanMsg" style="font-size:0.75rem;color:var(--m);text-align:center;margin-top:6px;">وجّه الكاميرا نحو باركود الشحنة</div>
+    </div>
+  </div>
 
-  <!-- رفع الشيت والتخصيص -->
-  <div class="modal" id="mX"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت CSV وتخصيصه</b><span style="cursor:pointer;" onclick="clsM('mX')">✕</span></div><label style="font-size:0.7rem;color:var(--m);">إسناد الشحنات إلى المندوب:</label><select id="xCr" class="c-in" style="margin-bottom:6px;"></select><input type="file" id="xf" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;"><button class="btn-s" style="background:var(--s);width:100%;" onclick="upX()">تأكيد ورفع البيانات ⬆️</button></div></div>
+  <!-- رفع الشيت وتخصيصه -->
+  <div class="modal" id="mX">
+    <div class="m-box">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <b>📁 رفع شيت وتخصيصه لمندوب</b>
+        <span style="cursor:pointer;font-size:1.1rem;padding:0 5px;" onclick="clsM('mX')">✕</span>
+      </div>
+      <label style="font-size:0.75rem;color:var(--m);display:block;margin-bottom:3px;">اختيار المندوب المسند إليه:</label>
+      <select id="xCr" class="c-in" style="margin-bottom:8px;"></select>
+      <label style="font-size:0.75rem;color:var(--m);display:block;margin-bottom:3px;">ملف الشيت (CSV):</label>
+      <input type="file" id="xf" accept=".csv,.txt" class="c-in" style="margin-bottom:10px;">
+      <div id="upInfo" style="font-size:0.75rem;color:#38bdf8;margin-bottom:6px;"></div>
+      <button class="btn-s" style="background:var(--s);width:100%;padding:8px;" onclick="upX()">تأكيد الرفع والتخصيص ⬆️</button>
+    </div>
+  </div>
 
   <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"></select><input type="password" id="lP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول ➜</button></div></div>
   <div class="modal" id="mC"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 المناديب</b><span style="cursor:pointer;" onclick="clsM('mC')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="اسم المندوب" style="margin-bottom:4px;"><input type="password" id="ncP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
@@ -69,8 +91,36 @@
     function sc(l){localStorage.setItem('am_c',JSON.stringify(l));rc();}
     function gu(){try{return JSON.parse(localStorage.getItem('am_u'))||{role:'admin',name:'المدير'};}catch{return{role:'admin',name:'المدير'};}}
     function su(u){localStorage.setItem('am_u',JSON.stringify(u));au();}
-    function au(){const u=gu();document.getElementById('uN').innerText=(u.role==='admin'?'👑 المدير':'🚴 '+u.name);document.getElementById('bAdm').style.display=(u.role==='admin'?'inline-block':'none');document.getElementById('bXls').style.display=(u.role==='admin'?'inline-block':'none');const f=document.getElementById('cF');if(u.role==='courier'){f.value=u.id;f.disabled=true;}else{f.disabled=false;}}
-    function rc(){const cs=gc(),u=gu();let h=(u.role==='admin'?'<option value="all">عرض كل المناديب</option>':'');cs.forEach(c=>{h+=`<option value="${c.id}">${c.name}</option>`;});document.getElementById('cF').innerHTML=h;let xh='';cs.forEach(c=>{xh+=`<option value="${c.id}">${c.name}</option>`;});const xe=document.getElementById('xCr');if(xe)xe.innerHTML=xh;let lh='<option value="admin">👑 المدير (PIN: 1234)</option>';cs.forEach(c=>{lh+=`<option value="${c.id}">🚴 ${c.name}</option>`;});document.getElementById('lU').innerHTML=lh;let ch='';cs.forEach(c=>{ch+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #334155;"><span>${c.name} (${c.pin})</span><button onclick="dlC('${c.id}')" style="color:#f87171;background:none;border:none;">حذف</button></div>`;});document.getElementById('cL').innerHTML=ch;}
+    
+    function au(){
+      const u=gu();
+      document.getElementById('uN').innerText=(u.role==='admin'?'👑 المدير':'🚴 '+u.name);
+      document.getElementById('bAdm').style.display=(u.role==='admin'?'inline-block':'none');
+      document.getElementById('bXls').style.display=(u.role==='admin'?'inline-block':'none');
+      const f=document.getElementById('cF');
+      if(u.role==='courier'){f.value=u.id;f.disabled=true;}else{f.disabled=false;}
+    }
+
+    function rc(){
+      const cs=gc(),u=gu();
+      let h=(u.role==='admin'?'<option value="all">عرض كل المناديب</option>':'');
+      cs.forEach(c=>{h+=`<option value="${c.id}">${c.name}</option>`;});
+      document.getElementById('cF').innerHTML=h;
+      
+      let xh='';
+      cs.forEach(c=>{xh+=`<option value="${c.id}">${c.name}</option>`;});
+      const xe=document.getElementById('xCr');
+      if(xe) xe.innerHTML=xh;
+
+      let lh='<option value="admin">👑 المدير (PIN: 1234)</option>';
+      cs.forEach(c=>{lh+=`<option value="${c.id}">🚴 ${c.name}</option>`;});
+      document.getElementById('lU').innerHTML=lh;
+
+      let ch='';
+      cs.forEach(c=>{ch+=`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #334155;"><span>${c.name} (${c.pin})</span><button onclick="dlC('${c.id}')" style="color:#f87171;background:none;border:none;">حذف</button></div>`;});
+      document.getElementById('cL').innerHTML=ch;
+    }
+
     function opL(){document.getElementById('lP').value='';document.getElementById('mL').style.display='flex';}
     function lgn(){const v=document.getElementById('lU').value,p=(document.getElementById('lP').value||'').trim();if(v==='admin'){if(p==='1234'||!p){su({role:'admin',name:'المدير'});clsM('mL');ld();}else alert('رمز خطأ');}else{const c=gc().find(x=>x.id===v);if(c&&(c.pin===p||p==='1234')){su({role:'courier',id:c.id,name:c.name});clsM('mL');ld();}else alert('رمز المندوب خطأ');}}
     function opC(){if(gu().role!=='admin')return;document.getElementById('mC').style.display='flex';}
@@ -86,13 +136,19 @@
         const u=gu(),cf=document.getElementById('cF');
         let ep='shipments?select=*&order=created_at.desc';
         const cid=(u.role==='courier'?u.id:(cf?cf.value:'all'));
-        if(cid&&cid!=='all') ep+='&courier_id=eq.'+cid;
+        if(cid&&cid!=='all') ep+=`&courier_id=eq.${encodeURIComponent(cid)}`;
         const res=await api(ep);
         raw=Array.isArray(res)?res:[];
         rnd();
       }catch(e){el.innerHTML='<p style="text-align:center;color:#f87171;">فشل الاتصال: '+e.message+'</p>';}
     }
-    function getD(s){return s.rescheduled_date||(s.created_at?s.created_at.split('T')[0]:'');}
+
+    function getD(s){
+      if(s.rescheduled_date) return s.rescheduled_date;
+      if(!s.created_at) return '';
+      return s.created_at.includes('T') ? s.created_at.split('T')[0] : s.created_at.split(' ')[0];
+    }
+
     function rnd(){
       const q=(document.getElementById('q').value||'').trim().toLowerCase(),df=document.getElementById('dF').value;
       const arr=raw.filter(s=>{
@@ -101,7 +157,7 @@
         return mQ&&(!df||sd===df);
       });
       const el=document.getElementById('lst');
-      if(!arr.length){el.innerHTML='<p style="text-align:center;color:var(--m);margin-top:25px;">لا توجد شحنات لهذا اليوم.</p>';document.getElementById('kC').innerText=0;document.getElementById('kM').innerText='0 ج.م';return;}
+      if(!arr.length){el.innerHTML='<p style="text-align:center;color:var(--m);margin-top:25px;">لا توجد شحنات مسجلة لهذا اليوم أو البحث.</p>';document.getElementById('kC').innerText=0;document.getElementById('kM').innerText='0 ج.م';return;}
       let c=0,m=0,h='';
       arr.forEach((s,i)=>{
         let am=0;
@@ -115,6 +171,7 @@
       });
       el.innerHTML=h;document.getElementById('kC').innerText=c;document.getElementById('kM').innerText=m+' ج.م';
     }
+
     async function upS(id,st,amt,ex={}){const it=raw.find(x=>x.id===id);if(it){it.status=st;it.collected_amount=amt;if(ex.rescheduled_date!==undefined)it.rescheduled_date=ex.rescheduled_date;rnd();}api('shipments?id=eq.'+id,'PATCH',{status:st,collected_amount:amt,...ex});}
     function opP(id){document.getElementById('pI').value=id;document.getElementById('pA').value='';document.getElementById('mP').style.display='flex';}
     function svP(){const id=document.getElementById('pI').value,a=Number(document.getElementById('pA').value);if(isNaN(a)||a<0)return alert('مبلغ غير صحيح');clsM('mP');upS(id,'partial',a);}
@@ -122,64 +179,89 @@
     function svR(){const id=document.getElementById('rI').value,d=document.getElementById('rD').value;if(!d)return alert('حدد التاريخ');clsM('mR');upS(id,'rescheduled',0,{rescheduled_date:d});}
     function mv(id,dir){const i=raw.findIndex(s=>s.id===id);if(i<0||i+dir<0||i+dir>=raw.length)return;const item=raw.splice(i,1)[0];raw.splice(i+dir,0,item);rnd();}
 
-    // قارئ الكاميرا الفوري للباركود
-    let qrScanner = null;
+    // تشغيل الكاميرا الخلفية للباركود
+    let qr = null;
     function opScan(){
       document.getElementById('mSc').style.display='flex';
-      qrScanner = new Html5Qrcode("reader");
-      qrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 220 }, (txt) => {
-        clScan();
-        document.getElementById('q').value = txt.trim();
-        rnd();
-      }).catch(err => {
-        alert("تعذر تشغيل الكاميرا، تأكد من إعطاء إذن الكاميرا للمتصفح");
-        clScan();
-      });
+      document.getElementById('scanMsg').innerText = 'جارٍ تشغيل الكاميرا...';
+      try {
+        qr = new Html5Qrcode("reader");
+        qr.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 240, height: 180 } }, (txt) => {
+          clScan();
+          document.getElementById('q').value = txt.trim();
+          rnd();
+        }).catch(err => {
+          document.getElementById('scanMsg').innerText = 'تعذر تشغيل الكاميرا: ' + err;
+        });
+      } catch(e) {
+        document.getElementById('scanMsg').innerText = 'خطأ في تشغيل القارئ';
+      }
     }
     function clScan(){
-      if(qrScanner){
-        qrScanner.stop().then(() => { qrScanner.clear(); document.getElementById('mSc').style.display='none'; }).catch(() => { document.getElementById('mSc').style.display='none'; });
-      } else { document.getElementById('mSc').style.display='none'; }
+      if(qr){
+        qr.stop().then(()=>{ qr.clear(); document.getElementById('mSc').style.display='none'; }).catch(()=>{ document.getElementById('mSc').style.display='none'; });
+      } else {
+        document.getElementById('mSc').style.display='none';
+      }
     }
 
-    // رفع الشيت وتخصيصه للمندوب المختار
-    function opX(){if(gu().role!=='admin')return alert('خاص بالمدير');document.getElementById('xf').value='';document.getElementById('mX').style.display='flex';}
+    // رفع الشيت مع ربط المندوب وتاريخ اليوم بدقة
+    function opX(){
+      if(gu().role!=='admin') return alert('خاص بالمدير فقط');
+      document.getElementById('xf').value='';
+      document.getElementById('upInfo').innerText='';
+      document.getElementById('mX').style.display='flex';
+    }
+
     async function upX(){
-      const fi=document.getElementById('xf');
-      if(!fi.files.length)return alert('اختر ملف CSV أولاً');
-      const f=fi.files[0], cid=document.getElementById('xCr').value, todayStr=new Date().toISOString();
-      const rd=new FileReader();
-      rd.onload=async function(e){
-        const rows=e.target.result.split('\n').filter(r=>r.trim()),ups=[];
-        for(let i=1;i<rows.length;i++){
-          const c=rows[i].split(',');
-          if(c.length>=4){
+      const fi = document.getElementById('xf');
+      if(!fi.files.length) return alert('يرجى اختيار ملف CSV أولاً');
+      const f = fi.files[0], cid = document.getElementById('xCr').value;
+      const today = document.getElementById('dF').value || new Date().toISOString().split('T')[0];
+      const rd = new FileReader();
+
+      document.getElementById('upInfo').innerText = 'جارٍ قراءة البيانات...';
+
+      rd.onload = async function(e){
+        const rows = e.target.result.split(/\r?\n/).filter(r => r.trim());
+        const ups = [];
+        for(let i=1; i<rows.length; i++){
+          const c = rows[i].split(',');
+          if(c.length >= 4){
             ups.push({
-              tracking_code: c[0].trim(),
-              recipient_name: c[1].trim(),
-              recipient_phone: c[2].trim(),
-              delivery_address: c[3].trim(),
-              cod_amount: Number(c[4])||0,
+              tracking_code: c[0].replace(/["']/g,'').trim(),
+              recipient_name: c[1].replace(/["']/g,'').trim(),
+              recipient_phone: c[2].replace(/["']/g,'').trim(),
+              delivery_address: c[3].replace(/["']/g,'').trim(),
+              cod_amount: Number(c[4]) || 0,
               courier_id: cid,
               status: 'out_for_delivery',
-              created_at: todayStr
+              created_at: today
             });
           }
         }
         if(ups.length){
-          await api('shipments','POST',ups);
-          alert('تم رفع وتخصيص '+ups.length+' شحنة للمندوب بنجاح!');
+          document.getElementById('upInfo').innerText = 'جارٍ الحفظ في قاعدة البيانات...';
+          await api('shipments', 'POST', ups);
+          alert('تم رفع وتخصيص ' + ups.length + ' شحنة للمندوب بنجاح!');
           clsM('mX');
           ld();
         } else {
           alert('تأكد من احتواء الملف على أعمدة: الكود، الاسم، الهاتف، العنوان، المبلغ');
+          document.getElementById('upInfo').innerText = '';
         }
       };
       rd.readAsText(f);
     }
 
-    document.getElementById('dF').value=new Date().toISOString().split('T')[0];
-    rc();au();ld();
+    // تعيين التاريخ المحلي تلقائياً
+    const tzOffset = (new Date()).getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(Date.now() - tzOffset)).toISOString().slice(0, 10);
+    document.getElementById('dF').value = localISOTime;
+
+    rc();
+    au();
+    ld();
   </script>
 </body>
 </html>
