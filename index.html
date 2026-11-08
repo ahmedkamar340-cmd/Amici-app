@@ -21,6 +21,8 @@
     .btn-a{background:transparent;border:1px solid var(--b);color:#fff;padding:5px;border-radius:5px;text-decoration:none;text-align:center;font-size:0.75rem;font-weight:bold;}
     .st-g{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
     .btn-s{border:none;padding:7px;border-radius:5px;font-weight:bold;font-size:0.72rem;cursor:pointer;color:#fff;}
+    .adm-bar{display:flex;gap:4px;margin-top:8px;padding-top:6px;border-top:1px dashed var(--b);}
+    .btn-adm-act{flex:1;background:#334155;border:1px solid var(--b);color:#fff;padding:5px;border-radius:4px;font-size:0.72rem;cursor:pointer;}
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;justify-content:center;align-items:center;padding:12px;}
     .m-box{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:360px;padding:12px;}
   </style>
@@ -47,21 +49,51 @@
   </div>
   <div id="lst"></div>
 
+  <!-- نوافذ العمليات -->
   <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"></select><input type="password" id="lP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول ➜</button></div></div>
+  
   <div class="modal" id="mC"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 المناديب</b><span style="cursor:pointer;" onclick="clsM('mC')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="اسم المندوب" style="margin-bottom:4px;"><input type="password" id="ncP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
-  <div class="modal" id="mP"><div class="m-box"><b>📦 استلام جزئي</b><input type="hidden" id="pI"><input type="number" id="pA" class="c-in" placeholder="المبلغ الفعلي" style="margin:8px 0;"><button class="btn-s" style="background:#8b5cf6;width:100%;" onclick="svP()">تأكيد</button></div></div>
+  
+  <div class="modal" id="mP"><div class="m-box"><b>📦 استلام جزئي</b><input type="hidden" id="pI"><input type="number" id="pA" class="c-in" placeholder="المبلغ الفعلي المحصل" style="margin:8px 0;"><button class="btn-s" style="background:#8b5cf6;width:100%;" onclick="svP()">تأكيد الحفظ</button></div></div>
+  
   <div class="modal" id="mR"><div class="m-box"><b>📅 تأجيل الشحنة ليوم محدد</b><input type="hidden" id="rI"><input type="date" id="rD" class="c-in" style="margin:8px 0;"><button class="btn-s" style="background:var(--w);width:100%;" onclick="svR()">حفظ التأجيل</button></div></div>
+
+  <!-- نافذة نقل الشحنة لمندوب آخر -->
+  <div class="modal" id="mTr">
+    <div class="m-box">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔄 تحويل الشحنة لمندوب آخر</b><span style="cursor:pointer;" onclick="clsM('mTr')">✕</span></div>
+      <input type="hidden" id="trId">
+      <label style="font-size:0.75rem;color:var(--m);display:block;margin-bottom:4px;">اختر المندوب الجديد:</label>
+      <select id="trCourier" class="c-in" style="margin-bottom:10px;"></select>
+      <button class="btn-s" style="background:#0284c7;width:100%;" onclick="svTr()">تأكيد التحويل الآن ➜</button>
+    </div>
+  </div>
 
   <script>
     const S_U='https://difabkjpyypaylnofbcl.supabase.co',S_K='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
-    async function api(ep,m='GET',b=null){const o={method:m,headers:{'apikey':S_K,'Authorization':'Bearer '+S_K,'Content-Type':'application/json','Prefer':'return=representation'}};if(b)o.body=JSON.stringify(b);try{const r=await fetch(S_U+'/rest/v1/'+ep,o);return r.ok?await r.json():[];}catch{return[];}}
     
-    const DEF=[{id:"a0000000-0000-0000-0000-000000000004",name:"مينا عبد النور",pin:"1111"},{id:"a0000000-0000-0000-0000-000000000001",name:"أحمد",pin:"1234"},{id:"a0000000-0000-0000-0000-000000000002",name:"محمد محمود",pin:"2222"},{id:"a0000000-0000-0000-0000-000000000003",name:"إسلام فتحي",pin:"3333"}];
+    async function api(ep,m='GET',b=null){
+      const o={method:m,headers:{'apikey':S_K,'Authorization':'Bearer '+S_K,'Content-Type':'application/json','Prefer':'return=representation'}};
+      if(b)o.body=JSON.stringify(b);
+      try{
+        const r=await fetch(S_U+'/rest/v1/'+ep,o);
+        if(!r.ok){ console.error('API Error:', await r.text()); return null; }
+        return await r.json();
+      }catch(e){console.error(e);return null;}
+    }
+
+    const DEF=[
+      {id:"a0000000-0000-0000-0000-000000000004",name:"مينا عبد النور",pin:"1111"},
+      {id:"a0000000-0000-0000-0000-000000000001",name:"أحمد",pin:"1234"},
+      {id:"a0000000-0000-0000-0000-000000000002",name:"محمد محمود",pin:"2222"},
+      {id:"a0000000-0000-0000-0000-000000000003",name:"إسلام فتحي",pin:"3333"}
+    ];
+
     function gc(){try{return JSON.parse(localStorage.getItem('am_c'))||DEF;}catch{return DEF;}}
     function sc(l){localStorage.setItem('am_c',JSON.stringify(l));rc();}
     function gu(){try{return JSON.parse(localStorage.getItem('am_u'))||{role:'admin',name:'المدير'};}catch{return{role:'admin',name:'المدير'};}}
     function su(u){localStorage.setItem('am_u',JSON.stringify(u));au();}
-    
+
     function au(){
       const u=gu();
       document.getElementById('uN').innerText=(u.role==='admin'?'👑 المدير':'🚴 '+u.name);
@@ -76,6 +108,11 @@
       let h=(u.role==='admin'?'<option value="all">عرض كل المناديب</option>':'');
       cs.forEach(c=>{h+=`<option value="${c.id}">${c.name}</option>`;});
       document.getElementById('cF').innerHTML=h;
+
+      let trH='';
+      cs.forEach(c=>{trH+=`<option value="${c.id}">${c.name}</option>`;});
+      const trEl = document.getElementById('trCourier');
+      if(trEl) trEl.innerHTML = trH;
 
       let lh='<option value="admin">👑 المدير (PIN: 1234)</option>';
       cs.forEach(c=>{lh+=`<option value="${c.id}">🚴 ${c.name}</option>`;});
@@ -116,6 +153,7 @@
 
     function rnd(){
       const q=(document.getElementById('q').value||'').trim().toLowerCase(),df=document.getElementById('dF').value;
+      const isAdmin = gu().role === 'admin';
       const arr=raw.filter(s=>{
         const mQ=!q||(String(s.tracking_code||'').toLowerCase().includes(q)||String(s.recipient_name||'').toLowerCase().includes(q)||String(s.recipient_phone||'').includes(q)||String(s.delivery_address||'').toLowerCase().includes(q));
         const sd=getD(s);
@@ -132,22 +170,110 @@
         if(['delivered','partial','shipping_only'].includes(s.status)){c++;m+=am;}
         const ph=String(s.recipient_phone||'').replace(/[^0-9]/g,'');
         const wa=ph?`https://wa.me/2${ph}?text=${encodeURIComponent('السلام عليكم أستاذ '+s.recipient_name+'، بخصوص شحنتك رقم ('+s.tracking_code+') والمطلوب '+s.cod_amount+' ج.م')}`:'#';
-        h+=`<div class="card"><div style="display:flex;justify-content:space-between;font-weight:bold;margin-bottom:4px;"><span style="color:#38bdf8;">#${i+1} 🏷️ ${s.tracking_code||''}</span><span style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:#334155;">${s.status}${s.rescheduled_date?' (مؤجل)':''}</span></div><div style="font-weight:600;">${s.recipient_name||''}</div><div style="font-size:0.75rem;color:var(--m);margin:2px 0;">${s.delivery_address||''}</div><div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.25);padding:4px 8px;border-radius:4px;margin:6px 0;font-size:0.8rem;"><span>المطلوب: <b>${s.cod_amount||0}ج</b></span><span>المحصل: <b style="color:#38bdf8;">${am}ج</b></span></div><div class="acts"><a href="tel:${s.recipient_phone}" class="btn-a">📞 اتصال</a><a href="${wa}" target="_blank" class="btn-a" style="background:rgba(37,211,102,0.15);border-color:#25d366;color:#25d366;">💬 واتساب</a><a href="https://maps.google.com/?q=${encodeURIComponent(s.delivery_address||'')}" target="_blank" class="btn-a">🗺️ خريطة</a></div><div class="st-g"><button class="btn-s" style="background:var(--s);grid-column:span 2;" onclick="upS('${s.id}','delivered',${s.cod_amount})">تم التسليم كامل ✓</button><button class="btn-s" style="background:#8b5cf6;" onclick="opP('${s.id}')">استلام جزئي</button><button class="btn-s" style="background:#0d9488;" onclick="upS('${s.id}','shipping_only',75)">شحن فقط (75)</button><button class="btn-s" style="background:var(--w);" onclick="opR('${s.id}')">تأجيل 📅</button><button class="btn-s" style="background:var(--d);" onclick="upS('${s.id}','returned',0)">مرتجع ✕</button></div><div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #334155;padding-top:6px;margin-top:6px;font-size:0.75rem;"><span>خط السير</span><div><button style="background:#334155;border:1px solid #334155;color:#fff;width:30px;height:26px;border-radius:4px;" onclick="mv('${s.id}',-1)">⬆️</button> <button style="background:#334155;border:1px solid #334155;color:#fff;width:30px;height:26px;border-radius:4px;" onclick="mv('${s.id}',1)">⬇️</button></div></div></div>`;
+        
+        let stBadge = s.status;
+        if(s.status === 'delivered') stBadge = 'تم التسليم ✓';
+        else if(s.status === 'partial') stBadge = 'استلام جزئي';
+        else if(s.status === 'shipping_only') stBadge = 'شحن 75ج';
+        else if(s.status === 'rescheduled') stBadge = `مؤجل: ${s.rescheduled_date||''}`;
+        else if(s.status === 'returned') stBadge = 'مرتجع ✕';
+        else stBadge = 'قيد التوصيل';
+
+        h+=`<div class="card">
+          <div style="display:flex;justify-content:space-between;font-weight:bold;margin-bottom:4px;">
+            <span style="color:#38bdf8;">#${i+1} 🏷️ ${s.tracking_code||''}</span>
+            <span style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:#334155;">${stBadge}</span>
+          </div>
+          <div style="font-weight:600;">${s.recipient_name||''}</div>
+          <div style="font-size:0.75rem;color:var(--m);margin:2px 0;">${s.delivery_address||''}</div>
+          <div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.25);padding:4px 8px;border-radius:4px;margin:6px 0;font-size:0.8rem;">
+            <span>المطلوب: <b>${s.cod_amount||0}ج</b></span>
+            <span>المحصل: <b style="color:#38bdf8;">${am}ج</b></span>
+          </div>
+          <div class="acts">
+            <a href="tel:${s.recipient_phone}" class="btn-a">📞 اتصال</a>
+            <a href="${wa}" target="_blank" class="btn-a" style="background:rgba(37,211,102,0.15);border-color:#25d366;color:#25d366;">💬 واتساب</a>
+            <a href="https://maps.google.com/?q=${encodeURIComponent(s.delivery_address||'')}" target="_blank" class="btn-a">🗺️ خريطة</a>
+          </div>
+          <div class="st-g">
+            <button class="btn-s" style="background:var(--s);grid-column:span 2;" onclick="upS('${s.id}','delivered',${s.cod_amount})">تم التسليم كامل ✓</button>
+            <button class="btn-s" style="background:#8b5cf6;" onclick="opP('${s.id}')">استلام جزئي</button>
+            <button class="btn-s" style="background:#0d9488;" onclick="upS('${s.id}','shipping_only',75)">شحن فقط (75)</button>
+            <button class="btn-s" style="background:var(--w);" onclick="opR('${s.id}')">تأجيل 📅</button>
+            <button class="btn-s" style="background:var(--d);" onclick="upS('${s.id}','returned',0)">مرتجع ✕</button>
+          </div>
+          ${isAdmin ? `
+          <div class="adm-bar">
+            <button class="btn-adm-act" style="background:#0284c7;" onclick="opTr('${s.id}')">🔄 تحويل لمندوب</button>
+            <button class="btn-adm-act" style="background:#b91c1c;" onclick="delShipment('${s.id}')">🗑️ حذف الشحنة</button>
+          </div>` : ''}
+        </div>`;
       });
       el.innerHTML=h;document.getElementById('kC').innerText=c;document.getElementById('kM').innerText=m+' ج.م';
     }
 
-    async function upS(id,st,amt,ex={}){const it=raw.find(x=>x.id===id);if(it){it.status=st;it.collected_amount=amt;if(ex.rescheduled_date!==undefined)it.rescheduled_date=ex.rescheduled_date;rnd();}api('shipments?id=eq.'+id,'PATCH',{status:st,collected_amount:amt,...ex});}
-    function opP(id){document.getElementById('pI').value=id;document.getElementById('pA').value='';document.getElementById('mP').style.display='flex';}
-    function svP(){const id=document.getElementById('pI').value,a=Number(document.getElementById('pA').value);if(isNaN(a)||a<0)return alert('مبلغ غير صحيح');clsM('mP');upS(id,'partial',a);}
-    function opR(id){document.getElementById('rI').value=id;document.getElementById('rD').value='';document.getElementById('mR').style.display='flex';}
-    function svR(){const id=document.getElementById('rI').value,d=document.getElementById('rD').value;if(!d)return alert('حدد التاريخ');clsM('mR');upS(id,'rescheduled',0,{rescheduled_date:d});}
-    function mv(id,dir){const i=raw.findIndex(s=>s.id===id);if(i<0||i+dir<0||i+dir>=raw.length)return;const item=raw.splice(i,1)[0];raw.splice(i+dir,0,item);rnd();}
+    async function upS(id,st,amt,ex={}){
+      const it=raw.find(x=>x.id===id);
+      if(it){
+        it.status=st;
+        it.collected_amount=amt;
+        if(ex.rescheduled_date!==undefined) it.rescheduled_date=ex.rescheduled_date;
+        rnd();
+      }
+      const res = await api(`shipments?id=eq.${id}`,'PATCH',{status:st,collected_amount:amt,...ex});
+      if(!res){
+        alert('تنبيه: تعذر تحديث قاعدة البيانات، تأكد من تشغيل أمر تعطيل RLS في Supabase');
+      }
+    }
 
-    // زر إدخال الشحنات الثلاث بضغطة زر واحدة
+    function opP(id){document.getElementById('pI').value=id;document.getElementById('pA').value='';document.getElementById('mP').style.display='flex';}
+    async function svP(){
+      const id=document.getElementById('pI').value,a=Number(document.getElementById('pA').value);
+      if(isNaN(a)||a<0)return alert('مبلغ غير صحيح');
+      clsM('mP');
+      await upS(id,'partial',a);
+    }
+
+    function opR(id){document.getElementById('rI').value=id;document.getElementById('rD').value='';document.getElementById('mR').style.display='flex';}
+    async function svR(){
+      const id=document.getElementById('rI').value,d=document.getElementById('rD').value;
+      if(!d)return alert('حدد التاريخ');
+      clsM('mR');
+      await upS(id,'rescheduled',0,{rescheduled_date:d});
+    }
+
+    // إدارة المدير: تحويل الشحنة لمندوب آخر
+    function opTr(id){
+      document.getElementById('trId').value = id;
+      document.getElementById('mTr').style.display = 'flex';
+    }
+    async function svTr(){
+      const id = document.getElementById('trId').value;
+      const targetCid = document.getElementById('trCourier').value;
+      if(!targetCid) return alert('اختر مندوباً');
+      
+      const res = await api(`shipments?id=eq.${id}`, 'PATCH', { courier_id: targetCid });
+      clsM('mTr');
+      if(res){
+        alert('تم تحويل الشحنة للمندوب بنجاح!');
+        ld();
+      } else {
+        alert('حدث خطأ أثناء تحويل الشحنة');
+      }
+    }
+
+    // إدارة المدير: حذف الشحنة نهائياً
+    async function delShipment(id){
+      if(!confirm('هل أنت متأكد من حذف هذه الشحنة نهائياً من السيستم؟')) return;
+      const res = await api(`shipments?id=eq.${id}`, 'DELETE');
+      alert('تم حذف الشحنة بنجاح!');
+      ld();
+    }
+
+    // زر إدخال الشحنات الثلاث
     async function addSampleOrders(){
       const cf = document.getElementById('cF').value;
-      const targetCourier = (cf && cf !== 'all') ? cf : "a0000000-0000-0000-0000-000000000004"; // إسناد لمينا عبد النور افتراضياً أو المندوب المختار
+      const targetCourier = (cf && cf !== 'all') ? cf : "a0000000-0000-0000-0000-000000000004";
       const today = document.getElementById('dF').value || new Date().toISOString().split('T')[0];
 
       const sampleData = [
