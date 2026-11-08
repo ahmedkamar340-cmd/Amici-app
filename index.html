@@ -1,11 +1,64 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>أميتشي إكسبريس</title>
+  <style>
+    :root{--bg:#0f172a;--c:#1e293b;--b:#334155;--t:#f8fafc;--m:#94a3b8;--s:#16a34a;--w:#d97706;--d:#dc2626;}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif;}
+    body{background:var(--bg);color:var(--t);padding-bottom:80px;}
+    header{background:var(--c);padding:10px;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:50;}
+    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .btns{display:flex;gap:4px;}
+    .btn-h{background:#334155;border:1px solid #475569;color:#fff;padding:5px 8px;border-radius:5px;font-size:0.75rem;cursor:pointer;}
+    .s-in{width:100%;background:#0f172a;color:#fff;border:1px solid var(--b);padding:7px;border-radius:6px;font-size:0.8rem;outline:none;margin-bottom:6px;}
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+    .sel-b{background:rgba(0,0,0,0.25);padding:5px;border-radius:6px;border:1px solid var(--b);}
+    .c-in{width:100%;background:#0f172a;color:#fff;border:1px solid var(--b);padding:5px;border-radius:4px;font-size:0.75rem;outline:none;}
+    .kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 10px;}
+    .kpi-b{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:6px;text-align:center;}
+    .card{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:10px;margin:8px 10px;}
+    .acts{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:4px;margin:6px 0;}
+    .btn-a{background:transparent;border:1px solid var(--b);color:#fff;padding:5px;border-radius:5px;text-decoration:none;text-align:center;font-size:0.75rem;font-weight:bold;}
+    .st-g{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+    .btn-s{border:none;padding:7px;border-radius:5px;font-weight:bold;font-size:0.72rem;cursor:pointer;color:#fff;}
+    .reorder{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--b);padding-top:6px;margin-top:6px;font-size:0.75rem;}
+    .btn-r{background:#334155;border:1px solid var(--b);color:#fff;width:30px;height:26px;border-radius:4px;}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;justify-content:center;align-items:center;padding:12px;}
+    .m-box{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:360px;padding:12px;}
+  </style>
 </head>
 <body>
-  <div id="app"></div>
-  <script src="app.js?v=9"></script>
+  <header>
+    <div class="top">
+      <h1 style="font-size:0.95rem;color:#38bdf8;">أميتشي <span id="uN" style="font-size:0.72rem;color:#fff;">👑 المدير</span></h1>
+      <div class="btns">
+        <button class="btn-h" style="background:#0284c7;" onclick="scn()">📷 باركود</button>
+        <button class="btn-h" style="background:#059669;" id="bXls" onclick="opX()">📁 شيت</button>
+        <button class="btn-h" id="bAdm" onclick="opC()">👥 مناديب</button>
+        <button class="btn-h" onclick="opL()">🔄 حساب</button>
+      </div>
+    </div>
+    <input type="text" id="q" class="s-in" placeholder="🔍 بحث بالشحنة أو الاسم أو العنوان..." oninput="rnd()">
+    <div class="g2">
+      <div class="sel-b"><label style="font-size:0.65rem;color:var(--m);">المندوب:</label><select id="cF" class="c-in" onchange="ld()"></select></div>
+      <div class="sel-b"><label style="font-size:0.65rem;color:var(--m);">الوردية:</label><input type="date" id="dF" class="c-in" onchange="rnd()"></div>
+    </div>
+  </header>
+  <div class="kpi">
+    <div class="kpi-b"><div id="kC" style="font-size:1.1rem;font-weight:bold;color:#38bdf8;">0</div><div style="font-size:0.7rem;color:var(--m);">منجزة</div></div>
+    <div class="kpi-b"><div id="kM" style="font-size:1.1rem;font-weight:bold;color:#38bdf8;">0 ج.م</div><div style="font-size:0.7rem;color:var(--m);">محصل</div></div>
+  </div>
+  <div id="lst"></div>
+
+  <div class="modal" id="mX"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت CSV</b><span style="cursor:pointer;" onclick="clsM('mX')">✕</span></div><label style="font-size:0.7rem;color:var(--m);">تخصيص للمندوب:</label><select id="xCr" class="c-in" style="margin-bottom:6px;"></select><input type="file" id="xf" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;"><button class="btn-s" style="background:var(--s);width:100%;" onclick="upX()">رفع الشحنات ⬆️</button></div></div>
+  <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"></select><input type="password" id="lP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول ➜</button></div></div>
+  <div class="modal" id="mC"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 المناديب</b><span style="cursor:pointer;" onclick="clsM('mC')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="اسم المندوب" style="margin-bottom:4px;"><input type="password" id="ncP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
+  <div class="modal" id="mP"><div class="m-box"><b>📦 استلام جزئي</b><input type="hidden" id="pI"><input type="number" id="pA" class="c-in" placeholder="المبلغ الفعلي" style="margin:8px 0;"><button class="btn-s" style="background:#8b5cf6;width:100%;" onclick="svP()">تأكيد</button></div></div>
+  <div class="modal" id="mR"><div class="m-box"><b>📅 تأجيل الشحنة ليوم محدد</b><input type="hidden" id="rI"><input type="date" id="rD" class="c-in" style="margin:8px 0;"><button class="btn-s" style="background:var(--w);width:100%;" onclick="svR()">حفظ التأجيل</button></div></div>
+
+  <script src="app.js?v=11"></script>
 </body>
-</html>
+      </html>
+  
