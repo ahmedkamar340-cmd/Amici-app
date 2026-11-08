@@ -1,55 +1,37 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>أميتشي إكسبريس</title>
   <style>
-    :root{--bg:#0f172a;--c:#1e293b;--b:#334155;--t:#f8fafc;--m:#94a3b8;--s:#16a34a;--w:#d97706;--d:#dc2626;}
-    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif;}
-    body{background:var(--bg);color:var(--t);padding-bottom:80px;}
-    header{background:var(--c);padding:10px 12px;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:50;}
-    .h-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-    .btn-h{background:#334155;border:1px solid #475569;color:#fff;padding:5px 7px;border-radius:6px;font-size:0.75rem;cursor:pointer;}
-    .s-in{width:100%;background:#0f172a;color:#fff;border:1px solid var(--b);padding:7px;border-radius:6px;font-size:0.8rem;outline:none;margin-bottom:8px;}
-    .g2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-    .sel-b{background:rgba(0,0,0,0.25);padding:6px;border-radius:6px;border:1px solid var(--b);}
-    .sel-b label{font-size:0.7rem;color:var(--m);display:block;}
-    .c-in{width:100%;background:#0f172a;color:#fff;border:1px solid var(--b);padding:5px;border-radius:4px;font-size:0.78rem;outline:none;}
-    .kpi-r{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 12px;}
-    .kpi-b{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:6px;text-align:center;}
-    .kpi-v{font-size:1.1rem;font-weight:bold;color:#38bdf8;}
-    .card{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:10px;margin:8px 12px;}
-    .card-t{display:flex;justify-content:space-between;margin-bottom:4px;font-weight:bold;}
-    .acts{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:4px;margin:6px 0;}
-    .btn-a{background:transparent;border:1px solid var(--b);color:#fff;padding:5px;border-radius:6px;text-decoration:none;text-align:center;font-size:0.75rem;font-weight:bold;}
-    .btn-wa{background:rgba(37,211,102,0.15);border-color:#25d366;color:#25d366;}
-    .status-g{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-    .btn-s{border:none;padding:7px;border-radius:6px;font-weight:bold;font-size:0.74rem;cursor:pointer;color:#fff;}
-    .reorder{display:flex;justify-content:space-between;align-items:center;border-top:1px dashed var(--b);padding-top:6px;margin-top:8px;font-size:0.75rem;color:var(--m);}
-    .btn-r{background:#334155;border:1px solid var(--b);color:#fff;width:30px;height:26px;border-radius:4px;cursor:pointer;}
-    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;justify-content:center;align-items:center;padding:12px;}
-    .m-box{background:var(--c);border:1px solid var(--b);border-radius:10px;width:100%;max-width:380px;padding:14px;}
-  </style>
-</head>
-<body>
-  <header>
-    <div class="h-top">
-      <h1 style="font-size:0.95rem;color:#38bdf8;">أميتشي إكسبريس <span id="uN" style="font-size:0.75rem;">👑 المدير</span></h1>
-      <div style="display:flex;gap:4px;">
-        <button class="btn-h" style="background:#0284c7;" onclick="scn()">📷 باركود</button>
-        <button class="btn-h" style="background:#059669;" id="bXls" onclick="opXls()">📁 شيت</button>
-        <button class="btn-h" id="bAdm" onclick="opCr()">👥 مناديب</button>
-        <button class="btn-h" onclick="opLg()">🔄 حساب</button>
-      </div>
-    </div>
-    <input type="text" id="q" class="s-in" placeholder="🔍 بحث بالشحنة أو الاسم..." oninput="rnd()">
-    <div class="g2"><div class="sel-b"><label>👤 المندوب:</label><select id="cF" class="c-in" onchange="ld()"></select></div><div class="sel-b"><label>📅 الوردية:</label><input type="date" id="dF" class="c-in" onchange="rnd()"></div></div>
-  </header>
-  <div class="kpi-r"><div class="kpi-b"><div class="kpi-v" id="kC">0</div><div style="font-size:0.7rem;color:var(--m);">منجزة</div></div><div class="kpi-b"><div class="kpi-v" id="kM">0 ج.م</div><div style="font-size:0.7rem;color:var(--m);">محصل</div></div></div>
-  <div id="lst"></div>
-
-  <div class="modal" id="mXls"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت (CSV أو نص)</b><span style="cursor:pointer;" onclick="clsM('mXls')">✕</span></div><label style="font-size:0.72rem;color:var(--m);">تخصيص للمندوب:</label><select id="xCr" class="c-in" style="margin-bottom:6px;"></select><input type="file" id="xf" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;"><button class="btn-s" style="background:var(--s);width:100%;padding:8px;" onclick="upXls()">تأكيد الرفع ⬆️</button></div></div>
-  <div class="modal" id="mLg"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mLg')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"></select><input type="password" id="lP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:#2563eb;width:100%;margin-top:8px;padding:8px;" onclick="lgn()">دخول ➜</button></div></div>
-  <div class="modal" id="mCr"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 المناديب</b><span style="cursor:pointer;" onclick="clsM('mCr')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="الاسم" style="margin-bottom:4px;"><input type="password" id="ncP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
-  <div class="modal" id="mPt"><div class="m-box"><b>📦 استلام جزئي</b><input type="hidden" id="pI"><input type="number" id="pA" class="c-in" placeholder="المبلغ الفعلي" style="margin:8px 0;"><button class="btn-s" style="background:#8b5cf6;width:100%;" onclick="svPt()">تأكيد</button></div></div>
-  <div class="modal" id="mRs"><div class="m-box"><b>📅 تأجيل الشحنة</b><input type="hidden" id="rI"><input type="date" id
+    :root { --bg: #0f172a; --card: #1e293b; --border: #334155; --text: #f8fafc; --muted: #94a3b8; --primary: #38bdf8; --success: #16a34a; --warning: #d97706; --danger: #dc2626; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 90px; }
+    header { background: var(--card); padding: 12px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .btn-group { display: flex; gap: 5px; }
+    .btn-h { background: #334155; border: 1px solid #475569; color: #fff; padding: 6px 9px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; }
+    .s-in { width: 100%; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 8px 10px; border-radius: 6px; font-size: 0.85rem; outline: none; margin-bottom: 8px; }
+    .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .filter-box { background: rgba(0,0,0,0.25); padding: 6px 8px; border-radius: 6px; border: 1px solid var(--border); }
+    .filter-box label { font-size: 0.7rem; color: var(--muted); display: block; margin-bottom: 2px; }
+    .c-in { width: 100%; background: #0f172a; color: #fff; border: 1px solid var(--border); padding: 6px; border-radius: 4px; font-size: 0.8rem; outline: none; }
+    .kpi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 14px; }
+    .kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 8px; text-align: center; }
+    .kpi-val { font-size: 1.15rem; font-weight: bold; color: var(--primary); }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin: 10px 14px; }
+    .card-top { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 4px; }
+    .card-title { font-size: 0.95rem; font-weight: 600; }
+    .card-addr { font-size: 0.78rem; color: var(--muted); margin: 3px 0 6px 0; }
+    .card-fin { display: flex; justify-content: space-between; background: rgba(0,0,0,0.25); padding: 5px 8px; border-radius: 4px; margin-bottom: 8px; font-size: 0.82rem; }
+    .acts-grid { display: grid; grid-template-columns: 1fr 1.2fr 1fr; gap: 5px; margin-bottom: 8px; }
+    .btn-act { background: transparent; border: 1px solid var(--border); color: #fff; padding: 6px 0; border-radius: 6px; text-decoration: none; text-align: center; font-size: 0.75rem; font-weight: bold; }
+    .btn-wa { background: rgba(37,211,102,0.15); border-color: #25d366; color: #25d366; }
+    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+    .btn-status { border: none; padding: 8px; border-radius: 6px; font-weight: bold; font-size: 0.74rem; cursor: pointer; color: #fff; }
+    .reorder { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 8px; font-size: 0.75rem; color: var(--muted); }
+    .btn-arrow { background: #334155; border: 1px solid var(--border); color: #fff; width: 32px; height: 28px; border-radius: 4px; cursor: pointer; }
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 14px; }
+    .m-box { background: var(--card); border: 1px solid var(--
+                                                            
