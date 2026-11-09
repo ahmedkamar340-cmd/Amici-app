@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
   <title>أميتشي إكسبريس</title>
   <style>
     :root{--bg:#0f172a;--c:#1e293b;--b:#334155;--m:#94a3b8;--s:#16a34a;--w:#d97706;--d:#dc2626;}
@@ -15,8 +16,8 @@
     .g2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
     .sel-b{background:rgba(0,0,0,0.25);padding:5px;border-radius:6px;border:1px solid var(--b);}
     .c-in{width:100%;background:#0f172a;color:#fff;border:1px solid var(--b);padding:5px;border-radius:4px;font-size:0.75rem;outline:none;}
-    .kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 10px;margin-top:4px;}
-    .kpi-b{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:8px;text-align:center;}
+    .kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 10px;}
+    .kpi-b{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:6px;text-align:center;}
     .card{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:10px;margin:8px 10px;}
     .acts{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:4px;margin:6px 0;}
     .btn-a{background:transparent;border:1px solid var(--b);color:#fff;padding:5px;border-radius:5px;text-decoration:none;text-align:center;font-size:0.75rem;font-weight:bold;}
@@ -63,13 +64,13 @@
   </header>
 
   <div class="kpi">
-    <div class="kpi-b"><div id="kC" style="font-size:1.15rem;font-weight:bold;color:#38bdf8;">0</div><div style="font-size:0.7rem;color:var(--m);">منجزة</div></div>
-    <div class="kpi-b"><div id="kM" style="font-size:1.15rem;font-weight:bold;color:#38bdf8;">0 ج.م</div><div style="font-size:0.7rem;color:var(--m);">محصل</div></div>
+    <div class="kpi-b"><div id="kC" style="font-size:1.1rem;font-weight:bold;color:#38bdf8;">0</div><div style="font-size:0.7rem;color:var(--m);">منجزة</div></div>
+    <div class="kpi-b"><div id="kM" style="font-size:1.1rem;font-weight:bold;color:#38bdf8;">0 ج.م</div><div style="font-size:0.7rem;color:var(--m);">محصل</div></div>
   </div>
 
   <div id="lst"></div>
 
-  <!-- النوافذ المنبثقة -->
+  <!-- النوافذ -->
   <div class="modal" id="mShp">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🚚 تحصيل شحن فقط</b><span style="cursor:pointer;" onclick="clsM('mShp')">✕</span></div>
@@ -242,5 +243,16 @@
 
     function addCourier(){
       const n = document.getElementById('ncN').value.trim();
-      if(!n) return
-                               
+      if(!n) return;
+      const opt = document.createElement('option');
+      opt.value = n; opt.text = n;
+      document.getElementById('cF').add(opt);
+      document.getElementById('cL').innerHTML += `<div>🚴 ${n}</div>`;
+      document.getElementById('ncN').value = '';
+    }
+
+    rnd();
+  </script>
+</body>
+  </html>
+  
