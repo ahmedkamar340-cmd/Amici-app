@@ -5,7 +5,7 @@
   <title>أميتشي إكسبريس</title>
   <style>
     :root{--bg:#0f172a;--c:#1e293b;--b:#334155;--m:#94a3b8;--s:#16a34a;--w:#d97706;--d:#dc2626;}
-    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;}
     body{background:var(--bg);color:#f8fafc;padding-bottom:80px;}
     header{background:var(--c);padding:10px;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:50;}
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
@@ -26,6 +26,7 @@
     .btn-adm{flex:1;background:#334155;border:1px solid var(--b);color:#fff;padding:5px;border-radius:4px;font-size:0.72rem;cursor:pointer;}
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;justify-content:center;align-items:center;padding:12px;}
     .m-box{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:350px;padding:12px;}
+    #scanner-video{width:100%;border-radius:6px;background:#000;display:block;}
   </style>
 </head>
 <body>
@@ -33,10 +34,10 @@
     <div class="top">
       <h1 style="font-size:0.95rem;color:#38bdf8;">أميتشي <span id="uN" style="font-size:0.72rem;color:#fff;">👑 المدير</span></h1>
       <div class="btns">
+        <button class="btn-h" style="background:#0284c7;" onclick="openScanner()">📷 باركود</button>
         <button class="btn-h" style="background:#059669;" id="bXls" onclick="opM('mX')">📁 شيت</button>
         <button class="btn-h" style="background:#8b5cf6;" id="bDemo" onclick="addSampleOrders()">⚡ بوالص</button>
         <button class="btn-h" style="background:#0284c7;" onclick="opLoc()">📍 المناديب</button>
-        <button class="btn-h" style="background:#0284c7;" onclick="opScan()">📷 باركود</button>
         <button class="btn-h" id="bAdm" onclick="opC()">👥 مناديب</button>
         <button class="btn-h" onclick="opM('mL')">🔄 حساب</button>
       </div>
@@ -61,15 +62,26 @@
 
   <div id="lst"></div>
 
-  <!-- النوافذ المنبثقة -->
-  <!-- شحن فقط بمبلغ مخصص -->
+  <!-- كاميرا الباركود -->
+  <div class="modal" id="mScanner">
+    <div class="m-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <b>📷 مسح باركود الشحنة</b>
+        <span style="cursor:pointer;font-size:1.2rem;" onclick="closeScanner()">✕</span>
+      </div>
+      <video id="scanner-video" playsinline></video>
+      <p style="text-align:center;font-size:0.72rem;color:var(--m);margin-top:6px;">وجه الكاميرا نحو باركود البوليصة</p>
+    </div>
+  </div>
+
+  <!-- شحن بمبلغ مخصص -->
   <div class="modal" id="mShp">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🚚 تحصيل شحن فقط</b><span style="cursor:pointer;" onclick="clsM('mShp')">✕</span></div>
       <input type="hidden" id="shpId">
       <label style="font-size:0.75rem;color:var(--m);">مبلغ الشحن المطلوب:</label>
       <input type="number" id="shpAmt" class="c-in" value="75" style="margin:6px 0 10px;">
-      <button class="btn-s" style="background:#0d9488;width:100%;" onclick="svShp()">تأكيد تحصيل الشحن</button>
+      <button class="btn-s" style="background:#0d9488;width:100%;" onclick="svShp()">تأكيد الشحن</button>
     </div>
   </div>
 
@@ -80,7 +92,7 @@
       <input type="hidden" id="pI">
       <label style="font-size:0.75rem;color:var(--m);">المبلغ الفعلي المستلم:</label>
       <input type="number" id="pA" class="c-in" placeholder="المبلغ" style="margin:6px 0 10px;">
-      <button class="btn-s" style="background:#8b5cf6;width:100%;" onclick="svP()">تأكيد الاستلام الجزئي</button>
+      <button class="btn-s" style="background:#8b5cf6;width:100%;" onclick="svP()">تأكيد المبلغ</button>
     </div>
   </div>
 
@@ -140,243 +152,5 @@
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع وتخصيص شيت</b><span style="cursor:pointer;" onclick="clsM('mX')">✕</span></div>
       <label style="font-size:0.7rem;color:var(--m);">المندوب:</label>
-      <select id="xCr" class="c-in" style="margin-bottom:6px;"></select>
-      <input type="file" id="xf" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;">
-      <button class="btn-s" style="background:var(--s);width:100%;" onclick="upX()">رفع الشحنات ⬆️</button>
-    </div>
-  </div>
 
-  <script>
-    const DEF = [
-      {id:"a0000000-0000-0000-0000-000000000001",name:"أحمد",pin:"1234"},
-      {id:"c-biko-01",name:"بيكو",pin:"1234"},
-      {id:"a0000000-0000-0000-0000-000000000004",name:"مينا عبد النور",pin:"1111"},
-      {id:"a0000000-0000-0000-0000-000000000002",name:"محمد محمود",pin:"2222"},
-      {id:"a0000000-0000-0000-0000-000000000003",name:"إسلام فتحي",pin:"3333"}
-    ];
-
-    let raw = [
-      {id:"1",tracking_code:"7791",recipient_name:"Demyana Botros Zachary",recipient_phone:"01001232790",delivery_address:"الاسكندرية العجمي البيطاش ش مسجد الهدي الاندلس والحجاز عمارة 2",cod_amount:190,status:"delivered",collected_amount:190,courier_id:"a0000000-0000-0000-0000-000000000001"},
-      {id:"2",tracking_code:"12258",recipient_name:"شروق",recipient_phone:"01059947327",delivery_address:"شارع العوامي خلف مدرسة العجمي النموذجية عمارة سنتر الفيروز",cod_amount:610,status:"returned",collected_amount:0,courier_id:"a0000000-0000-0000-0000-000000000001"},
-      {id:"3",tracking_code:"12282",recipient_name:"فيلوباتير",recipient_phone:"01507992457",delivery_address:"105 ش المكس القباري - اسكندرية",cod_amount:610,status:"out_for_delivery",collected_amount:0,courier_id:"a0000000-0000-0000-0000-000000000001"}
-    ];
-
-    function gc(){try{return JSON.parse(localStorage.getItem('am_c'))||DEF;}catch{return DEF;}}
-    function sc(l){localStorage.setItem('am_c',JSON.stringify(l));rc();}
-    function gu(){try{return JSON.parse(localStorage.getItem('am_u'))||{role:'admin',name:'المدير'};}catch{return{role:'admin',name:'المدير'};}}
-    function su(u){localStorage.setItem('am_u',JSON.stringify(u));au();}
-
-    function opM(id){document.getElementById(id).style.display='flex';}
-    function clsM(id){document.getElementById(id).style.display='none';}
-
-    function rc(){
-      const cs = gc();
-      let h = '<option value="all">عرض كل المناديب</option>';
-      cs.forEach(c => { h += `<option value="${c.id}">${c.name}</option>`; });
-      document.getElementById('cF').innerHTML = h;
-      document.getElementById('xCr').innerHTML = h.replace('<option value="all">عرض كل المناديب</option>','');
-      document.getElementById('trCourier').innerHTML = h.replace('<option value="all">عرض كل المناديب</option>','');
-
-      let lh = '<option value="admin">👑 المدير (PIN: 1234)</option>';
-      cs.forEach(c => { lh += `<option value="${c.id}">🚴 ${c.name}</option>`; });
-      document.getElementById('lU').innerHTML = lh;
-
-      let ch = '';
-      cs.forEach(c => {
-        ch += `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #334155;">
-          <span>${c.name} (${c.pin})</span>
-          <button onclick="dlC('${c.id}')" style="color:#f87171;background:none;border:none;cursor:pointer;">حذف</button>
-        </div>`;
-      });
-      document.getElementById('cL').innerHTML = ch;
-    }
-
-    function au(){
-      const u = gu();
-      document.getElementById('uN').innerText = (u.role==='admin'?'👑 المدير':'🚴 '+u.name);
-      const isA = (u.role==='admin');
-      document.getElementById('bAdm').style.display = isA?'inline-block':'none';
-      document.getElementById('bDemo').style.display = isA?'inline-block':'none';
-      document.getElementById('bXls').style.display = isA?'inline-block':'none';
-      const f = document.getElementById('cF');
-      if(u.role==='courier'){
-        f.value = u.id;
-        f.disabled = true;
-        if(navigator.geolocation){
-          navigator.geolocation.getCurrentPosition(p=>{
-            const locs = JSON.parse(localStorage.getItem('am_locs')||'{}');
-            locs[u.id] = { name: u.name, lat: p.coords.latitude, lng: p.coords.longitude, t: new Date().toLocaleTimeString('ar-EG') };
-            localStorage.setItem('am_locs', JSON.stringify(locs));
-          });
-        }
-      } else {
-        f.disabled = false;
-      }
-    }
-
-    function rnd(){
-      const q = (document.getElementById('q').value||'').trim().toLowerCase();
-      const u = gu(), cf = document.getElementById('cF');
-      const cid = (u.role==='courier' ? u.id : (cf ? cf.value : 'all'));
-      const isA = (u.role === 'admin');
-
-      const arr = raw.filter(s => {
-        const mQ = !q || (String(s.tracking_code||'').toLowerCase().includes(q) || String(s.recipient_name||'').toLowerCase().includes(q) || String(s.delivery_address||'').toLowerCase().includes(q) || String(s.recipient_phone||'').includes(q));
-        const mC = (cid === 'all' || s.courier_id === cid);
-        return mQ && mC;
-      });
-
-      const el = document.getElementById('lst');
-      if(!arr.length){
-        el.innerHTML = '<p style="text-align:center;color:var(--m);margin-top:25px;">لا توجد شحنات.</p>';
-        document.getElementById('kC').innerText = 0;
-        document.getElementById('kM').innerText = '0 ج.م';
-        return;
-      }
-
-      let c = 0, m = 0, h = '';
-      arr.forEach((s, i) => {
-        let am = 0;
-        if(s.status === 'delivered') am = Number(s.collected_amount!=null ? s.collected_amount : s.cod_amount);
-        else if(s.status === 'shipping_only') am = Number(s.collected_amount!=null ? s.collected_amount : 75);
-        else if(s.status === 'partial') am = Number(s.collected_amount || 0);
-
-        if(['delivered','partial','shipping_only'].includes(s.status)){ c++; m += am; }
-
-        const ph = String(s.recipient_phone||'').replace(/[^0-9]/g,'');
-        const wa = ph ? `https://wa.me/2${ph}?text=${encodeURIComponent('السلام عليكم أستاذ '+s.recipient_name+'، بخصوص شحنتك رقم ('+s.tracking_code+') والمطلوب '+s.cod_amount+' ج.م')}` : '#';
-        
-        let stBadge = s.status === 'delivered' ? 'تم التسليم ✓' :
-                      s.status === 'partial' ? 'استلام جزئي' :
-                      s.status === 'shipping_only' ? `شحن (${am}ج)` :
-                      s.status === 'rescheduled' ? `مؤجل: ${s.rescheduled_date||''}` :
-                      s.status === 'returned' ? 'مرتجع ✕' : 'قيد التوصيل';
-
-        h += `<div class="card">
-          <div style="display:flex;justify-content:space-between;font-weight:bold;margin-bottom:4px;">
-            <span style="color:#38bdf8;">#${i+1} 🏷️ ${s.tracking_code||''}</span>
-            <span style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:#334155;">${stBadge}</span>
-          </div>
-          <div style="font-weight:600;">${s.recipient_name||''}</div>
-          <div style="font-size:0.75rem;color:var(--m);margin:2px 0;">${s.delivery_address||''}</div>
-          <div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.25);padding:4px 8px;border-radius:4px;margin:6px 0;font-size:0.8rem;">
-            <span>المطلوب: <b>${s.cod_amount||0}ج</b></span>
-            <span>المحصل: <b style="color:#38bdf8;">${am}ج</b></span>
-          </div>
-          <div class="acts">
-            <a href="tel:${s.recipient_phone}" class="btn-a">📞 اتصال</a>
-            <a href="${wa}" target="_blank" class="btn-a" style="background:rgba(37,211,102,0.15);border-color:#25d366;color:#25d366;">💬 واتساب</a>
-            <a href="https://maps.google.com/?q=${encodeURIComponent(s.delivery_address||'')}" target="_blank" class="btn-a">🗺️ خريطة</a>
-          </div>
-          <div class="st-g">
-            <button class="btn-s" style="background:var(--s);grid-column:span 2;" onclick="upS('${s.id}','delivered',${s.cod_amount})">تم التسليم كامل ✓</button>
-            <button class="btn-s" style="background:#8b5cf6;" onclick="opP('${s.id}')">استلام جزئي</button>
-            <button class="btn-s" style="background:#0d9488;" onclick="opShp('${s.id}')">شحن فقط 🚚</button>
-            <button class="btn-s" style="background:var(--w);" onclick="opR('${s.id}')">تأجيل 📅</button>
-            <button class="btn-s" style="background:var(--d);" onclick="upS('${s.id}','returned',0)">مرتجع ✕</button>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #334155;padding-top:6px;margin-top:6px;font-size:0.75rem;">
-            <span>خط السير</span>
-            <div>
-              <button style="background:#334155;border:1px solid #334155;color:#fff;width:30px;height:26px;border-radius:4px;" onclick="mv('${s.id}',-1)">⬆️</button>
-              <button style="background:#334155;border:1px solid #334155;color:#fff;width:30px;height:26px;border-radius:4px;" onclick="mv('${s.id}',1)">⬇️</button>
-            </div>
-          </div>
-          ${isA ? `
-          <div class="adm-bar">
-            <button class="btn-adm" style="background:#0284c7;" onclick="opTr('${s.id}')">🔄 تحويل لمندوب</button>
-            <button class="btn-adm" style="background:#b91c1c;" onclick="delS('${s.id}')">🗑️ حذف</button>
-          </div>` : ''}
-        </div>`;
-      });
-
-      el.innerHTML = h;
-      document.getElementById('kC').innerText = c;
-      document.getElementById('kM').innerText = m + ' ج.م';
-    }
-
-    function upS(id, st, amt, ex={}){
-      const it = raw.find(x => x.id === id);
-      if(it){
-        it.status = st;
-        it.collected_amount = amt;
-        if(ex.rescheduled_date !== undefined) it.rescheduled_date = ex.rescheduled_date;
-        rnd();
-      }
-    }
-
-    // شحن بمبلغ مخصص
-    function opShp(id){
-      document.getElementById('shpId').value = id;
-      document.getElementById('shpAmt').value = 75;
-      opM('mShp');
-    }
-    function svShp(){
-      const id = document.getElementById('shpId').value;
-      const amt = Number(document.getElementById('shpAmt').value) || 0;
-      clsM('mShp');
-      upS(id, 'shipping_only', amt);
-    }
-
-    // استلام جزئي
-    function opP(id){
-      document.getElementById('pI').value = id;
-      document.getElementById('pA').value = '';
-      opM('mP');
-    }
-    function svP(){
-      const id = document.getElementById('pI').value;
-      const a = Number(document.getElementById('pA').value);
-      if(isNaN(a) || a < 0) return alert('مبلغ غير صحيح');
-      clsM('mP');
-      upS(id, 'partial', a);
-    }
-
-    // تأجيل
-    function opR(id){
-      document.getElementById('rI').value = id;
-      document.getElementById('rD').value = '';
-      opM('mR');
-    }
-    function svR(){
-      const id = document.getElementById('rI').value;
-      const d = document.getElementById('rD').value;
-      if(!d) return alert('حدد التاريخ');
-      clsM('mR');
-      upS(id, 'rescheduled', 0, {rescheduled_date: d});
-    }
-
-    // تحويل لمندوب
-    function opTr(id){
-      document.getElementById('trId').value = id;
-      opM('mTr');
-    }
-    function svTr(){
-      const id = document.getElementById('trId').value;
-      const tCid = document.getElementById('trCourier').value;
-      clsM('mTr');
-      const it = raw.find(x => x.id === id);
-      if(it) it.courier_id = tCid;
-      alert('تم تحويل الشحنة بنجاح!');
-      rnd();
-    }
-
-    // حذف شحنة
-    function delS(id){
-      if(!confirm('هل تريد حذف هذه الشحنة نهائياً؟')) return;
-      raw = raw.filter(s => s.id !== id);
-      rnd();
-    }
-
-    // ترتيب خط السير
-    function mv(id, dir){
-      const i = raw.findIndex(s => s.id === id);
-      if(i < 0 || i + dir < 0 || i + dir >= raw.length) return;
-      const it = raw.splice(i, 1)[0];
-      raw.splice(i + dir, 0, it);
-      rnd();
-    }
-
-    // باركود
-    function opScan(){
-      const code = prompt
+      
