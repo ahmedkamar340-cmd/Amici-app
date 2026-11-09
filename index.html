@@ -10,7 +10,7 @@
     header{background:var(--c);padding:10px;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:50;}
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
     .btns{display:flex;gap:4px;overflow-x:auto;}
-    .btn-h{background:#334155;border:1px solid #475569;color:#fff;padding:5px 8px;border-radius:5px;font-size:0.72rem;cursor:pointer;white-space:nowrap;}
+    .btn-h{background:#334155;border:1px solid #475569;color:#fff;padding:5px 8px;border-radius:5px;font-size:0.72rem;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;}
     .s-in{width:100%;background:#0f172a;color:#fff;border:1px solid var(--b);padding:7px;border-radius:6px;font-size:0.8rem;outline:none;margin-bottom:6px;}
     .g2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
     .sel-b{background:rgba(0,0,0,0.25);padding:5px;border-radius:6px;border:1px solid var(--b);}
@@ -26,7 +26,6 @@
     .btn-adm{flex:1;background:#334155;border:1px solid var(--b);color:#fff;padding:5px;border-radius:4px;font-size:0.72rem;cursor:pointer;}
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;justify-content:center;align-items:center;padding:12px;}
     .m-box{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:350px;padding:12px;}
-    #scanner-video{width:100%;border-radius:6px;background:#000;display:block;}
   </style>
 </head>
 <body>
@@ -34,7 +33,11 @@
     <div class="top">
       <h1 style="font-size:0.95rem;color:#38bdf8;">أميتشي <span id="uN" style="font-size:0.72rem;color:#fff;">👑 المدير</span></h1>
       <div class="btns">
-        <button class="btn-h" style="background:#0284c7;" onclick="openScanner()">📷 باركود</button>
+        <!-- كاميرا الباركود المباشرة عبر الموبايل بدون تعليق -->
+        <label class="btn-h" style="background:#0284c7;margin:0;">
+          📷 باركود
+          <input type="file" accept="image/*" capture="environment" id="camIn" style="display:none;" onchange="handleScan(this)">
+        </label>
         <button class="btn-h" style="background:#059669;" id="bXls" onclick="opM('mX')">📁 شيت</button>
         <button class="btn-h" style="background:#8b5cf6;" id="bDemo" onclick="addSampleOrders()">⚡ بوالص</button>
         <button class="btn-h" style="background:#0284c7;" onclick="opLoc()">📍 المناديب</button>
@@ -46,7 +49,12 @@
     <div class="g2">
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">المندوب:</label>
-        <select id="cF" class="c-in" onchange="rnd()"></select>
+        <select id="cF" class="c-in" onchange="rnd()">
+          <option value="all">عرض كل المناديب</option>
+          <option value="a0000000-0000-0000-0000-000000000001" selected>أحمد</option>
+          <option value="c-biko-01">بيكو</option>
+          <option value="a0000000-0000-0000-0000-000000000004">مينا عبد النور</option>
+        </select>
       </div>
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">الوردية:</label>
@@ -61,18 +69,6 @@
   </div>
 
   <div id="lst"></div>
-
-  <!-- كاميرا الباركود -->
-  <div class="modal" id="mScanner">
-    <div class="m-box">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-        <b>📷 مسح باركود الشحنة</b>
-        <span style="cursor:pointer;font-size:1.2rem;" onclick="closeScanner()">✕</span>
-      </div>
-      <video id="scanner-video" playsinline></video>
-      <p style="text-align:center;font-size:0.72rem;color:var(--m);margin-top:6px;">وجه الكاميرا نحو باركود البوليصة</p>
-    </div>
-  </div>
 
   <!-- شحن بمبلغ مخصص -->
   <div class="modal" id="mShp">
@@ -162,9 +158,7 @@
     const DEF = [
       {id:"a0000000-0000-0000-0000-000000000001",name:"أحمد",pin:"1234"},
       {id:"c-biko-01",name:"بيكو",pin:"1234"},
-      {id:"a0000000-0000-0000-0000-000000000004",name:"مينا عبد النور",pin:"1111"},
-      {id:"a0000000-0000-0000-0000-000000000002",name:"محمد محمود",pin:"2222"},
-      {id:"a0000000-0000-0000-0000-000000000003",name:"إسلام فتحي",pin:"3333"}
+      {id:"a0000000-0000-0000-0000-000000000004",name:"مينا عبد النور",pin:"1111"}
     ];
 
     let raw = [
@@ -214,13 +208,6 @@
       if(u.role==='courier'){
         f.value = u.id;
         f.disabled = true;
-        if(navigator.geolocation){
-          navigator.geolocation.getCurrentPosition(p=>{
-            const locs = JSON.parse(localStorage.getItem('am_locs')||'{}');
-            locs[u.id] = { name: u.name, lat: p.coords.latitude, lng: p.coords.longitude, t: new Date().toLocaleTimeString('ar-EG') };
-            localStorage.setItem('am_locs', JSON.stringify(locs));
-          });
-        }
       } else {
         f.disabled = false;
       }
@@ -260,8 +247,7 @@
         
         let stBadge = s.status === 'delivered' ? 'تم التسليم ✓' :
                       s.status === 'partial' ? 'استلام جزئي' :
-                      s.status === 'shipping_only' ? `شحن (${am}ج)` :
-                      s.status === 'rescheduled' ? `مؤجل: ${s.rescheduled_date||''}` :
+                      s.status === 'shipping_only' ? `شحن (${am}ج)` : s.status === 'rescheduled' ? `مؤجل: ${s.rescheduled_date||''}` :
                       s.status === 'returned' ? 'مرتجع ✕' : 'قيد التوصيل';
 
         h += `<div class="card">
@@ -290,82 +276,5 @@
           <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px dashed #334155;padding-top:6px;margin-top:6px;font-size:0.75rem;">
             <span>خط السير</span>
             <div>
-              <button style="background:#334155;border:1px solid #334155;color:#fff;width:30px;height:26px;border-radius:4px;" onclick="mv('${s.id}',-1)">⬆️</button>
-              <button style="background:#334155;border:1px solid #334155;color:#fff;width:30px;height:26px;border-radius:4px;" onclick="mv('${s.id}',1)">⬇️</button>
-            </div>
-          </div>
-          ${isA ? `
-          <div class="adm-bar">
-            <button class="btn-adm" style="background:#0284c7;" onclick="opTr('${s.id}')">🔄 تحويل لمندوب</button>
-            <button class="btn-adm" style="background:#b91c1c;" onclick="delS('${s.id}')">🗑️ حذف</button>
-          </div>` : ''}
-        </div>`;
-      });
-
-      el.innerHTML = h;
-      document.getElementById('kC').innerText = c;
-      document.getElementById('kM').innerText = m + ' ج.م';
-    }
-
-    function upS(id, st, amt, ex={}){
-      const it = raw.find(x => x.id === id);
-      if(it){
-        it.status = st;
-        it.collected_amount = amt;
-        if(ex.rescheduled_date !== undefined) it.rescheduled_date = ex.rescheduled_date;
-        rnd();
-      }
-    }
-
-    // شحن بمبلغ مخصص
-    function opShp(id){
-      document.getElementById('shpId').value = id;
-      document.getElementById('shpAmt').value = 75;
-      opM('mShp');
-    }
-    function svShp(){
-      const id = document.getElementById('shpId').value;
-      const amt = Number(document.getElementById('shpAmt').value) || 0;
-      clsM('mShp');
-      upS(id, 'shipping_only', amt);
-    }
-
-    // استلام جزئي
-    function opP(id){
-      document.getElementById('pI').value = id;
-      document.getElementById('pA').value = '';
-      opM('mP');
-    }
-    function svP(){
-      const id = document.getElementById('pI').value;
-      const a = Number(document.getElementById('pA').value);
-      if(isNaN(a) || a < 0) return alert('مبلغ غير صحيح');
-      clsM('mP');
-      upS(id, 'partial', a);
-    }
-
-    // تأجيل
-    function opR(id){
-      document.getElementById('rI').value = id;
-      document.getElementById('rD').value = '';
-      opM('mR');
-    }
-    function svR(){
-      const id = document.getElementById('rI').value;
-      const d = document.getElementById('rD').value;
-      if(!d) return alert('حدد التاريخ');
-      clsM('mR');
-      upS(id, 'rescheduled', 0, {rescheduled_date: d});
-    }
-
-    // تحويل
-    function opTr(id){
-      document.getElementById('trId').value = id;
-      opM('mTr');
-    }
-    function svTr(){
-      const id = document.getElementById('trId').value;
-      const tCid = document.getElementById('trCourier').value;
-      clsM('mTr');
-      const it = raw.find(x => x.id === id);
+              <button style="background:#334155;border:1px solid #334155;color:#fff;
       
