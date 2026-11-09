@@ -93,6 +93,7 @@
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📅 تأجيل الشحنة</b><span style="cursor:pointer;" onclick="clsM('mR')">✕</span></div>
       <input type="hidden" id="rI">
+      <label style="font-size:0.75rem;color:var(--m);">تأجيل إلى يوم:</label>
       <input type="date" id="rD" class="c-in" style="margin:6px 0 10px;">
       <button class="btn-s" style="background:var(--w);width:100%;" onclick="svR()">حفظ التأجيل</button>
     </div>
@@ -102,6 +103,7 @@
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔄 تحويل الشحنة</b><span style="cursor:pointer;" onclick="clsM('mTr')">✕</span></div>
       <input type="hidden" id="trId">
+      <label style="font-size:0.75rem;color:var(--m);">اختر المندوب الجديد:</label>
       <select id="trCourier" class="c-in" style="margin:6px 0 10px;"></select>
       <button class="btn-s" style="background:#0284c7;width:100%;" onclick="svTr()">تحويل الآن ➜</button>
     </div>
@@ -200,12 +202,12 @@
     function rnd(){
       const q = (document.getElementById('q').value||'').trim().toLowerCase();
       const u = gu(), cf = document.getElementById('cF');
-      const cid = (u.role==='courier' ? u.id : (cf ? cf.value : 'all'));
+      const cid = (u.role==='courier' ? u.id : (cf && cf.value ? cf.value : 'a0000000-0000-0000-0000-000000000001'));
       const isA = (u.role === 'admin');
 
       const list = raw.filter(s => {
         const mQ = !q || (String(s.tracking_code||'').toLowerCase().includes(q) || String(s.recipient_name||'').toLowerCase().includes(q) || String(s.delivery_address||'').toLowerCase().includes(q) || String(s.recipient_phone||'').includes(q));
-        const mC = (cid === 'all' || s.courier_id === cid);
+        const mC = (cid === 'all' || s.courier_id === cid || !s.courier_id);
         return mQ && mC;
       });
 
@@ -265,7 +267,7 @@
         </div>`;
       });
 
-      document.getElementById('lst').innerHTML = h || '<p style="text-align:center;color:var(--m);margin-top:20px;">لا توجد شحنات لهذا المندوب.</p>';
+      document.getElementById('lst').innerHTML = h || '<p style="text-align:center;color:var(--m);margin-top:20px;">لا توجد شحنات مسجلة لهذا المندوب.</p>';
       document.getElementById('kC').innerText = done;
       document.getElementById('kM').innerText = money + ' ج.م';
     }
@@ -276,7 +278,7 @@
         it.status = st;
         it.collected_amount = amt;
         Object.assign(it, extra);
-        saveStore(raw); // تثبيت وحفظ فوري
+        saveStore(raw); // تثبيت فوري في الذاكرة
         rnd();
       }
     }
@@ -361,11 +363,4 @@
           const img = await createImageBitmap(file);
           const barcodes = await detector.detect(img);
           if(barcodes.length > 0){
-            document.getElementById('q').value = barcodes[0].rawValue.trim();
-            rnd();
-            return;
-          }
-        }catch(e){}
-      }
-      const c = prompt('أدخل كود الشحنة الممسوح:');
-      if(c){ document.getElementById('q').value =
+            document.g
