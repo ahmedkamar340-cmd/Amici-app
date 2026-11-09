@@ -49,9 +49,9 @@
         <label style="font-size:0.65rem;color:var(--m);">المندوب:</label>
         <select id="cF" class="c-in" onchange="rnd()">
           <option value="all">عرض كل المناديب</option>
-          <option value="a0000000-0000-0000-0000-000000000001" selected>أحمد</option>
-          <option value="c-biko-01">بيكو</option>
-          <option value="a0000000-0000-0000-0000-000000000004">مينا عبد النور</option>
+          <option value="ahmed" selected>أحمد</option>
+          <option value="biko">بيكو</option>
+          <option value="mina">مينا عبد النور</option>
         </select>
       </div>
       <div class="sel-b">
@@ -68,7 +68,7 @@
 
   <div id="lst"></div>
 
-  <!-- النوافذ -->
+  <!-- النوافذ المنبثقة -->
   <div class="modal" id="mShp">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🚚 تحصيل شحن فقط</b><span style="cursor:pointer;" onclick="clsM('mShp')">✕</span></div>
@@ -103,8 +103,9 @@
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔄 تحويل الشحنة</b><span style="cursor:pointer;" onclick="clsM('mTr')">✕</span></div>
       <input type="hidden" id="trId">
-      <label style="font-size:0.75rem;color:var(--m);">اختر المندوب الجديد:</label>
-      <select id="trCourier" class="c-in" style="margin:6px 0 10px;"></select>
+      <select id="trCourier" class="c-in" style="margin:6px 0 10px;">
+        <option value="ahmed">أحمد</option><option value="biko">بيكو</option><option value="mina">مينا عبد النور</option>
+      </select>
       <button class="btn-s" style="background:#0284c7;width:100%;" onclick="svTr()">تحويل الآن ➜</button>
     </div>
   </div>
@@ -113,98 +114,47 @@
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع وتخصيص شيت</b><span style="cursor:pointer;" onclick="clsM('mX')">✕</span></div>
       <label style="font-size:0.7rem;color:var(--m);">المندوب المخصص:</label>
-      <select id="xCr" class="c-in" style="margin-bottom:6px;"></select>
+      <select id="xCr" class="c-in" style="margin-bottom:6px;">
+        <option value="ahmed">أحمد</option><option value="biko">بيكو</option><option value="mina">مينا عبد النور</option>
+      </select>
       <input type="file" id="xf" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;">
       <button class="btn-s" style="background:var(--s);width:100%;" onclick="upX()">رفع وتثبيت الشحنات ⬆️</button>
     </div>
   </div>
 
   <div class="modal" id="mLoc"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📍 مواقع المناديب</b><span style="cursor:pointer;" onclick="clsM('mLoc')">✕</span></div><div id="locBody"></div></div></div>
-  <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"></select><input type="password" id="lP" class="c-in" placeholder="PIN (1234)"><button class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول</button></div></div>
-  <div class="modal" id="mC"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 إدارة المناديب</b><span style="cursor:pointer;" onclick="clsM('mC')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="اسم المندوب" style="margin-bottom:4px;"><input type="password" id="ncP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
+  <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"><option value="admin">👑 المدير</option><option value="ahmed">🚴 أحمد</option><option value="biko">🚴 بيكو</option></select><input type="password" id="lP" class="c-in" placeholder="PIN (1234)"><button class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول</button></div></div>
+  <div class="modal" id="mC"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 إدارة المناديب</b><span style="cursor:pointer;" onclick="clsM('mC')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="اسم المندوب" style="margin-bottom:4px;"><button class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
 
   <script>
-    const DEF_C = [
-      {id:"a0000000-0000-0000-0000-000000000001",name:"أحمد",pin:"1234"},
-      {id:"c-biko-01",name:"بيكو",pin:"1234"},
-      {id:"a0000000-0000-0000-0000-000000000004",name:"مينا عبد النور",pin:"1111"}
+    const INITIAL_SHIPMENTS = [
+      { id:"1", tracking_code:"7791", recipient_name:"Demyana Botros Zachary", recipient_phone:"01001232790", delivery_address:"الاسكندرية العجمي البيطاش ش مسجد الهدي الاندلس والحجاز عمارة 2", cod_amount:190, status:"delivered", collected_amount:190, courier_id:"ahmed", date:"2026-11-08" },
+      { id:"2", tracking_code:"12258", recipient_name:"شروق", recipient_phone:"01059947327", delivery_address:"شارع العوامي خلف مدرسة العجمي النموذجية عمارة سنتر الفيروز", cod_amount:610, status:"returned", collected_amount:0, courier_id:"ahmed", date:"2026-11-08" },
+      { id:"3", tracking_code:"12282", recipient_name:"فيلوباتير", recipient_phone:"01507992457", delivery_address:"105 ش المكس القباري - اسكندرية", cod_amount:610, status:"out_for_delivery", collected_amount:0, courier_id:"ahmed", date:"2026-11-08" }
     ];
-
-    const DEF_S = [
-      { id:"1", tracking_code:"7791", recipient_name:"Demyana Botros Zachary", recipient_phone:"01001232790", delivery_address:"الاسكندرية العجمي البيطاش ش مسجد الهدي الاندلس والحجاز عمارة 2", cod_amount:190, status:"delivered", collected_amount:190, courier_id:"a0000000-0000-0000-0000-000000000001" },
-      { id:"2", tracking_code:"12258", recipient_name:"شروق", recipient_phone:"01059947327", delivery_address:"شارع العوامي خلف مدرسة العجمي النموذجية عمارة سنتر الفيروز", cod_amount:610, status:"returned", collected_amount:0, courier_id:"a0000000-0000-0000-0000-000000000001" },
-      { id:"3", tracking_code:"12282", recipient_name:"فيلوباتير", recipient_phone:"01507992457", delivery_address:"105 ش المكس القباري - اسكندرية", cod_amount:610, status:"out_for_delivery", collected_amount:0, courier_id:"a0000000-0000-0000-0000-000000000001" }
-    ];
-
-    function gc(){ try{ return JSON.parse(localStorage.getItem('am_c')) || DEF_C; }catch{ return DEF_C; } }
-    function sc(l){ localStorage.setItem('am_c', JSON.stringify(l)); rc(); }
 
     function getStore(){
       try{
-        const saved = JSON.parse(localStorage.getItem('am_shipments_store'));
+        const saved = JSON.parse(localStorage.getItem('am_shipments_store_v2'));
         if(Array.isArray(saved) && saved.length > 0) return saved;
       }catch{}
-      return DEF_S;
+      return INITIAL_SHIPMENTS;
     }
     function saveStore(list){
-      localStorage.setItem('am_shipments_store', JSON.stringify(list));
+      localStorage.setItem('am_shipments_store_v2', JSON.stringify(list));
     }
 
     let raw = getStore();
     let actId = null;
 
-    function gu(){ try{ return JSON.parse(localStorage.getItem('am_u')) || {role:'admin',name:'المدير'}; }catch{ return {role:'admin',name:'المدير'}; } }
-    function su(u){ localStorage.setItem('am_u', JSON.stringify(u)); au(); }
-
     function opM(id){ document.getElementById(id).style.display = 'flex'; }
     function clsM(id){ document.getElementById(id).style.display = 'none'; }
 
-    function rc(){
-      const cs = gc();
-      let h = '<option value="all">عرض كل المناديب</option>';
-      cs.forEach(c => { h += `<option value="${c.id}">${c.name}</option>`; });
-      document.getElementById('cF').innerHTML = h;
-      document.getElementById('cF').value = "a0000000-0000-0000-0000-000000000001";
-
-      const optOnly = h.replace('<option value="all">عرض كل المناديب</option>','');
-      document.getElementById('xCr').innerHTML = optOnly;
-      document.getElementById('trCourier').innerHTML = optOnly;
-
-      let lh = '<option value="admin">👑 المدير (PIN: 1234)</option>';
-      cs.forEach(c => { lh += `<option value="${c.id}">🚴 ${c.name}</option>`; });
-      document.getElementById('lU').innerHTML = lh;
-
-      let ch = '';
-      cs.forEach(c => {
-        ch += `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #334155;">
-          <span>${c.name} (${c.pin})</span>
-          <button onclick="dlC('${c.id}')" style="color:#f87171;background:none;border:none;cursor:pointer;">حذف</button>
-        </div>`;
-      });
-      document.getElementById('cL').innerHTML = ch;
-    }
-
-    function au(){
-      const u = gu();
-      document.getElementById('uN').innerText = (u.role==='admin'?'👑 المدير':'🚴 '+u.name);
-      const isA = (u.role==='admin');
-      document.getElementById('bAdm').style.display = isA?'inline-block':'none';
-      document.getElementById('bXls').style.display = isA?'inline-block':'none';
-      const f = document.getElementById('cF');
-      if(u.role==='courier'){
-        f.value = u.id;
-        f.disabled = true;
-      } else {
-        f.disabled = false;
-      }
-    }
-
     function rnd(){
       const q = (document.getElementById('q').value||'').trim().toLowerCase();
-      const u = gu(), cf = document.getElementById('cF');
-      const cid = (u.role==='courier' ? u.id : (cf && cf.value ? cf.value : 'a0000000-0000-0000-0000-000000000001'));
-      const isA = (u.role === 'admin');
+      const cid = document.getElementById('cF').value;
 
+      // مطابقة شحنات المندوب
       const list = raw.filter(s => {
         const mQ = !q || (String(s.tracking_code||'').toLowerCase().includes(q) || String(s.recipient_name||'').toLowerCase().includes(q) || String(s.delivery_address||'').toLowerCase().includes(q) || String(s.recipient_phone||'').includes(q));
         const mC = (cid === 'all' || s.courier_id === cid || !s.courier_id);
@@ -259,15 +209,14 @@
               <button style="background:#334155;border:1px solid #334155;color:#fff;width:30px;height:26px;border-radius:4px;" onclick="mv('${s.id}',1)">⬇️</button>
             </div>
           </div>
-          ${isA ? `
           <div class="adm-bar">
             <button class="btn-adm" style="background:#0284c7;" onclick="opTr('${s.id}')">🔄 تحويل لمندوب</button>
             <button class="btn-adm" style="background:#b91c1c;" onclick="delS('${s.id}')">🗑️ حذف</button>
-          </div>` : ''}
+          </div>
         </div>`;
       });
 
-      document.getElementById('lst').innerHTML = h || '<p style="text-align:center;color:var(--m);margin-top:20px;">لا توجد شحنات مسجلة لهذا المندوب.</p>';
+      document.getElementById('lst').innerHTML = h || '<p style="text-align:center;color:var(--m);margin-top:20px;">لا توجد شحنات لهذا المندوب.</p>';
       document.getElementById('kC').innerText = done;
       document.getElementById('kM').innerText = money + ' ج.م';
     }
@@ -278,7 +227,7 @@
         it.status = st;
         it.collected_amount = amt;
         Object.assign(it, extra);
-        saveStore(raw); // تثبيت فوري في الذاكرة
+        saveStore(raw); // تثبيت فوري في ذاكرة الجهاز
         rnd();
       }
     }
@@ -339,7 +288,7 @@
     }
 
     function delS(id){
-      if(!confirm('هل تريد حذف هذه الشحنة نهائياً؟')) return;
+      if(!confirm('هل تريد حذف هذه الشحنة؟')) return;
       raw = raw.filter(x => String(x.id) !== String(id));
       saveStore(raw);
       rnd();
@@ -363,4 +312,60 @@
           const img = await createImageBitmap(file);
           const barcodes = await detector.detect(img);
           if(barcodes.length > 0){
-            document.g
+            document.getElementById('q').value = barcodes[0].rawValue.trim();
+            rnd();
+            return;
+          }
+        }catch(e){}
+      }
+      const c = prompt('أدخل كود الشحنة للبحث:');
+      if(c){ document.getElementById('q').value = c.trim(); rnd(); }
+    }
+
+    function opLoc(){
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(p => {
+          document.getElementById('locBody').innerHTML = `<p style="margin-bottom:8px;">موقع المندوب أحمد متصل الآن:</p><a href="https://maps.google.com/?q=${p.coords.latitude},${p.coords.longitude}" target="_blank" style="color:#25d366;text-decoration:none;">🗺️ فتح الموقع على خرائط جوجل</a>`;
+          opM('mLoc');
+        }, () => { alert('يرجى تفعيل GPS على الهاتف أولاً.'); });
+      }
+    }
+
+    function lgn(){
+      const v = document.getElementById('lU').value;
+      document.getElementById('uN').innerText = (v==='admin'?'👑 المدير':'🚴 '+v);
+      document.getElementById('cF').value = (v==='admin'?'all':v);
+      clsM('mL'); rnd();
+    }
+
+    function opC(){ opM('mC'); }
+    function addC(){
+      const n = document.getElementById('ncN').value.trim();
+      if(!n) return;
+      const opt = document.createElement('option');
+      opt.value = n; opt.text = n;
+      document.getElementById('cF').add(opt);
+      document.getElementById('cL').innerHTML += `<div style="padding:4px 0;">🚴 ${n}</div>`;
+      document.getElementById('ncN').value = '';
+    }
+
+    function upX(){
+      const fi = document.getElementById('xf');
+      if(!fi.files.length) return alert('اختر ملف CSV أولاً');
+      const f = fi.files[0], cid = document.getElementById('xCr').value;
+      const rd = new FileReader();
+      rd.onload = function(e){
+        const rows = e.target.result.split(/\r?\n/).filter(r=>r.trim());
+        let count = 0;
+        for(let i=1; i<rows.length; i++){
+          const c = rows[i].split(',');
+          if(c.length >= 4){
+            raw.push({
+              id: 'imp-'+Date.now()+'-'+i,
+              tracking_code: c[0].replace(/["']/g,'').trim(),
+              recipient_name: c[1].replace(/["']/g,'').trim(),
+              recipient_phone: c[2].replace(/["']/g,'').trim(),
+              delivery_address: c[3].replace(/["']/g,'').trim(),
+              cod_amount: Number(c[4]) || 0,
+              courier_id: cid,
+    
