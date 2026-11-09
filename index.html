@@ -47,7 +47,12 @@
     <div class="g2">
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">المندوب:</label>
-        <select id="cF" class="c-in" onchange="rnd()"></select>
+        <select id="cF" class="c-in" onchange="rnd()">
+          <option value="all">عرض كل المناديب</option>
+          <option value="a0000000-0000-0000-0000-000000000001" selected>أحمد</option>
+          <option value="c-biko-01">بيكو</option>
+          <option value="a0000000-0000-0000-0000-000000000004">مينا عبد النور</option>
+        </select>
       </div>
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">الوردية:</label>
@@ -88,7 +93,6 @@
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📅 تأجيل الشحنة</b><span style="cursor:pointer;" onclick="clsM('mR')">✕</span></div>
       <input type="hidden" id="rI">
-      <label style="font-size:0.75rem;color:var(--m);">تأجيل إلى يوم:</label>
       <input type="date" id="rD" class="c-in" style="margin:6px 0 10px;">
       <button class="btn-s" style="background:var(--w);width:100%;" onclick="svR()">حفظ التأجيل</button>
     </div>
@@ -98,7 +102,6 @@
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔄 تحويل الشحنة</b><span style="cursor:pointer;" onclick="clsM('mTr')">✕</span></div>
       <input type="hidden" id="trId">
-      <label style="font-size:0.75rem;color:var(--m);">اختر المندوب الجديد:</label>
       <select id="trCourier" class="c-in" style="margin:6px 0 10px;"></select>
       <button class="btn-s" style="background:#0284c7;width:100%;" onclick="svTr()">تحويل الآن ➜</button>
     </div>
@@ -262,7 +265,7 @@
         </div>`;
       });
 
-      document.getElementById('lst').innerHTML = h || '<p style="text-align:center;color:var(--m);margin-top:20px;">لا توجد شحنات.</p>';
+      document.getElementById('lst').innerHTML = h || '<p style="text-align:center;color:var(--m);margin-top:20px;">لا توجد شحنات لهذا المندوب.</p>';
       document.getElementById('kC').innerText = done;
       document.getElementById('kM').innerText = money + ' ج.م';
     }
@@ -273,7 +276,7 @@
         it.status = st;
         it.collected_amount = amt;
         Object.assign(it, extra);
-        saveStore(raw); // تثبيت وحفظ دائم فوري
+        saveStore(raw); // تثبيت وحفظ فوري
         rnd();
       }
     }
@@ -365,9 +368,4 @@
         }catch(e){}
       }
       const c = prompt('أدخل كود الشحنة الممسوح:');
-      if(c){ document.getElementById('q').value = c.trim(); rnd(); }
-    }
-
-    function opLoc(){
-      if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(p 
+      if(c){ document.getElementById('q').value =
