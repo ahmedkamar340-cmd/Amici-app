@@ -6,8 +6,8 @@
   <title>أميتشي إكسبريس</title>
   <style>
     :root{--bg:#0f172a;--c:#1e293b;--b:#334155;--m:#94a3b8;--s:#16a34a;--w:#d97706;--d:#dc2626;}
-    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;}
-    body{background:var(--bg);color:#f8fafc;padding-bottom:85px;}
+    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;}
+    body{background:var(--bg);color:#f8fafc;padding-bottom:80px;}
     header{background:var(--c);padding:10px;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:50;}
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
     .btns{display:flex;gap:4px;overflow-x:auto;}
@@ -26,7 +26,7 @@
     .adm-bar{display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:1px dashed var(--b);}
     .btn-adm{flex:1;background:#334155;border:1px solid var(--b);color:#fff;padding:5px;border-radius:4px;font-size:0.72rem;cursor:pointer;}
     .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:100;justify-content:center;align-items:center;padding:12px;}
-    .m-box{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:350px;padding:12px;}
+    .m-box{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:340px;padding:12px;}
   </style>
 </head>
 <body>
@@ -40,7 +40,7 @@
         </label>
         <button type="button" class="btn-h" style="background:#059669;" onclick="opM('mX')">📁 شيت</button>
         <button type="button" class="btn-h" style="background:#0284c7;" onclick="opLoc()">📍 المناديب</button>
-        <button type="button" class="btn-h" id="bAdm" onclick="opC()">👥 مناديب</button>
+        <button type="button" class="btn-h" onclick="opM('mC')">👥 مناديب</button>
         <button type="button" class="btn-h" onclick="opM('mL')">🔄 حساب</button>
       </div>
     </div>
@@ -69,7 +69,7 @@
 
   <div id="lst"></div>
 
-  <!-- النوافذ المنبثقة -->
+  <!-- النوافذ -->
   <div class="modal" id="mShp">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🚚 تحصيل شحن فقط</b><span style="cursor:pointer;" onclick="clsM('mShp')">✕</span></div>
@@ -94,7 +94,6 @@
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📅 تأجيل الشحنة</b><span style="cursor:pointer;" onclick="clsM('mR')">✕</span></div>
       <input type="hidden" id="rI">
-      <label style="font-size:0.75rem;color:var(--m);">تأجيل إلى يوم:</label>
       <input type="date" id="rD" class="c-in" style="margin:6px 0 10px;">
       <button type="button" class="btn-s" style="background:var(--w);width:100%;" onclick="svR()">حفظ التأجيل</button>
     </div>
@@ -113,43 +112,37 @@
 
   <div class="modal" id="mX">
     <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع وتخصيص شيت</b><span style="cursor:pointer;" onclick="clsM('mX')">✕</span></div>
-      <label style="font-size:0.7rem;color:var(--m);">المندوب المخصص:</label>
-      <select id="xCr" class="c-in" style="margin-bottom:6px;">
-        <option value="ahmed">أحمد</option><option value="biko">بيكو</option><option value="mina">مينا عبد النور</option>
-      </select>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت</b><span style="cursor:pointer;" onclick="clsM('mX')">✕</span></div>
+      <select id="xCr" class="c-in" style="margin-bottom:6px;"><option value="ahmed">أحمد</option><option value="biko">بيكو</option></select>
       <input type="file" id="xf" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;">
-      <button type="button" class="btn-s" style="background:var(--s);width:100%;" onclick="upX()">رفع وتثبيت الشحنات ⬆️</button>
+      <button type="button" class="btn-s" style="background:var(--s);width:100%;" onclick="upX()">رفع الشحنات</button>
     </div>
   </div>
 
   <div class="modal" id="mLoc"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📍 مواقع المناديب</b><span style="cursor:pointer;" onclick="clsM('mLoc')">✕</span></div><div id="locBody"></div></div></div>
-  <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"><option value="admin">👑 المدير</option><option value="ahmed">🚴 أحمد</option><option value="biko">🚴 بيكو</option></select><input type="password" id="lP" class="c-in" placeholder="PIN (1234)"><button type="button" class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول</button></div></div>
-  <div class="modal" id="mC"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 إدارة المناديب</b><span style="cursor:pointer;" onclick="clsM('mC')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="اسم المندوب" style="margin-bottom:4px;"><button type="button" class="btn-s" style="background:var(--s);width:100%;margin:6px 0;" onclick="addC()">+ إضافة مندوب</button><div id="cL"></div></div></div>
+  <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"><option value="admin">👑 المدير</option><option value="ahmed">🚴 أحمد</option></select><button type="button" class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول</button></div></div>
+  <div class="modal" id="mC"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 المناديب</b><span style="cursor:pointer;" onclick="clsM('mC')">✕</span></div><input type="text" id="ncN" class="c-in" placeholder="اسم المندوب" style="margin-bottom:4px;"><button type="button" class="btn-s" style="background:var(--s);width:100%;" onclick="addC()">+ إضافة</button><div id="cL" style="margin-top:6px;"></div></div></div>
 
   <script>
-    const INITIAL_ORDERS = [
+    const DEFAULT_SHIPMENTS = [
       { id:"1", tracking_code:"7791", recipient_name:"Demyana Botros Zachary", recipient_phone:"01001232790", delivery_address:"الاسكندرية العجمي البيطاش ش مسجد الهدي الاندلس والحجاز عمارة 2", cod_amount:190, status:"delivered", collected_amount:190, courier_id:"ahmed" },
       { id:"2", tracking_code:"12258", recipient_name:"شروق", recipient_phone:"01059947327", delivery_address:"شارع العوامي خلف مدرسة العجمي النموذجية عمارة سنتر الفيروز", cod_amount:610, status:"returned", collected_amount:0, courier_id:"ahmed" },
       { id:"3", tracking_code:"12282", recipient_name:"فيلوباتير", recipient_phone:"01507992457", delivery_address:"105 ش المكس القباري - اسكندرية", cod_amount:610, status:"out_for_delivery", collected_amount:0, courier_id:"ahmed" }
     ];
 
-    function loadData(){
-      try{
-        const saved = JSON.parse(localStorage.getItem('am_orders_v4'));
-        if(Array.isArray(saved) && saved.length > 0) return saved;
-      }catch(e){}
-      localStorage.setItem('am_orders_v4', JSON.stringify(INITIAL_ORDERS));
-      return INITIAL_ORDERS;
+    let raw = [];
+    try {
+      const stored = localStorage.getItem('am_active_orders_clean');
+      if (stored) {
+        raw = JSON.parse(stored);
+      }
+    } catch(e) {}
+    if (!Array.isArray(raw) || raw.length === 0) {
+      raw = JSON.parse(JSON.stringify(DEFAULT_SHIPMENTS));
+      localStorage.setItem('am_active_orders_clean', JSON.stringify(raw));
     }
 
-    function saveData(data){
-      localStorage.setItem('am_orders_v4', JSON.stringify(data));
-    }
-
-    let raw = loadData();
     let actId = null;
-
     function opM(id){ document.getElementById(id).style.display = 'flex'; }
     function clsM(id){ document.getElementById(id).style.display = 'none'; }
 
@@ -230,7 +223,7 @@
         it.status = st;
         it.collected_amount = amt;
         Object.assign(it, extra);
-        saveData(raw);
+        localStorage.setItem('am_active_orders_clean', JSON.stringify(raw));
         rnd();
       }
     }
@@ -283,7 +276,7 @@
       const it = raw.find(x => String(x.id) === String(actId));
       if(it){
         it.courier_id = c;
-        saveData(raw);
+        localStorage.setItem('am_active_orders_clean', JSON.stringify(raw));
         alert('تم تحويل الشحنة بنجاح!');
       }
       clsM('mTr');
@@ -291,9 +284,9 @@
     }
 
     function delS(id){
-      if(!confirm('هل تريد حذف هذه الشحنة نهائياً؟')) return;
+      if(!confirm('هل تريد حذف هذه الشحنة؟')) return;
       raw = raw.filter(x => String(x.id) !== String(id));
-      saveData(raw);
+      localStorage.setItem('am_active_orders_clean', JSON.stringify(raw));
       rnd();
     }
 
@@ -302,7 +295,7 @@
       if(i < 0 || i + dir < 0 || i + dir >= raw.length) return;
       const it = raw.splice(i, 1)[0];
       raw.splice(i + dir, 0, it);
-      saveData(raw);
+      localStorage.setItem('am_active_orders_clean', JSON.stringify(raw));
       rnd();
     }
 
@@ -321,14 +314,14 @@
           }
         }catch(e){}
       }
-      const c = prompt('أدخل كود الشحنة الممسوح:');
+      const c = prompt('أدخل كود الشحنة للبحث:');
       if(c){ document.getElementById('q').value = c.trim(); rnd(); }
     }
 
     function opLoc(){
       if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition(p => {
-          document.getElementById('locBody').innerHTML = `<p style="margin-bottom:8px;">موقع المندوب أحمد متصل الآن:</p><a href="https://maps.google.com/?q=${p.coords.latitude},${p.coords.longitude}" target="_blank" style="color:#25d366;text-decoration:none;">🗺️ اضغط لفتح الموقع على خرائط جوجل</a>`;
+          document.getElementById('locBody').innerHTML = `<p style="margin-bottom:8px;">موقع المندوب أحمد متصل:</p><a href="https://maps.google.com/?q=${p.coords.latitude},${p.coords.longitude}" target="_blank" style="color:#25d366;text-decoration:none;">🗺️ فتح خرائط جوجل</a>`;
           opM('mLoc');
         }, () => { alert('يرجى تفعيل GPS على الهاتف أولاً.'); });
       }
@@ -341,14 +334,13 @@
       clsM('mL'); rnd();
     }
 
-    function opC(){ opM('mC'); }
     function addC(){
       const n = document.getElementById('ncN').value.trim();
       if(!n) return;
       const opt = document.createElement('option');
       opt.value = n; opt.text = n;
       document.getElementById('cF').add(opt);
-      document.getElementById('cL').innerHTML += `<div style="padding:4px 0;">🚴 ${n}</div>`;
+      document.getElementById('cL').innerHTML += `<div>🚴 ${n}</div>`;
       document.getElementById('ncN').value = '';
     }
 
@@ -367,4 +359,13 @@
               id: 'imp-'+Date.now()+'-'+i,
               tracking_code: c[0].replace(/["']/g,'').trim(),
               recipient_name: c[1].replace(/["']/g,'').trim(),
-    
+              recipient_phone: c[2].replace(/["']/g,'').trim(),
+              delivery_address: c[3].replace(/["']/g,'').trim(),
+              cod_amount: Number(c[4]) || 0,
+              courier_id: cid,
+              status: 'out_for_delivery',
+              collected_amount: 0
+            });
+            count++;
+          }
+   
