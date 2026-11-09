@@ -45,14 +45,7 @@
     <div class="g2">
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">المندوب:</label>
-        <select id="cF" class="c-in" onchange="ld()">
-          <option value="all">عرض كل المناديب</option>
-          <option value="a0000000-0000-0000-0000-000000000001">أحمد</option>
-          <option value="c-biko-01">بيكو</option>
-          <option value="a0000000-0000-0000-0000-000000000004">مينا عبد النور</option>
-          <option value="a0000000-0000-0000-0000-000000000002">محمد محمود</option>
-          <option value="a0000000-0000-0000-0000-000000000003">إسلام فتحي</option>
-        </select>
+        <select id="cF" class="c-in" onchange="ld()"></select>
       </div>
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">الوردية:</label>
@@ -66,7 +59,6 @@
   </div>
   <div id="lst"></div>
 
-  <!-- النوافذ -->
   <div class="modal" id="mLoc"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📍 مواقع المناديب الحالية</b><span style="cursor:pointer;" onclick="clsM('mLoc')">✕</span></div><div id="locList" style="max-height:260px;overflow-y:auto;font-size:0.8rem;"></div></div></div>
   <div class="modal" id="mX"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع وتخصيص شيت</b><span style="cursor:pointer;" onclick="clsM('mX')">✕</span></div><label style="font-size:0.7rem;color:var(--m);">المندوب:</label><select id="xCr" class="c-in" style="margin-bottom:6px;"></select><input type="file" id="xf" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;"><button class="btn-s" style="background:var(--s);width:100%;" onclick="upX()">رفع الشحنات ⬆️</button></div></div>
   <div class="modal" id="mL"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="clsM('mL')">✕</span></div><select id="lU" class="c-in" style="margin-bottom:6px;"></select><input type="password" id="lP" class="c-in" placeholder="PIN"><button class="btn-s" style="background:#2563eb;width:100%;margin-top:6px;" onclick="lgn()">دخول ➜</button></div></div>
@@ -258,4 +250,11 @@
 
     function opScan(){const code=prompt('امسح الباركود أو اكتب الكود:');if(code){document.getElementById('q').value=code.trim();rnd();}}
 
-    function opX(){if(gu().role!=='admin')retur
+    function opX(){if(gu().role!=='admin')return alert('خاص بالمدير');document.getElementById('xf').value='';document.getElementById('mX').style.display='flex';}
+    async function upX(){
+      const fi=document.getElementById('xf');
+      if(!fi.files.length)return alert('اختر ملف CSV أولاً');
+      const f=fi.files[0],cid=document.getElementById('xCr').value,today=document.getElementById('dF').value;
+      const rd=new FileReader();
+      rd.onload=async function(e){
+        const rows=e.target.result.s
