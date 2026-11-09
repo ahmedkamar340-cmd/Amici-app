@@ -56,7 +56,7 @@
       </div>
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">الوردية:</label>
-        <input type="date" id="dF" class="c-in" value="2026-11-08" onchange="rnd()">
+        <input type="date" id="dF" class="c-in" value="2026-11-08">
       </div>
     </div>
   </header>
@@ -68,7 +68,7 @@
 
   <div id="lst"></div>
 
-  <!-- النوافذ المنبثقة -->
+  <!-- نافذة شحن فقط -->
   <div class="modal" id="mShp">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🚚 تحصيل شحن فقط</b><span style="cursor:pointer;" onclick="clsM('mShp')">✕</span></div>
@@ -79,6 +79,7 @@
     </div>
   </div>
 
+  <!-- استلام جزئي -->
   <div class="modal" id="mP">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📦 استلام جزئي</b><span style="cursor:pointer;" onclick="clsM('mP')">✕</span></div>
@@ -89,6 +90,7 @@
     </div>
   </div>
 
+  <!-- تأجيل -->
   <div class="modal" id="mR">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📅 تأجيل الشحنة</b><span style="cursor:pointer;" onclick="clsM('mR')">✕</span></div>
@@ -99,6 +101,7 @@
     </div>
   </div>
 
+  <!-- تحويل لمندوب -->
   <div class="modal" id="mTr">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔄 تحويل الشحنة</b><span style="cursor:pointer;" onclick="clsM('mTr')">✕</span></div>
@@ -110,6 +113,7 @@
     </div>
   </div>
 
+  <!-- رفع الشيت -->
   <div class="modal" id="mX">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع وتخصيص شيت</b><span style="cursor:pointer;" onclick="clsM('mX')">✕</span></div>
@@ -133,17 +137,16 @@
       { id:"3", tracking_code:"12282", recipient_name:"فيلوباتير", recipient_phone:"01507992457", delivery_address:"105 ش المكس القباري - اسكندرية", cod_amount:610, status:"out_for_delivery", collected_amount:0, courier_id:"ahmed" }
     ];
 
-    // استرجاع البيانات مع تنظيف أي كاش تالف سابق
     function getStore(){
       try{
-        const saved = JSON.parse(localStorage.getItem('am_active_orders_v3'));
+        const saved = JSON.parse(localStorage.getItem('am_shipments_final_db'));
         if(Array.isArray(saved) && saved.length > 0) return saved;
       }catch(e){}
-      localStorage.setItem('am_active_orders_v3', JSON.stringify(INITIAL_SHIPMENTS));
+      localStorage.setItem('am_shipments_final_db', JSON.stringify(INITIAL_SHIPMENTS));
       return INITIAL_SHIPMENTS;
     }
     function saveStore(list){
-      localStorage.setItem('am_active_orders_v3', JSON.stringify(list));
+      localStorage.setItem('am_shipments_final_db', JSON.stringify(list));
     }
 
     let raw = getStore();
@@ -156,10 +159,10 @@
       const q = (document.getElementById('q').value||'').trim().toLowerCase();
       const cid = document.getElementById('cF').value;
 
-      // إظهار الشحنات المطابقة لأحمد أو العرض العام
+      // العرض الفوري لكل الشحنات المسندة للمندوب
       const list = raw.filter(s => {
         const mQ = !q || (String(s.tracking_code||'').toLowerCase().includes(q) || String(s.recipient_name||'').toLowerCase().includes(q) || String(s.delivery_address||'').toLowerCase().includes(q) || String(s.recipient_phone||'').includes(q));
-        const mC = (cid === 'all' || s.courier_id === cid || !s.courier_id || s.courier_id === 'a0000000-0000-0000-0000-000000000001');
+        const mC = (cid === 'all' || s.courier_id === cid || !s.courier_id);
         return mQ && mC;
       });
 
@@ -229,7 +232,7 @@
         it.status = st;
         it.collected_amount = amt;
         Object.assign(it, extra);
-        saveStore(raw); // تثبيت فوري في ذاكرة الموبايل
+        saveStore(raw); // تثبيت وحفظ فوري
         rnd();
       }
     }
@@ -327,7 +330,7 @@
     function opLoc(){
       if(navigator.geolocation){
         navigator.geolocation.getCurrentPosition(p => {
-          document.getElementById('locBody').innerHTML = `<p style="margin-bottom:8px;">موقع المندوب أحمد متصل الآن:</p><a href="https://maps.google.com/?q=${p.coords.latitude},${p.coords.longitude}" target="_blank" style="color:#25d366;text-decoration:none;">🗺️ فتح الموقع على خرائط جوجل</a>`;
+          document.getElementById('locBody').innerHTML = `<p style="margin-bottom:8px;">موقع المندوب أحمد متصل الآن:</p><a href="https://maps.google.com/?q=${p.coords.latitude},${p.coords.longitude}" target="_blank" style="color:#25d366;text-decoration:none;">🗺️ اضغط لفتح الموقع على خرائط جوجل</a>`;
           opM('mLoc');
         }, () => { alert('يرجى تفعيل GPS على الهاتف أولاً.'); });
       }
@@ -366,4 +369,5 @@
               id: 'imp-'+Date.now()+'-'+i,
               tracking_code: c[0].replace(/["']/g,'').trim(),
               recipient_name: c[1].replace(/["']/g,'').trim(),
-              recipient_phone: c[2].replace(/["']/
+              recipient_phone: c[2].replace(/["']/g,'').trim(),
+              delivery_address: c[
