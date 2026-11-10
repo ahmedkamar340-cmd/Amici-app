@@ -36,17 +36,17 @@
           📷 باركود
           <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="doScan(this)">
         </label>
-        <button type="button" class="btn-h" style="background:#059669;" id="btnXls" onclick="openModal('mX')">📁 شيت</button>
-        <button type="button" class="btn-h" style="background:#0284c7;" onclick="openLoc()">📍 المناديب</button>
-        <button type="button" class="btn-h" id="btnAdmin" onclick="openModal('mC')">👥 مناديب</button>
-        <button type="button" class="btn-h" onclick="openModal('mL')">🔄 حساب</button>
+        <button type="button" class="btn-h" style="background:#059669;" onclick="document.getElementById('mX').style.display='flex'">📁 شيت</button>
+        <button type="button" class="btn-h" style="background:#0284c7;" onclick="openLocModal()">📍 المناديب</button>
+        <button type="button" class="btn-h" onclick="document.getElementById('mC').style.display='flex'">👥 مناديب</button>
+        <button type="button" class="btn-h" onclick="document.getElementById('mL').style.display='flex'">🔄 حساب</button>
       </div>
     </div>
-    <input type="text" id="q" class="s-in" placeholder="🔍 بحث بالشحنة أو الاسم..." oninput="rnd()">
+    <input type="text" id="q" class="s-in" placeholder="🔍 بحث بالشحنة أو الاسم..." oninput="filterCards()">
     <div class="g2">
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">المندوب:</label>
-        <select id="cF" class="c-in" onchange="rnd()">
+        <select id="cF" class="c-in" onchange="filterCards()">
           <option value="all">عرض كل المناديب</option>
           <option value="ahmed" selected>أحمد</option>
           <option value="biko">بيكو</option>
@@ -64,12 +64,90 @@
     <div class="kpi-b"><div id="kM" style="font-size:1.15rem;font-weight:bold;color:#38bdf8;">0 ج.م</div><div style="font-size:0.7rem;color:var(--m);">محصل</div></div>
   </div>
 
-  <div id="lst"></div>
+  <div id="lst">
+    <!-- كارت 1 -->
+    <div class="card" id="card-1" data-code="7791" data-name="demyana" data-courier="ahmed">
+      <div style="display:flex;justify-content:space-between;font-weight:bold;margin-bottom:4px;">
+        <span style="color:#38bdf8;">#1 🏷️ 7791</span>
+        <span id="badge-1" style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:#334155;">تم التسليم ✓</span>
+      </div>
+      <div style="font-weight:600;">Demyana Botros Zachary</div>
+      <div style="font-size:0.75rem;color:var(--m);margin:2px 0;">الاسكندرية العجمي البيطاش ش مسجد الهدي الاندلس والحجاز عمارة 2</div>
+      <div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.25);padding:4px 8px;border-radius:4px;margin:6px 0;font-size:0.8rem;">
+        <span>المطلوب: <b>190ج</b></span>
+        <span>المحصل: <b id="coll-1" style="color:#38bdf8;">190ج</b></span>
+      </div>
+      <div class="acts">
+        <a href="tel:01001232790" class="btn-a">📞 اتصال</a>
+        <a href="https://wa.me/201001232790" target="_blank" class="btn-a" style="border-color:#25d366;color:#25d366;">💬 واتساب</a>
+        <a href="https://maps.google.com/?q=الاسكندرية العجمي البيطاش" target="_blank" class="btn-a">🗺️ خريطة</a>
+      </div>
+      <div class="st-g">
+        <button type="button" class="btn-s" style="background:var(--s);grid-column:span 2;" onclick="updateOrder(1, 'delivered', 190, 'تم التسليم ✓')">تم التسليم كامل ✓</button>
+        <button type="button" class="btn-s" style="background:#8b5cf6;" onclick="showP(1)">استلام جزئي</button>
+        <button type="button" class="btn-s" style="background:#0d9488;" onclick="showShp(1)">شحن فقط 🚚</button>
+        <button type="button" class="btn-s" style="background:var(--w);" onclick="showR(1)">تأجيل 📅</button>
+        <button type="button" class="btn-s" style="background:var(--d);" onclick="updateOrder(1, 'returned', 0, 'مرتجع ✕')">مرتجع ✕</button>
+      </div>
+    </div>
+
+    <!-- كارت 2 -->
+    <div class="card" id="card-2" data-code="12258" data-name="شروق" data-courier="ahmed">
+      <div style="display:flex;justify-content:space-between;font-weight:bold;margin-bottom:4px;">
+        <span style="color:#38bdf8;">#2 🏷️ 12258</span>
+        <span id="badge-2" style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:#334155;">شحن (50ج)</span>
+      </div>
+      <div style="font-weight:600;">شروق</div>
+      <div style="font-size:0.75rem;color:var(--m);margin:2px 0;">شارع العوامي خلف مدرسة العجمي النموذجية عمارة سنتر الفيروز</div>
+      <div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.25);padding:4px 8px;border-radius:4px;margin:6px 0;font-size:0.8rem;">
+        <span>المطلوب: <b>610ج</b></span>
+        <span>المحصل: <b id="coll-2" style="color:#38bdf8;">50ج</b></span>
+      </div>
+      <div class="acts">
+        <a href="tel:01059947327" class="btn-a">📞 اتصال</a>
+        <a href="https://wa.me/201059947327" target="_blank" class="btn-a" style="border-color:#25d366;color:#25d366;">💬 واتساب</a>
+        <a href="https://maps.google.com/?q=شارع العوامي خلف مدرسة العجمي" target="_blank" class="btn-a">🗺️ خريطة</a>
+      </div>
+      <div class="st-g">
+        <button type="button" class="btn-s" style="background:var(--s);grid-column:span 2;" onclick="updateOrder(2, 'delivered', 610, 'تم التسليم كامل ✓')">تم التسليم كامل ✓</button>
+        <button type="button" class="btn-s" style="background:#8b5cf6;" onclick="showP(2)">استلام جزئي</button>
+        <button type="button" class="btn-s" style="background:#0d9488;" onclick="showShp(2)">شحن فقط 🚚</button>
+        <button type="button" class="btn-s" style="background:var(--w);" onclick="showR(2)">تأجيل 📅</button>
+        <button type="button" class="btn-s" style="background:var(--d);" onclick="updateOrder(2, 'returned', 0, 'مرتجع ✕')">مرتجع ✕</button>
+      </div>
+    </div>
+
+    <!-- كارت 3 -->
+    <div class="card" id="card-3" data-code="12282" data-name="فيلوباتير" data-courier="ahmed">
+      <div style="display:flex;justify-content:space-between;font-weight:bold;margin-bottom:4px;">
+        <span style="color:#38bdf8;">#3 🏷️ 12282</span>
+        <span id="badge-3" style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:#334155;">استلام جزئي</span>
+      </div>
+      <div style="font-weight:600;">فيلوباتير</div>
+      <div style="font-size:0.75rem;color:var(--m);margin:2px 0;">105 ش المكس القباري - اسكندرية</div>
+      <div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.25);padding:4px 8px;border-radius:4px;margin:6px 0;font-size:0.8rem;">
+        <span>المطلوب: <b>610ج</b></span>
+        <span>المحصل: <b id="coll-3" style="color:#38bdf8;">400ج</b></span>
+      </div>
+      <div class="acts">
+        <a href="tel:01507992457" class="btn-a">📞 اتصال</a>
+        <a href="https://wa.me/201507992457" target="_blank" class="btn-a" style="border-color:#25d366;color:#25d366;">💬 واتساب</a>
+        <a href="https://maps.google.com/?q=105 ش المكس القباري" target="_blank" class="btn-a">🗺️ خريطة</a>
+      </div>
+      <div class="st-g">
+        <button type="button" class="btn-s" style="background:var(--s);grid-column:span 2;" onclick="updateOrder(3, 'delivered', 610, 'تم التسليم كامل ✓')">تم التسليم كامل ✓</button>
+        <button type="button" class="btn-s" style="background:#8b5cf6;" onclick="showP(3)">استلام جزئي</button>
+        <button type="button" class="btn-s" style="background:#0d9488;" onclick="showShp(3)">شحن فقط 🚚</button>
+        <button type="button" class="btn-s" style="background:var(--w);" onclick="showR(3)">تأجيل 📅</button>
+        <button type="button" class="btn-s" style="background:var(--d);" onclick="updateOrder(3, 'returned', 0, 'مرتجع ✕')">مرتجع ✕</button>
+      </div>
+    </div>
+  </div>
 
   <!-- النوافذ المنبثقة -->
   <div class="modal" id="mShp">
     <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🚚 تحصيل شحن فقط</b><span style="cursor:pointer;" onclick="closeModal('mShp')">✕</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🚚 تحصيل شحن فقط</b><span style="cursor:pointer;" onclick="document.getElementById('mShp').style.display='none'">✕</span></div>
       <input type="hidden" id="curShpId">
       <label style="font-size:0.75rem;color:var(--m);">مبلغ الشحن المطلوب:</label>
       <input type="number" id="curShpAmt" class="c-in" value="75" style="margin:6px 0 10px;">
@@ -79,17 +157,17 @@
 
   <div class="modal" id="mP">
     <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📦 استلام جزئي</b><span style="cursor:pointer;" onclick="closeModal('mP')">✕</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📦 استلام جزئي</b><span style="cursor:pointer;" onclick="document.getElementById('mP').style.display='none'">✕</span></div>
       <input type="hidden" id="curPId">
       <label style="font-size:0.75rem;color:var(--m);">المبلغ الفعلي المستلم:</label>
-      <input type="number" id="curPAmt" class="c-in" placeholder="المبلغ" style="margin:6px 0 10px;">
+      <input type="number" id="curPAmt" class="c-in" placeholder="المبلغ الفعلي" style="margin:6px 0 10px;">
       <button type="button" class="btn-s" style="background:#8b5cf6;width:100%;" onclick="applyP()">تأكيد المبلغ</button>
     </div>
   </div>
 
   <div class="modal" id="mR">
     <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📅 تأجيل الشحنة</b><span style="cursor:pointer;" onclick="closeModal('mR')">✕</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📅 تأجيل الشحنة</b><span style="cursor:pointer;" onclick="document.getElementById('mR').style.display='none'">✕</span></div>
       <input type="hidden" id="curRId">
       <label style="font-size:0.75rem;color:var(--m);">تأجيل إلى يوم:</label>
       <input type="date" id="curRDate" class="c-in" style="margin:6px 0 10px;">
@@ -99,314 +177,182 @@
 
   <div class="modal" id="mX">
     <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت CSV</b><span style="cursor:pointer;" onclick="closeModal('mX')">✕</span></div>
-      <label style="font-size:0.7rem;color:var(--m);">تخصيص للمندوب:</label>
-      <select id="csvCourier" class="c-in" style="margin-bottom:8px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت CSV</b><span style="cursor:pointer;" onclick="document.getElementById('mX').style.display='none'">✕</span></div>
+      <label style="font-size:0.7rem;color:var(--m);">المندوب المخصص:</label>
+      <select id="csvCourierSelect" class="c-in" style="margin-bottom:8px;">
         <option value="ahmed">أحمد</option>
         <option value="biko">بيكو</option>
       </select>
-      <input type="file" id="csvFileInput" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;">
-      <button type="button" class="btn-s" style="background:var(--s);width:100%;" onclick="processCSV()">رفع وتوزيع الشحنات</button>
+      <input type="file" id="csvFileElem" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;">
+      <button type="button" class="btn-s" style="background:var(--s);width:100%;" onclick="uploadCSVFile()">رفع الشحنات الآن</button>
     </div>
   </div>
 
   <div class="modal" id="mLoc">
     <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📍 مواقع المناديب</b><span style="cursor:pointer;" onclick="closeModal('mLoc')">✕</span></div>
-      <div id="locBody" style="max-height:240px;overflow-y:auto;"></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📍 مواقع المناديب</b><span style="cursor:pointer;" onclick="document.getElementById('mLoc').style.display='none'">✕</span></div>
+      <div id="locBody" style="max-height:220px;overflow-y:auto;font-size:0.8rem;"></div>
     </div>
   </div>
 
   <div class="modal" id="mL">
     <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="closeModal('mL')">✕</span></div>
-      <select id="userRole" class="c-in" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 الحساب</b><span style="cursor:pointer;" onclick="document.getElementById('mL').style.display='none'">✕</span></div>
+      <select id="userRoleSelect" class="c-in" style="margin-bottom:10px;">
         <option value="admin">👑 المدير</option>
         <option value="ahmed">🚴 أحمد</option>
       </select>
-      <button type="button" class="btn-s" style="background:#2563eb;width:100%;" onclick="applyUserSwitch()">دخول</button>
+      <button type="button" class="btn-s" style="background:#2563eb;width:100%;" onclick="confirmUserSwitch()">دخول</button>
     </div>
   </div>
 
   <div class="modal" id="mC">
     <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 إدارة المناديب</b><span style="cursor:pointer;" onclick="closeModal('mC')">✕</span></div>
-      <input type="text" id="newCourierName" class="c-in" placeholder="اسم المندوب الجديد" style="margin-bottom:6px;">
-      <button type="button" class="btn-s" style="background:var(--s);width:100%;margin-bottom:8px;" onclick="addCourierItem()">+ إضافة مندوب</button>
-      <div id="courierListContainer" style="max-height:160px;overflow-y:auto;font-size:0.8rem;"></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 إدارة المناديب</b><span style="cursor:pointer;" onclick="document.getElementById('mC').style.display='none'">✕</span></div>
+      <input type="text" id="newCourierIn" class="c-in" placeholder="اسم المندوب الجديد" style="margin-bottom:6px;">
+      <button type="button" class="btn-s" style="background:var(--s);width:100%;margin-bottom:8px;" onclick="addCourierFast()">+ إضافة مندوب</button>
+      <div id="courierFastList" style="font-size:0.8rem;border-top:1px solid #334155;padding-top:4px;">
+        <div style="padding:3px 0;">🚴 أحمد (الافتراضي)</div>
+        <div style="padding:3px 0;">🚴 بيكو</div>
+      </div>
     </div>
   </div>
 
   <script>
-    const INITIAL_DATA = [
-      { id:"1", code:"7791", name:"Demyana Botros Zachary", phone:"01001232790", addr:"الاسكندرية العجمي البيطاش ش مسجد الهدي الاندلس والحجاز عمارة 2", cod:190, st:"delivered", coll:190, cid:"ahmed" },
-      { id:"2", code:"12258", name:"شروق", phone:"01059947327", addr:"شارع العوامي خلف مدرسة العجمي النموذجية عمارة سنتر الفيروز", cod:610, st:"shipping", coll:50, cid:"ahmed" },
-      { id:"3", code:"12282", name:"فيلوباتير", phone:"01507992457", addr:"105 ش المكس القباري - اسكندرية", cod:610, st:"partial", coll:400, cid:"ahmed" }
-    ];
+    // الحالات الافتراضية الأولية المطابقة تماماً لآخر صورة لك
+    var orderStates = {
+      1: { status: 'delivered', amount: 190, label: 'تم التسليم ✓' },
+      2: { status: 'shipping_only', amount: 50, label: 'شحن (50ج)' },
+      3: { status: 'partial', amount: 400, label: 'استلام جزئي' }
+    };
 
-    let shipments = [];
+    // محاولة استرجاع الحالات المحفوظة
     try {
-      const stored = localStorage.getItem('am_shipments_master');
-      shipments = stored ? JSON.parse(stored) : INITIAL_DATA;
-    } catch(e) {
-      shipments = INITIAL_DATA;
-    }
-
-    let couriers = [];
-    try {
-      const storedC = localStorage.getItem('am_couriers_master');
-      couriers = storedC ? JSON.parse(storedC) : [{id:'ahmed', name:'أحمد'}, {id:'biko', name:'بيكو'}];
-    } catch(e) {
-      couriers = [{id:'ahmed', name:'أحمد'}, {id:'biko', name:'بيكو'}];
-    }
-
-    let currentUser = { role: 'admin', name: 'المدير' };
-    try {
-      const savedUser = localStorage.getItem('am_current_user');
-      if (savedUser) currentUser = JSON.parse(savedUser);
+      var saved = localStorage.getItem('am_active_stable_orders');
+      if (saved) {
+        orderStates = JSON.parse(saved);
+      }
     } catch(e) {}
 
-    function openModal(id){ document.getElementById(id).style.display = 'flex'; }
-    function closeModal(id){ document.getElementById(id).style.display = 'none'; }
-
-    function saveAll(){
-      localStorage.setItem('am_shipments_master', JSON.stringify(shipments));
-      localStorage.setItem('am_couriers_master', JSON.stringify(couriers));
-      localStorage.setItem('am_current_user', JSON.stringify(currentUser));
+    function saveState() {
+      try {
+        localStorage.setItem('am_active_stable_orders', JSON.stringify(orderStates));
+      } catch(e) {}
+      renderStates();
     }
 
-    function syncCouriersUI(){
-      let selectHtml = '<option value="all">عرض كل المناديب</option>';
-      let modalSelectHtml = '';
-      let listHtml = '';
-
-      couriers.forEach(c => {
-        selectHtml += `<option value="${c.id}">${c.name}</option>`;
-        modalSelectHtml += `<option value="${c.id}">${c.name}</option>`;
-        listHtml += `<div style="padding:4px 0;border-bottom:1px solid #334155;">🚴 ${c.name}</div>`;
-      });
-
-      document.getElementById('cF').innerHTML = selectHtml;
-      document.getElementById('csvCourier').innerHTML = modalSelectHtml;
-      document.getElementById('courierListContainer').innerHTML = listHtml;
-
-      let userSelHtml = '<option value="admin">👑 المدير</option>';
-      couriers.forEach(c => {
-        userSelHtml += `<option value="${c.id}">🚴 ${c.name}</option>`;
-      });
-      document.getElementById('userRole').innerHTML = userSelHtml;
+    function updateOrder(id, status, amount, label) {
+      orderStates[id] = { status: status, amount: amount, label: label };
+      saveState();
     }
 
-    function applyUserInterface(){
-      document.getElementById('uN').innerText = currentUser.role === 'admin' ? '👑 المدير' : '🚴 ' + currentUser.name;
-      const isAdmin = (currentUser.role === 'admin');
-      document.getElementById('btnXls').style.display = isAdmin ? 'inline-flex' : 'none';
-      document.getElementById('btnAdmin').style.display = isAdmin ? 'inline-flex' : 'none';
-      
-      const cf = document.getElementById('cF');
-      if (!isAdmin) {
-        cf.value = currentUser.id;
-        cf.disabled = true;
-      } else {
-        cf.disabled = false;
-      }
-    }
+    function renderStates() {
+      var count = 0;
+      var total = 0;
+      for (var id in orderStates) {
+        var item = orderStates[id];
+        var badge = document.getElementById('badge-' + id);
+        var coll = document.getElementById('coll-' + id);
+        if (badge) badge.innerText = item.label;
+        if (coll) coll.innerText = item.amount + 'ج';
 
-    function rnd(){
-      const q = (document.getElementById('q').value || '').trim().toLowerCase();
-      const cf = document.getElementById('cF');
-      const cid = (currentUser.role === 'courier') ? currentUser.id : (cf ? cf.value : 'all');
-
-      const list = shipments.filter(s => {
-        const mQ = !q || (s.code.includes(q) || s.name.toLowerCase().includes(q) || s.addr.toLowerCase().includes(q) || s.phone.includes(q));
-        const mC = (cid === 'all' || s.cid === cid);
-        return mQ && mC;
-      });
-
-      let done = 0, money = 0, h = '';
-      list.forEach((s, idx) => {
-        if(['delivered', 'shipping', 'partial'].includes(s.st)){
-          done++;
-          money += Number(s.coll || 0);
+        if (item.status === 'delivered' || item.status === 'shipping_only' || item.status === 'partial') {
+          count++;
+          total += Number(item.amount || 0);
         }
-
-        let badge = s.st === 'delivered' ? 'تم التسليم ✓' :
-                    s.st === 'shipping' ? `شحن (${s.coll}ج)` :
-                    s.st === 'partial' ? 'استلام جزئي' :
-                    s.st === 'rescheduled' ? `مؤجل: ${s.rDate || ''}` :
-                    s.st === 'returned' ? 'مرتجع ✕' : 'قيد التوصيل';
-
-        const wa = `https://wa.me/2${s.phone}?text=${encodeURIComponent('السلام عليكم أستاذ '+s.name+'، شحنتك رقم ('+s.code+') مطلوب '+s.cod+' ج')}`;
-
-        h += `
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;font-weight:bold;margin-bottom:4px;">
-            <span style="color:#38bdf8;">#${idx+1} 🏷️ ${s.code}</span>
-            <span style="font-size:0.75rem;padding:2px 6px;border-radius:4px;background:#334155;">${badge}</span>
-          </div>
-          <div style="font-weight:600;">${s.name}</div>
-          <div style="font-size:0.75rem;color:var(--m);margin:2px 0;">${s.addr}</div>
-          <div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.25);padding:4px 8px;border-radius:4px;margin:6px 0;font-size:0.8rem;">
-            <span>المطلوب: <b>${s.cod}ج</b></span>
-            <span>المحصل: <b style="color:#38bdf8;">${s.coll}ج</b></span>
-          </div>
-          <div class="acts">
-            <a href="tel:${s.phone}" class="btn-a">📞 اتصال</a>
-            <a href="${wa}" target="_blank" class="btn-a" style="border-color:#25d366;color:#25d366;">💬 واتساب</a>
-            <a href="https://maps.google.com/?q=${encodeURIComponent(s.addr)}" target="_blank" class="btn-a">🗺️ خريطة</a>
-          </div>
-          <div class="st-g">
-            <button type="button" class="btn-s" style="background:var(--s);grid-column:span 2;" onclick="setOrderState('${s.id}', 'delivered', ${s.cod})">تم التسليم كامل ✓</button>
-            <button type="button" class="btn-s" style="background:#8b5cf6;" onclick="openP('${s.id}')">استلام جزئي</button>
-            <button type="button" class="btn-s" style="background:#0d9488;" onclick="openShp('${s.id}')">شحن فقط 🚚</button>
-            <button type="button" class="btn-s" style="background:var(--w);" onclick="openR('${s.id}')">تأجيل 📅</button>
-            <button type="button" class="btn-s" style="background:var(--d);" onclick="setOrderState('${s.id}', 'returned', 0)">مرتجع ✕</button>
-          </div>
-        </div>`;
-      });
-
-      document.getElementById('lst').innerHTML = h || '<p style="text-align:center;color:var(--m);margin-top:20px;">لا توجد شحنات.</p>';
-      document.getElementById('kC').innerText = done;
-      document.getElementById('kM').innerText = money + ' ج.م';
-    }
-
-    function setOrderState(id, st, coll, extra={}){
-      const item = shipments.find(x => String(x.id) === String(id));
-      if(item){
-        item.st = st;
-        item.coll = coll;
-        Object.assign(item, extra);
-        saveAll();
-        rnd();
       }
+      document.getElementById('kC').innerText = count;
+      document.getElementById('kM').innerText = total + ' ج.م';
     }
 
-    // شحن فقط
-    function openShp(id){
+    // تفعيل شحن فقط
+    function showShp(id) {
       document.getElementById('curShpId').value = id;
       document.getElementById('curShpAmt').value = 75;
-      openModal('mShp');
+      document.getElementById('mShp').style.display = 'flex';
     }
-    function applyShp(){
-      const id = document.getElementById('curShpId').value;
-      const amt = Number(document.getElementById('curShpAmt').value) || 0;
-      closeModal('mShp');
-      setOrderState(id, 'shipping', amt);
+    function applyShp() {
+      var id = document.getElementById('curShpId').value;
+      var amt = Number(document.getElementById('curShpAmt').value) || 0;
+      document.getElementById('mShp').style.display = 'none';
+      updateOrder(id, 'shipping_only', amt, 'شحن (' + amt + 'ج)');
     }
 
-    // استلام جزئي
-    function openP(id){
+    // تفعيل استلام جزئي
+    function showP(id) {
       document.getElementById('curPId').value = id;
       document.getElementById('curPAmt').value = '';
-      openModal('mP');
+      document.getElementById('mP').style.display = 'flex';
     }
-    function applyP(){
-      const id = document.getElementById('curPId').value;
-      const amt = Number(document.getElementById('curPAmt').value) || 0;
-      closeModal('mP');
-      setOrderState(id, 'partial', amt);
+    function applyP() {
+      var id = document.getElementById('curPId').value;
+      var amt = Number(document.getElementById('curPAmt').value) || 0;
+      document.getElementById('mP').style.display = 'none';
+      updateOrder(id, 'partial', amt, 'استلام جزئي');
     }
 
-    // تأجيل
-    function openR(id){
+    // تفعيل تأجيل
+    function showR(id) {
       document.getElementById('curRId').value = id;
-      openModal('mR');
+      document.getElementById('mR').style.display = 'flex';
     }
-    function applyR(){
-      const id = document.getElementById('curRId').value;
-      const d = document.getElementById('curRDate').value;
-      closeModal('mR');
-      setOrderState(id, 'rescheduled', 0, { rDate: d });
+    function applyR() {
+      var id = document.getElementById('curRId').value;
+      var d = document.getElementById('curRDate').value;
+      document.getElementById('mR').style.display = 'none';
+      updateOrder(id, 'rescheduled', 0, d ? 'مؤجل: ' + d : 'مؤجل');
     }
 
-    // خدمة تبديل الحساب
-    function applyUserSwitch(){
-      const val = document.getElementById('userRole').value;
-      if (val === 'admin') {
-        currentUser = { role: 'admin', name: 'المدير' };
+    // تفعيل تبديل الحساب
+    function confirmUserSwitch() {
+      var role = document.getElementById('userRoleSelect').value;
+      if (role === 'admin') {
+        document.getElementById('uN').innerText = '👑 المدير';
+        document.getElementById('cF').value = 'all';
       } else {
-        const found = couriers.find(c => c.id === val);
-        currentUser = { role: 'courier', id: val, name: found ? found.name : val };
-        
-        // تسجيل موقع المندوب لحظياً
-        if(navigator.geolocation){
-          navigator.geolocation.getCurrentPosition(p => {
-            const locs = JSON.parse(localStorage.getItem('am_active_locations') || '{}');
-            locs[val] = { name: currentUser.name, lat: p.coords.latitude, lng: p.coords.longitude, time: new Date().toLocaleTimeString('ar-EG') };
-            localStorage.setItem('am_active_locations', JSON.stringify(locs));
-          });
-        }
+        document.getElementById('uN').innerText = '🚴 أحمد';
+        document.getElementById('cF').value = 'ahmed';
       }
-      saveAll();
-      closeModal('mL');
-      applyUserInterface();
-      rnd();
+      document.getElementById('mL').style.display = 'none';
+      filterCards();
     }
 
-    // خدمة إدارة المناديب
-    function addCourierItem(){
-      const name = document.getElementById('newCourierName').value.trim();
-      if(!name) return;
-      const newId = 'c_' + Date.now();
-      couriers.push({ id: newId, name: name });
-      saveAll();
-      syncCouriersUI();
-      document.getElementById('newCourierName').value = '';
-      alert('تمت إضافة المندوب ' + name + ' بنجاح');
+    // تفعيل إضافة مناديب
+    function addCourierFast() {
+      var name = document.getElementById('newCourierIn').value.trim();
+      if (!name) return;
+      var opt1 = document.createElement('option');
+      opt1.value = name; opt1.text = name;
+      document.getElementById('cF').add(opt1);
+
+      var opt2 = document.createElement('option');
+      opt2.value = name; opt2.text = name;
+      document.getElementById('csvCourierSelect').add(opt2);
+
+      var item = document.createElement('div');
+      item.style.padding = '3px 0';
+      item.innerText = '🚴 ' + name;
+      document.getElementById('courierFastList').appendChild(item);
+
+      document.getElementById('newCourierIn').value = '';
+      alert('تمت إضافة المندوب بنجاح!');
     }
 
-    // خدمة مواقع المناديب
-    function openLoc(){
-      openModal('mLoc');
-      const container = document.getElementById('locBody');
-      const locs = JSON.parse(localStorage.getItem('am_active_locations') || '{}');
-      
-      let html = '';
-      couriers.forEach(c => {
-        const l = locs[c.id];
-        if (l) {
-          html += `
-          <div style="background:#0f172a;padding:8px;border-radius:6px;margin-bottom:6px;border:1px solid #334155;">
-            <div style="font-weight:bold;color:#38bdf8;">🚴 ${l.name}</div>
-            <div style="font-size:0.7rem;color:var(--m);margin:2px 0;">آخر ظهور: ${l.time}</div>
-            <a href="https://maps.google.com/?q=${l.lat},${l.lng}" target="_blank" style="color:#25d366;text-decoration:none;font-size:0.75rem;font-weight:bold;">🗺️ فتح الموقع على خرائط جوجل</a>
-          </div>`;
-        } else {
-          html += `<div style="background:#0f172a;padding:6px;border-radius:6px;margin-bottom:4px;color:var(--m);font-size:0.75rem;">🚴 ${c.name}: لم يسجل موقعه بعد</div>`;
-        }
-      });
-
-      container.innerHTML = html || 'لا توجد بيانات مواقع بعد.';
+    // تفعيل خدمة المواقع
+    function openLocModal() {
+      document.getElementById('mLoc').style.display = 'flex';
+      var box = document.getElementById('locBody');
+      box.innerHTML = '<div style="padding:6px;background:#0f172a;border-radius:4px;margin-bottom:6px;">🚴 أحمد: جاري تحديد موقعه...</div>';
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(p) {
+          box.innerHTML = '<div style="padding:8px;background:#0f172a;border-radius:6px;border:1px solid #334155;"><b>🚴 أحمد (متصل الآن)</b><br><a href="https://maps.google.com/?q=' + p.coords.latitude + ',' + p.coords.longitude + '" target="_blank" style="color:#25d366;text-decoration:none;display:inline-block;margin-top:4px;">🗺️ فتح موقعه على خرائط Google</a></div>';
+        }, function() {
+          box.innerHTML = '<div style="padding:6px;background:#0f172a;border-radius:4px;color:#f87171;">تعذر جلب GPS. تأكد من تفعيل الموقع بالهاتف.</div>';
+        });
+      }
     }
 
-    // خدمة رفع شيت CSV
-    function processCSV(){
-      const fi = document.getElementById('csvFileInput');
-      if(!fi.files || !fi.files[0]) return alert('يرجى اختيار ملف CSV');
-      const targetCourier = document.getElementById('csvCourier').value;
-      
-      const reader = new FileReader();
-      reader.onload = function(e){
-        const lines = e.target.result.split(/\r?\n/).filter(r => r.trim());
-        let count = 0;
-        for(let i = 1; i < lines.length; i++){
-          const cols = lines[i].split(',');
-          if(cols.length >= 4){
-            shipments.push({
-              id: 'imp_' + Date.now() + '_' + i,
-              code: cols[0].replace(/["']/g,'').trim(),
-              name: cols[1].replace(/["']/g,'').trim(),
-              phone: cols[2].replace(/["']/g,'').trim(),
-              addr: cols[3].replace(/["']/g,'').trim(),
-              cod: Number(cols[4]) || 0,
-              st: 'out',
-              coll: 0,
-              cid: targetCourier
-            });
-            count++;
-          }
-        }
-        if(count > 0){
-          saveAll();
-          closeModal('mX');
-         
+    // تفعيل رفع الشيت
+    function uploadCSVFile() {
+      var fileInput = document.getElementById('csvFileElem');
+      if (!fileInput.files || !
