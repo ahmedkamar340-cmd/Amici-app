@@ -11,7 +11,7 @@
     header{background:var(--c);padding:10px;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:50;}
     .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
     .btns{display:flex;gap:4px;overflow-x:auto;}
-    .btn-h{background:#334155;border:1px solid #475569;color:#fff;padding:6px 8px;border-radius:5px;font-size:0.73rem;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;}
+    .btn-h{background:#334155;border:1px solid #475569;color:#fff;padding:6px 8px;border-radius:5px;font-size:0.72rem;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;}
     .s-in{width:100%;background:#0f172a;color:#fff;border:1px solid var(--b);padding:7px;border-radius:6px;font-size:0.8rem;outline:none;margin-bottom:6px;}
     .g2{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
     .sel-b{background:rgba(0,0,0,0.25);padding:5px;border-radius:6px;border:1px solid var(--b);}
@@ -37,8 +37,9 @@
       <div class="btns">
         <label class="btn-h" style="background:#0284c7;margin:0;">📷 باركود<input type="file" accept="image/*" capture="environment" style="display:none;" onchange="doScan(this)"></label>
         <button type="button" class="btn-h" style="background:#059669;" id="btnXls" onclick="openM('mX')">📁 شيت</button>
-        <button type="button" class="btn-h" style="background:#0284c7;" id="btnLoc" onclick="openLocations()">📍 المناديب</button>
-        <button type="button" class="btn-h" onclick="fetchShipments()">🔄 تحديث</button>
+        <button type="button" class="btn-h" style="background:#0284c7;" id="btnLoc" onclick="openLocations()">📍 المواقع</button>
+        <button type="button" class="btn-h" id="btnAddC" onclick="openM('mC')">👥 مناديب</button>
+        <button type="button" class="btn-h" onclick="fetchAll()">🔄</button>
         <button type="button" class="btn-h" onclick="openM('mL')">🔐 حساب</button>
       </div>
     </div>
@@ -46,12 +47,7 @@
     <div class="g2">
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">المندوب:</label>
-        <select id="cF" class="c-in" onchange="renderList()">
-          <option value="all" selected>عرض كل المناديب</option>
-          <option value="ahmed">أحمد</option>
-          <option value="biko">بيكو</option>
-          <option value="mina">مينا عبد النور</option>
-        </select>
+        <select id="cF" class="c-in" onchange="renderList()"></select>
       </div>
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">الحساب الحالي:</label>
@@ -67,71 +63,185 @@
 
   <div id="lst"><p style="text-align:center;color:var(--m);margin-top:30px;">جاري التحميل...</p></div>
 
-  <div class="modal" id="mDel"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>✅ تأكيد التسليم</b><span style="cursor:pointer;" onclick="closeM('mDel')">✕</span></div><input type="hidden" id="delId"><input type="hidden" id="delCod"><button type="button" class="opt-btn" onclick="confirmDel('كاش')">💵 استلام نقدي (كاش)</button><button type="button" class="opt-btn" onclick="confirmDel('إنستاباي / محفظة')">📱 تحويل إنستاباي / فودافون كاش</button><button type="button" class="opt-btn" onclick="confirmDel('تسليم بالفرع')">🏢 تسليم مباشر بالفرع</button></div></div>
+  <!-- نافذة خيارات التسليم -->
+  <div class="modal" id="mDel">
+    <div class="m-box">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>✅ تأكيد التسليم</b><span style="cursor:pointer;" onclick="closeM('mDel')">✕</span></div>
+      <input type="hidden" id="delId"><input type="hidden" id="delCod">
+      <button type="button" class="opt-btn" onclick="confirmDel('كاش')">💵 استلام نقدي (كاش)</button>
+      <button type="button" class="opt-btn" onclick="confirmDel('إنستاباي / محفظة')">📱 تحويل إنستاباي / فودافون كاش</button>
+      <button type="button" class="opt-btn" onclick="confirmDel('تسليم بالفرع')">🏢 تسليم مباشر بالفرع</button>
+    </div>
+  </div>
 
-  <div class="modal" id="mRet"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>❌ اختر سبب المرتجع</b><span style="cursor:pointer;" onclick="closeM('mRet')">✕</span></div><input type="hidden" id="retId"><button type="button" class="opt-btn" onclick="confirmRet('لا يرد')">📵 العميل لا يرد</button><button type="button" class="opt-btn" onclick="confirmRet('غير متاح / مغلق')">📴 الهاتف مغلق أو غير متاح</button><button type="button" class="opt-btn" onclick="confirmRet('العميل رفض الاستلام')">🚫 العميل رفض الاستلام</button><button type="button" class="opt-btn" onclick="confirmRet('عنوان خاطئ')">📍 العنوان غير صحيح</button><div style="display:flex;gap:4px;margin-top:4px;"><input type="text" id="customRet" class="c-in" placeholder="سبب آخر..."><button type="button" class="btn-s" style="background:var(--d);white-space:nowrap;" onclick="confirmRet(document.getElementById('customRet').value||'مرتجع')">حفظ</button></div></div></div>
+  <!-- نافذة أسباب المرتجع -->
+  <div class="modal" id="mRet">
+    <div class="m-box">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>❌ اختر سبب المرتجع</b><span style="cursor:pointer;" onclick="closeM('mRet')">✕</span></div>
+      <input type="hidden" id="retId">
+      <button type="button" class="opt-btn" onclick="confirmRet('لا يرد')">📵 العميل لا يرد</button>
+      <button type="button" class="opt-btn" onclick="confirmRet('غير متاح / مغلق')">📴 الهاتف مغلق أو غير متاح</button>
+      <button type="button" class="opt-btn" onclick="confirmRet('العميل رفض الاستلام')">🚫 العميل رفض الاستلام</button>
+      <button type="button" class="opt-btn" onclick="confirmRet('عنوان خاطئ')">📍 العنوان غير صحيح</button>
+      <div style="display:flex;gap:4px;margin-top:4px;">
+        <input type="text" id="customRet" class="c-in" placeholder="سبب آخر...">
+        <button type="button" class="btn-s" style="background:var(--d);white-space:nowrap;" onclick="confirmRet(document.getElementById('customRet').value||'مرتجع')">حفظ</button>
+      </div>
+    </div>
+  </div>
 
-  <div class="modal" id="mTr"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔄 نقل الأوردر لمندوب</b><span style="cursor:pointer;" onclick="closeM('mTr')">✕</span></div><input type="hidden" id="trId"><select id="trCourier" class="c-in" style="margin:6px 0 10px;"><option value="ahmed">أحمد</option><option value="biko">بيكو</option><option value="mina">مينا عبد النور</option></select><button type="button" class="btn-s" style="background:#0284c7;width:100%;" onclick="confirmTr()">نقل الأوردر الآن ➜</button></div></div>
+  <!-- نافذة إضافة مندوب جديد -->
+  <div class="modal" id="mC">
+    <div class="m-box">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>👥 إدارة المناديب</b><span style="cursor:pointer;" onclick="closeM('mC')">✕</span></div>
+      <input type="text" id="newCName" class="c-in" placeholder="اسم المندوب الجديد" style="margin-bottom:6px;">
+      <input type="text" id="newCPin" class="c-in" placeholder="الرقم السري (PIN) للدخول" inputmode="numeric" style="margin-bottom:8px;">
+      <button type="button" class="btn-s" style="background:var(--s);width:100%;margin-bottom:10px;" onclick="addNewCourier()">+ إضافة وحفظ بالسحابة</button>
+      <div id="couriersListBox" style="max-height:160px;overflow-y:auto;font-size:0.78rem;border-top:1px solid #334155;padding-top:6px;"></div>
+    </div>
+  </div>
 
-  <div class="modal" id="mLoc"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📍 متابعة المناديب</b><span style="cursor:pointer;" onclick="closeM('mLoc')">✕</span></div><div id="locList" style="max-height:240px;overflow-y:auto;font-size:0.8rem;">جاري جلب المواقع...</div></div></div>
+  <!-- نافذة نقل الشحنة -->
+  <div class="modal" id="mTr">
+    <div class="m-box">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔄 نقل الأوردر لمندوب</b><span style="cursor:pointer;" onclick="closeM('mTr')">✕</span></div>
+      <input type="hidden" id="trId">
+      <select id="trCourier" class="c-in" style="margin:6px 0 10px;"></select>
+      <button type="button" class="btn-s" style="background:#0284c7;width:100%;" onclick="confirmTr()">نقل الأوردر الآن ➜</button>
+    </div>
+  </div>
 
+  <div class="modal" id="mLoc"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📍 متابعة المناديب</b><span style="cursor:pointer;" onclick="closeM('mLoc')">✕</span></div><div id="locList" style="max-height:240px;overflow-y:auto;font-size:0.8rem;"></div></div></div>
   <div class="modal" id="mShp"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🚚 تحصيل شحن فقط</b><span style="cursor:pointer;" onclick="closeM('mShp')">✕</span></div><input type="hidden" id="shpId"><input type="number" id="shpAmt" class="c-in" value="75" style="margin:6px 0 10px;"><button type="button" class="btn-s" style="background:#0d9488;width:100%;" onclick="confirmShp()">تأكيد الشحن</button></div></div>
   <div class="modal" id="mP"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📦 استلام جزئي</b><span style="cursor:pointer;" onclick="closeM('mP')">✕</span></div><input type="hidden" id="pId"><input type="number" id="pAmt" class="c-in" placeholder="المبلغ المستلم" style="margin:6px 0 10px;"><button type="button" class="btn-s" style="background:#8b5cf6;width:100%;" onclick="confirmP()">تأكيد المبلغ</button></div></div>
   <div class="modal" id="mR"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📅 تأجيل الشحنة</b><span style="cursor:pointer;" onclick="closeM('mR')">✕</span></div><input type="hidden" id="rId"><input type="date" id="rDate" class="c-in" style="margin:6px 0 10px;"><button type="button" class="btn-s" style="background:var(--w);width:100%;" onclick="confirmR()">حفظ التأجيل</button></div></div>
-  <div class="modal" id="mX"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت CSV</b><span style="cursor:pointer;" onclick="closeM('mX')">✕</span></div><select id="csvCourier" class="c-in" style="margin-bottom:8px;"><option value="ahmed">أحمد</option><option value="biko">بيكو</option><option value="mina">مينا عبد النور</option></select><input type="file" id="csvFile" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;"><button type="button" class="btn-s" style="background:var(--s);width:100%;" onclick="uploadCSVToCloud()">رفع وتوزيع ⬆️</button></div></div>
+  <div class="modal" id="mX"><div class="m-box"><div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت CSV</b><span style="cursor:pointer;" onclick="closeM('mX')">✕</span></div><select id="csvCourier" class="c-in" style="margin-bottom:8px;"></select><input type="file" id="csvFile" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;"><button type="button" class="btn-s" style="background:var(--s);width:100%;" onclick="uploadCSVToCloud()">رفع وتوزيع ⬆️</button></div></div>
 
   <div class="modal" id="mL">
     <div class="m-box">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>🔐 تسجيل الدخول</b><span style="cursor:pointer;" onclick="closeM('mL')">✕</span></div>
-      <select id="roleSel" class="c-in" style="margin-bottom:8px;">
-        <option value="admin">👑 المدير</option>
-        <option value="ahmed">🚴 أحمد</option>
-        <option value="biko">🚴 بيكو</option>
-        <option value="mina">🚴 مينا عبد النور</option>
-      </select>
-      <input type="password" id="pinIn" class="c-in" placeholder="أدخل الرقم السري (PIN)" style="margin-bottom:10px;" inputmode="numeric">
+      <select id="roleSel" class="c-in" style="margin-bottom:8px;"></select>
+      <input type="password" id="pinIn" class="c-in" placeholder="الرقم السري (PIN)" style="margin-bottom:10px;" inputmode="numeric">
       <button type="button" class="btn-s" style="background:#2563eb;width:100%;" onclick="switchRole()">دخول</button>
     </div>
   </div>
 
   <script>
-    const BASE_URL = 'https://difabkjpyypaylnofbcl.supabase.co/rest/v1/';
-    const API_URL = BASE_URL + 'shipments';
-    const LOC_URL = BASE_URL + 'courier_locations';
-    const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
-    const HEADERS = { 'apikey': API_KEY, 'Authorization': 'Bearer ' + API_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
-    const COURIERS = { ahmed: { name: 'أحمد', pin: '1111' }, biko: { name: 'بيكو', pin: '2222' }, mina: { name: 'مينا عبد النور', pin: '3333' } };
+    const BASE = 'https://difabkjpyypaylnofbcl.supabase.co/rest/v1/';
+    const API_URL = BASE + 'shipments';
+    const COUR_URL = BASE + 'couriers';
+    const LOC_URL = BASE + 'courier_locations';
+    const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
+    const HDR = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
     const ADMIN_PIN = '1234';
 
-    let allOrders = [], currentRole = 'admin', currentCourierId = '';
+    let allOrders = [], couriersMap = { ahmed: { name: 'أحمد', pin: '1111' }, biko: { name: 'بيكو', pin: '2222' }, mina: { name: 'مينا عبد النور', pin: '3333' } };
+    let currentRole = 'admin', currentCourierId = '';
+
     function openM(id){ document.getElementById(id).style.display = 'flex'; }
     function closeM(id){ document.getElementById(id).style.display = 'none'; }
     function cleanText(s){ return String(s||'').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD]/g,'').replace(/["']/g,'').trim(); }
+
+    async function fetchCouriers() {
+      try {
+        const res = await fetch(COUR_URL + '?select=*', { headers: HDR });
+        if (res.ok) {
+          const list = await res.json();
+          if (list.length) {
+            couriersMap = {};
+            list.forEach(c => { couriersMap[c.id] = { name: c.name, pin: c.pin }; });
+          }
+        }
+      } catch (e) {}
+      syncCouriersDropdowns();
+    }
+
+    function syncCouriersDropdowns() {
+      let optsAll = '<option value="all">عرض كل المناديب</option>';
+      let optsOnly = '';
+      let optsRole = '<option value="admin">👑 المدير</option>';
+      let listHtml = '';
+
+      for (let id in couriersMap) {
+        const c = couriersMap[id];
+        optsAll += '<option value="' + id + '">' + c.name + '</option>';
+        optsOnly += '<option value="' + id + '">' + c.name + '</option>';
+        optsRole += '<option value="' + id + '">🚴 ' + c.name + '</option>';
+        listHtml += '<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #334155;"><span>🚴 ' + c.name + ' (PIN: ' + c.pin + ')</span><span style="color:#ef4444;cursor:pointer;" onclick="delCourier(\'' + id + '\')">حذف</span></div>';
+      }
+
+      const prevCF = document.getElementById('cF').value || 'all';
+      document.getElementById('cF').innerHTML = optsAll;
+      document.getElementById('cF').value = currentRole === 'courier' ? currentCourierId : prevCF;
+      document.getElementById('trCourier').innerHTML = optsOnly;
+      document.getElementById('csvCourier').innerHTML = optsOnly;
+      document.getElementById('roleSel').innerHTML = optsRole;
+      document.getElementById('couriersListBox').innerHTML = listHtml;
+    }
+
+    async function addNewCourier() {
+      const name = document.getElementById('newCName').value.trim();
+      const pin = document.getElementById('newCPin').value.trim();
+      if (!name || !pin) return alert('اكتب اسم المندوب والرقم السري (PIN)');
+      const id = 'c_' + Date.now();
+      const res = await fetch(COUR_URL, { method: 'POST', headers: HDR, body: JSON.stringify({ id: id, name: name, pin: pin }) });
+      if (res.ok) {
+        document.getElementById('newCName').value = '';
+        document.getElementById('newCPin').value = '';
+        await fetchCouriers();
+        alert('تمت إضافة المندوب ' + name + ' بنجاح!');
+      } else {
+        alert('تأكد من تشغيل كود جدول couriers في SQL Editor أولاً.');
+      }
+    }
+
+    async function delCourier(id) {
+      if (!confirm('حذف هذا المندوب؟')) return;
+      await fetch(COUR_URL + '?id=eq.' + id, { method: 'DELETE', headers: HDR });
+      await fetchCouriers();
+    }
 
     async function fetchShipments() {
       const stEl = document.getElementById('syncStatus');
       stEl.style.color = '#eab308'; stEl.innerText = '⏳ مزامنة...';
       try {
-        const res = await fetch(API_URL + '?select=*&order=id.asc', { headers: HEADERS });
+        const res = await fetch(API_URL + '?select=*&order=id.asc', { headers: HDR });
         if (!res.ok) throw new Error(await res.text());
         allOrders = await res.json();
         stEl.style.color = '#22c55e'; stEl.innerText = '● متصل';
         renderList();
       } catch (err) {
         stEl.style.color = '#ef4444'; stEl.innerText = '❌ خطأ';
-        document.getElementById('lst').innerHTML = '<div style="text-align:center;color:#f87171;padding:20px;">خطأ اتصال: ' + err.message + '</div>';
       }
     }
 
+    async function fetchAll() {
+      await fetchCouriers();
+      await fetchShipments();
+    }
+
     async function updateCloudOrder(id, updates) {
-      document.getElementById('syncStatus').innerText = '⏳ حفظ...';
-      const res = await fetch(API_URL + '?id=eq.' + id, { method: 'PATCH', headers: HEADERS, body: JSON.stringify(updates) });
-      if (res.ok) await fetchShipments();
+      const stEl = document.getElementById('syncStatus');
+      stEl.style.color = '#eab308'; stEl.innerText = '⏳ حفظ...';
+      try {
+        let res = await fetch(API_URL + '?id=eq.' + id, { method: 'PATCH', headers: HDR, body: JSON.stringify(updates) });
+        if (!res.ok && updates.reason !== undefined) {
+          delete updates.reason;
+          res = await fetch(API_URL + '?id=eq.' + id, { method: 'PATCH', headers: HDR, body: JSON.stringify(updates) });
+        }
+        if (res.ok) {
+          await fetchShipments();
+        } else {
+          alert('خطأ بالحفظ: ' + await res.text());
+        }
+      } catch (e) {
+        alert('تعذر الحفظ: ' + e.message);
+      }
     }
 
     async function deleteCloudOrder(id) {
       if (!confirm('حذف الشحنة نهائياً؟')) return;
-      await fetch(API_URL + '?id=eq.' + id, { method: 'DELETE', headers: HEADERS });
+      await fetch(API_URL + '?id=eq.' + id, { method: 'DELETE', headers: HDR });
       await fetchShipments();
     }
 
@@ -141,12 +251,18 @@
     function confirmRet(r) { const id = document.getElementById('retId').value; closeM('mRet'); updateCloudOrder(id, { status: 'returned', collected_amount: 0, reason: r }); }
     function openTr(id) { document.getElementById('trId').value = id; openM('mTr'); }
     function confirmTr() { const id = document.getElementById('trId').value, c = document.getElementById('trCourier').value; closeM('mTr'); updateCloudOrder(id, { courier_id: c }); }
+    function openShp(id) { document.getElementById('shpId').value = id; openM('mShp'); }
+    function confirmShp() { const id = document.getElementById('shpId').value, amt = Number(document.getElementById('shpAmt').value)||0; closeM('mShp'); updateCloudOrder(id, { status: 'shipping_only', collected_amount: amt, reason: '' }); }
+    function openP(id) { document.getElementById('pId').value = id; openM('mP'); }
+    function confirmP() { const id = document.getElementById('pId').value, amt = Number(document.getElementById('pAmt').value)||0; closeM('mP'); updateCloudOrder(id, { status: 'partial', collected_amount: amt, reason: '' }); }
+    function openR(id) { document.getElementById('rId').value = id; openM('mR'); }
+    function confirmR() { const id = document.getElementById('rId').value, d = document.getElementById('rDate').value; closeM('mR'); updateCloudOrder(id, { status: 'rescheduled', collected_amount: 0, rescheduled_date: d, reason: '' }); }
 
     function sendMyLocation(cid) {
-      if (!navigator.geolocation) return;
+      if (!navigator.geolocation || !couriersMap[cid]) return;
       navigator.geolocation.getCurrentPosition(async function(p) {
-        const payload = { courier_id: cid, courier_name: COURIERS[cid].name, lat: p.coords.latitude, lng: p.coords.longitude, updated_at: new Date().toISOString() };
-        await fetch(LOC_URL + '?on_conflict=courier_id', { method: 'POST', headers: Object.assign({}, HEADERS, { 'Prefer': 'resolution=merge-duplicates' }), body: JSON.stringify(payload) });
+        const payload = { courier_id: cid, courier_name: couriersMap[cid].name, lat: p.coords.latitude, lng: p.coords.longitude, updated_at: new Date().toISOString() };
+        await fetch(LOC_URL + '?on_conflict=courier_id', { method: 'POST', headers: Object.assign({}, HDR, { 'Prefer': 'resolution=merge-duplicates' }), body: JSON.stringify(payload) });
       });
     }
 
@@ -155,7 +271,7 @@
       const box = document.getElementById('locList');
       box.innerHTML = 'جاري جلب المواقع...';
       try {
-        const res = await fetch(LOC_URL + '?select=*', { headers: HEADERS });
+        const res = await fetch(LOC_URL + '?select=*', { headers: HDR });
         const locs = await res.json();
         if (!locs.length) { box.innerHTML = '<p style="color:var(--m);">لا يوجد مناديب متصلون بـ GPS حالياً.</p>'; return; }
         let h = '';
@@ -169,93 +285,6 @@
 
     function renderList() {
       const q = (document.getElementById('q').value || '').trim().toLowerCase();
-      const cid = document.getElementById('cF').value;
+      const cid = document.getElementById('cF').value || 'all';
       const filtered = allOrders.filter(s => {
-        const mQ = !q || String(s.tracking_code||'').toLowerCase().includes(q) || String(s.recipient_name||'').toLowerCase().includes(q) || String(s.delivery_address||'').toLowerCase().includes(q) || String(s.recipient_phone||'').includes(q);
-        return mQ && (cid === 'all' || s.courier_id === cid);
-      });
-
-      let done = 0, money = 0, html = '';
-      filtered.forEach((s, idx) => {
-        const cod = Number(s.cod_amount || 0), coll = Number(s.collected_amount || 0);
-        if (['delivered', 'shipping_only', 'partial'].includes(s.status)) { done++; money += coll; }
-        const rsn = s.reason ? ' (' + s.reason + ')' : '';
-        let badge = s.status === 'delivered' ? 'تم التسليم' + rsn + ' ✓' : s.status === 'shipping_only' ? 'شحن ('+coll+'ج)' : s.status === 'partial' ? 'استلام جزئي' : s.status === 'rescheduled' ? 'مؤجل: '+(s.rescheduled_date||'') : s.status === 'returned' ? 'مرتجع' + rsn + ' ✕' : 'قيد التوصيل';
-        const cName = COURIERS[s.courier_id] ? COURIERS[s.courier_id].name : (s.courier_id || '');
-        const ph = String(s.recipient_phone||'').replace(/[^0-9]/g,'');
-        const wa = ph ? 'https://wa.me/2'+ph+'?text='+encodeURIComponent('السلام عليكم أستاذ '+s.recipient_name+'، شحنتك ('+s.tracking_code+') مطلوب '+cod+' ج.م') : '#';
-
-        html += '<div class="card"><div style="display:flex;justify-content:space-between;font-weight:bold;margin-bottom:4px;"><span style="color:#38bdf8;">#'+(idx+1)+' 🏷️ '+(s.tracking_code||'')+' <small style="color:var(--m);">['+cName+']</small></span><span style="font-size:0.72rem;padding:2px 6px;border-radius:4px;background:#334155;">'+badge+'</span></div><div style="font-weight:600;">'+(s.recipient_name||'')+'</div><div style="font-size:0.75rem;color:var(--m);margin:2px 0;">'+(s.delivery_address||'')+'</div><div style="display:flex;justify-content:space-between;background:rgba(0,0,0,0.25);padding:4px 8px;border-radius:4px;margin:6px 0;font-size:0.8rem;"><span>المطلوب: <b>'+cod+'ج</b></span><span>المحصل: <b style="color:#38bdf8;">'+coll+'ج</b></span></div><div class="acts"><a href="tel:'+s.recipient_phone+'" class="btn-a">📞 اتصال</a><a href="'+wa+'" target="_blank" class="btn-a" style="border-color:#25d366;color:#25d366;">💬 واتساب</a><a href="https://maps.google.com/?q='+encodeURIComponent(s.delivery_address||'')+'" target="_blank" class="btn-a">🗺️ خريطة</a></div><div class="st-g"><button type="button" class="btn-s" style="background:var(--s);grid-column:span 2;" onclick="openDel('+s.id+','+cod+')">تم التسليم ✓</button><button type="button" class="btn-s" style="background:#8b5cf6;" onclick="openP('+s.id+')">استلام جزئي</button><button type="button" class="btn-s" style="background:#0d9488;" onclick="openShp('+s.id+')">شحن فقط 🚚</button><button type="button" class="btn-s" style="background:var(--w);" onclick="openR('+s.id+')">تأجيل 📅</button><button type="button" class="btn-s" style="background:var(--d);" onclick="openRet('+s.id+')">مرتجع ✕</button></div>'+(currentRole==='admin'?'<div class="adm-bar"><button type="button" class="btn-adm" style="background:#0284c7;" onclick="openTr('+s.id+')">🔄 تحويل لمندوب</button><button type="button" class="btn-adm" style="background:#b91c1c;" onclick="deleteCloudOrder('+s.id+')">🗑️ حذف</button></div>':'')+'</div>';
-      });
-
-      document.getElementById('lst').innerHTML = html || '<p style="text-align:center;color:var(--m);margin-top:30px;">لا توجد شحنات.</p>';
-      document.getElementById('kC').innerText = done;
-      document.getElementById('kM').innerText = money + ' ج.م';
-    }
-
-    function openShp(id){ document.getElementById('shpId').value = id; openM('mShp'); }
-    function confirmShp(){ const id=document.getElementById('shpId').value, amt=Number(document.getElementById('shpAmt').value)||0; closeM('mShp'); updateCloudOrder(id,{status:'shipping_only',collected_amount:amt,reason:''}); }
-    function openP(id){ document.getElementById('pId').value = id; openM('mP'); }
-    function confirmP(){ const id=document.getElementById('pId').value, amt=Number(document.getElementById('pAmt').value)||0; closeM('mP'); updateCloudOrder(id,{status:'partial',collected_amount:amt,reason:''}); }
-    function openR(id){ document.getElementById('rId').value = id; openM('mR'); }
-    function confirmR(){ const id=document.getElementById('rId').value, d=document.getElementById('rDate').value; closeM('mR'); updateCloudOrder(id,{status:'rescheduled',collected_amount:0,rescheduled_date:d,reason:''}); }
-
-    function uploadCSVToCloud() {
-      const file = document.getElementById('csvFile').files[0];
-      if (!file) return alert('اختر ملف CSV أولاً');
-      const courier = document.getElementById('csvCourier').value;
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        let text = new TextDecoder('utf-8').decode(e.target.result);
-        if (text.includes('\uFFFD')) text = new TextDecoder('windows-1256').decode(e.target.result);
-        const lines = text.split(/\r?\n/).filter(r => r.trim());
-        const rows = [];
-        for (let i = 1; i < lines.length; i++) {
-          const cols = lines[i].split(lines[i].includes(';') ? ';' : ',');
-          if (cols.length >= 4) rows.push({ tracking_code:cleanText(cols[0]), recipient_name:cleanText(cols[1]), recipient_phone:cleanText(cols[2]), delivery_address:cleanText(cols[3]), cod_amount:Number(cleanText(cols[4]).replace(/[^0-9.]/g,''))||0, courier_id:courier, status:'out_for_delivery', collected_amount:0 });
-        }
-        if (rows.length) {
-          const res = await fetch(API_URL, { method: 'POST', headers: HEADERS, body: JSON.stringify(rows) });
-          if (res.ok) { alert('تم رفع ' + rows.length + ' شحنة!'); closeM('mX'); await fetchShipments(); }
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function applySession(role) {
-      const cf = document.getElementById('cF'), bx = document.getElementById('btnXls'), bl = document.getElementById('btnLoc');
-      if (role === 'admin') {
-        currentRole = 'admin'; currentCourierId = '';
-        document.getElementById('uN').innerText = '👑 المدير';
-        cf.value = 'all'; cf.disabled = false; bx.style.display = 'inline-flex'; bl.style.display = 'inline-flex';
-      } else {
-        currentRole = 'courier'; currentCourierId = role;
-        document.getElementById('uN').innerText = '🚴 ' + COURIERS[role].name;
-        cf.value = role; cf.disabled = true; bx.style.display = 'none'; bl.style.display = 'none';
-        sendMyLocation(role);
-      }
-      renderList();
-    }
-
-    function switchRole() {
-      const r = document.getElementById('roleSel').value, pin = document.getElementById('pinIn').value.trim();
-      const expected = r === 'admin' ? ADMIN_PIN : COURIERS[r].pin;
-      if (pin !== expected) { alert('الرقم السري (PIN) غير صحيح!'); return; }
-      localStorage.setItem('am_saved_role', r);
-      document.getElementById('pinIn').value = '';
-      closeM('mL'); applySession(r);
-    }
-
-    function doScan(input) {
-      if (!input.files || !input.files[0]) return;
-      const c = prompt('أدخل كود الشحنة:');
-      if (c) { document.getElementById('q').value = c.trim(); renderList(); }
-    }
-
-    const saved = localStorage.getItem('am_saved_role');
-    if (saved && (saved === 'admin' || COURIERS[saved])) applySession(saved);
-    setInterval(() => { if (currentRole === 'courier' && currentCourierId) sendMyLocation(currentCourierId); }, 30000);
-    fetchShipments();
-  </script>
-</body>
-</html>
+        const mQ = !q || String(s.tracking_code||'').toLowerCase().includes(q) || String(s.recipient_name||'').toLowerCase().includes(q) || String(s.delivery_address||'').toLowe
