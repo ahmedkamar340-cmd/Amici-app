@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>أميتشي إكسبريس - السحابي</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root{--bg:#0f172a;--c:#1e293b;--b:#334155;--m:#94a3b8;--s:#16a34a;--w:#d97706;--d:#dc2626;}
     *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;}
@@ -102,18 +103,18 @@
     </div>
   </div>
 
-  <!-- نافذة رفع شيت CSV للسحابة -->
+  <!-- نافذة رفع شيت Excel أو CSV -->
   <div class="modal" id="mX">
     <div class="m-box">
-      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت CSV للسحابة</b><span style="cursor:pointer;" onclick="closeM('mX')">✕</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;"><b>📁 رفع شيت (Excel / CSV)</b><span style="cursor:pointer;" onclick="closeM('mX')">✕</span></div>
       <label style="font-size:0.7rem;color:var(--m);">تخصيص للمندوب:</label>
       <select id="csvCourier" class="c-in" style="margin-bottom:8px;">
         <option value="ahmed">أحمد</option>
         <option value="biko">بيكو</option>
         <option value="mina">مينا عبد النور</option>
       </select>
-      <input type="file" id="csvFile" accept=".csv,.txt" class="c-in" style="margin-bottom:8px;">
-      <button type="button" class="btn-s" style="background:var(--s);width:100%;" onclick="uploadCSVToCloud()">رفع وتوزيع فوري ⬆️</button>
+      <input type="file" id="csvFile" accept=".xlsx,.xls,.csv,.txt" class="c-in" style="margin-bottom:8px;">
+      <button type="button" class="btn-s" style="background:var(--s);width:100%;" onclick="uploadSheetToCloud()">رفع وتوزيع فوري ⬆️</button>
     </div>
   </div>
 
@@ -142,8 +143,8 @@
     function openM(id){ document.getElementById(id).style.display = 'flex'; }
     function closeM(id){ document.getElementById(id).style.display = 'none'; }
 
-    function cleanText(str) {
-      return String(str || '').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD\\]/g, '').replace(/["']/g, '').trim();
+    function safeStr(val) {
+      return String(val ?? '').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD\\]/g, '').trim();
     }
 
     async function fetchShipments() {
@@ -154,7 +155,7 @@
       const { data, error } = await db.from('shipments').select('*').order('id', { ascending: true });
       if (error) {
         stEl.style.color = '#ef4444';
-        stEl.innerText = '❌ خطأ جدول';
+        stEl.innerText = '❌ خطأ اتصال';
         return;
       }
 
@@ -239,131 +240,5 @@
             <button type="button" class="btn-s" style="background:var(--w);" onclick="openR(${s.id})">تأجيل 📅</button>
             <button type="button" class="btn-s" style="background:var(--d);" onclick="updateCloudOrder(${s.id}, {status:'returned', collected_amount:0})">مرتجع ✕</button>
           </div>
-          ${currentRole === 'admin' ? `<div class="adm-bar"><button type="button" class="btn-adm" style="background:#b91c1c;" onclick="deleteCloudOrder(${s.id})">🗑️ حذف الشحنة</button></div>` : ''}
-        </div>`;
-      });
-
-      if (!html) {
-        html = `<div style="text-align:center;color:var(--m);margin-top:30px;padding:15px;">
-          <p style="margin-bottom:12px;">لا توجد شحنات معروضة حالياً.</p>
-          <button type="button" class="btn-s" style="background:#0284c7;padding:10px 16px;" onclick="addSampleData()">+ إضافة شحنات تجريبية للاختبار</button>
-        </div>`;
-      }
-
-      document.getElementById('lst').innerHTML = html;
-      document.getElementById('kC').innerText = done;
-      document.getElementById('kM').innerText = money + ' ج.م';
-    }
-
-    function openShp(id) { document.getElementById('shpId').value = id; document.getElementById('shpAmt').value = 75; openM('mShp'); }
-    function confirmShp() {
-      const id = document.getElementById('shpId').value;
-      const amt = Number(document.getElementById('shpAmt').value) || 0;
-      closeM('mShp');
-      updateCloudOrder(id, { status: 'shipping_only', collected_amount: amt });
-    }
-
-    function openP(id) { document.getElementById('pId').value = id; document.getElementById('pAmt').value = ''; openM('mP'); }
-    function confirmP() {
-      const id = document.getElementById('pId').value;
-      const amt = Number(document.getElementById('pAmt').value) || 0;
-      closeM('mP');
-      updateCloudOrder(id, { status: 'partial', collected_amount: amt });
-    }
-
-    function openR(id) { document.getElementById('rId').value = id; openM('mR'); }
-    function confirmR() {
-      const id = document.getElementById('rId').value;
-      const d = document.getElementById('rDate').value;
-      closeM('mR');
-      updateCloudOrder(id, { status: 'rescheduled', collected_amount: 0, rescheduled_date: d });
-    }
-
-    function uploadCSVToCloud() {
-      const file = document.getElementById('csvFile').files[0];
-      if (!file) return alert('اختر ملف CSV أولاً');
-      if (file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
-        return alert('يرجى حفظ الملف من الإكسل بصيغة CSV UTF-8 أولاً قبل الرفع.');
-      }
-      const courier = document.getElementById('csvCourier').value;
-
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        const buffer = e.target.result;
-        let text = new TextDecoder('utf-8').decode(buffer);
-        if (text.includes('\uFFFD')) {
-          text = new TextDecoder('windows-1256').decode(buffer);
-        }
-
-        const lines = text.split(/\r?\n/).filter(r => r.trim());
-        const rowsToInsert = [];
-
-        for (let i = 1; i < lines.length; i++) {
-          const sep = lines[i].includes(';') ? ';' : ',';
-          const cols = lines[i].split(sep);
-          if (cols.length >= 4) {
-            rowsToInsert.push({
-              tracking_code: cleanText(cols[0]),
-              recipient_name: cleanText(cols[1]),
-              recipient_phone: cleanText(cols[2]),
-              delivery_address: cleanText(cols[3]),
-              cod_amount: Number(cleanText(cols[4]).replace(/[^0-9.]/g, '')) || 0,
-              courier_id: courier,
-              status: 'out_for_delivery',
-              collected_amount: 0
-            });
-          }
-        }
-
-        if (rowsToInsert.length > 0) {
-          const { error } = await db.from('shipments').insert(rowsToInsert);
-          if (error) {
-            alert('خطأ أثناء الرفع: ' + error.message);
-          } else {
-            alert('تم رفع وتوزيع ' + rowsToInsert.length + ' شحنة في السحابة بنجاح!');
-            closeM('mX');
-            await fetchShipments();
-          }
-        } else {
-          alert('لم يتم العثور على صفوف صالحة في الملف.');
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-
-    function switchRole() {
-      const r = document.getElementById('roleSel').value;
-      const cf = document.getElementById('cF');
-      const btnXls = document.getElementById('btnXls');
-      if (r === 'admin') {
-        currentRole = 'admin';
-        document.getElementById('uN').innerText = '👑 المدير';
-        cf.disabled = false;
-        btnXls.style.display = 'inline-flex';
-      } else {
-        currentRole = 'courier';
-        document.getElementById('uN').innerText = '🚴 ' + r;
-        cf.value = r;
-        cf.disabled = true;
-        btnXls.style.display = 'none';
-      }
-      closeM('mL');
-      renderList();
-    }
-
-    function doScan(input) {
-      if (!input.files || !input.files[0]) return;
-      const c = prompt('أدخل كود الشحنة الممسوح:');
-      if (c) { document.getElementById('q').value = c.trim(); renderList(); }
-    }
-
-    db.channel('realtime-shipments')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments' }, () => {
-        fetchShipments();
-      })
-      .subscribe();
-
-    fetchShipments();
-  </script>
-</body>
-</html>
+          ${currentRole === 'admin' ? `<div class="adm-bar"><button type="button" class="btn-adm" style="background:#b91c1c;" onclick="deleteCloudOrder(${s.id})">🗑️ حذف الشحنة</button></div>
+    
