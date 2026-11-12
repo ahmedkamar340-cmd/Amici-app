@@ -204,4 +204,58 @@
       const file = document.getElementById('csvFile').files[0];
       if (!file) return alert('اختر ملف CSV أولاً');
       const courier = document.getElementById('csvCourier').value;
-      const reader = new FileReader
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        let text = new TextDecoder('utf-8').decode(e.target.result);
+        if (text.includes('\uFFFD')) text = new TextDecoder('windows-1256').decode(e.target.result);
+        const lines = text.split(/\r?\n/).filter(r => r.trim());
+        const rows = [];
+        for (let i = 1; i < lines.length; i++) {
+          const cols = lines[i].split(lines[i].includes(';') ? ';' : ',');
+          if (cols.length >= 4) rows.push({ tracking_code:cleanText(cols[0]), recipient_name:cleanText(cols[1]), recipient_phone:cleanText(cols[2]), delivery_address:cleanText(cols[3]), cod_amount:Number(cleanText(cols[4]).replace(/[^0-9.]/g,''))||0, courier_id:courier, status:'out_for_delivery', collected_amount:0 });
+        }
+        if (rows.length) {
+          const res = await fetch(API_URL, { method: 'POST', headers: HEADERS, body: JSON.stringify(rows) });
+          if (res.ok) { alert('تم رفع ' + rows.length + ' شحنة!'); closeM('mX'); await fetchShipments(); }
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    function applySession(role) {
+      const cf = document.getElementById('cF'), bx = document.getElementById('btnXls'), bl = document.getElementById('btnLoc');
+      if (role === 'admin') {
+        currentRole = 'admin'; currentCourierId = '';
+        document.getElementById('uN').innerText = '👑 المدير';
+        cf.value = 'all'; cf.disabled = false; bx.style.display = 'inline-flex'; bl.style.display = 'inline-flex';
+      } else {
+        currentRole = 'courier'; currentCourierId = role;
+        document.getElementById('uN').innerText = '🚴 ' + COURIERS[role].name;
+        cf.value = role; cf.disabled = true; bx.style.display = 'none'; bl.style.display = 'none';
+        sendMyLocation(role);
+      }
+      renderList();
+    }
+
+    function switchRole() {
+      const r = document.getElementById('roleSel').value, pin = document.getElementById('pinIn').value.trim();
+      const expected = r === 'admin' ? ADMIN_PIN : COURIERS[r].pin;
+      if (pin !== expected) { alert('الرقم السري (PIN) غير صحيح!'); return; }
+      localStorage.setItem('am_saved_role', r);
+      document.getElementById('pinIn').value = '';
+      closeM('mL'); applySession(r);
+    }
+
+    function doScan(input) {
+      if (!input.files || !input.files[0]) return;
+      const c = prompt('أدخل كود الشحنة:');
+      if (c) { document.getElementById('q').value = c.trim(); renderList(); }
+    }
+
+    const saved = localStorage.getItem('am_saved_role');
+    if (saved && (saved === 'admin' || COURIERS[saved])) applySession(saved);
+    setInterval(() => { if (currentRole === 'courier' && currentCourierId) sendMyLocation(currentCourierId); }, 30000);
+    fetchShipments();
+  </script>
+</body>
+</html>
