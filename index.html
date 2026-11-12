@@ -49,8 +49,8 @@
       <div class="sel-b">
         <label style="font-size:0.65rem;color:var(--m);">المندوب:</label>
         <select id="cF" class="c-in" onchange="renderList()">
-          <option value="all">عرض كل المناديب</option>
-          <option value="ahmed" selected>أحمد</option>
+          <option value="all" selected>عرض كل المناديب</option>
+          <option value="ahmed">أحمد</option>
           <option value="biko">بيكو</option>
           <option value="mina">مينا عبد النور</option>
         </select>
@@ -142,6 +142,10 @@
     function openM(id){ document.getElementById(id).style.display = 'flex'; }
     function closeM(id){ document.getElementById(id).style.display = 'none'; }
 
+    function cleanText(str) {
+      return String(str || '').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD\\]/g, '').replace(/["']/g, '').trim();
+    }
+
     async function fetchShipments() {
       const stEl = document.getElementById('syncStatus');
       stEl.style.color = '#eab308';
@@ -151,7 +155,6 @@
       if (error) {
         stEl.style.color = '#ef4444';
         stEl.innerText = '❌ خطأ جدول';
-        document.getElementById('lst').innerHTML = `<p style="text-align:center;color:#f87171;padding:20px;">تأكد من تشغيل كود إنشاء الجدول في SQL Editor.<br><small>${error.message}</small></p>`;
         return;
       }
 
@@ -164,15 +167,12 @@
     async function updateCloudOrder(id, updates) {
       document.getElementById('syncStatus').innerText = '⏳ حفظ...';
       const { error } = await db.from('shipments').update(updates).eq('id', id);
-      if (error) {
-        alert('فشل الحفظ: ' + error.message);
-      } else {
-        await fetchShipments();
-      }
+      if (error) alert('فشل الحفظ: ' + error.message);
+      else await fetchShipments();
     }
 
     async function deleteCloudOrder(id) {
-      if (!confirm('هل تريد حذف هذه الشحنة من قاعدة البيانات؟')) return;
+      if (!confirm('حذف هذه الشحنة نهائياً؟')) return;
       await db.from('shipments').delete().eq('id', id);
       await fetchShipments();
     }
@@ -184,8 +184,8 @@
         { tracking_code:"12282", recipient_name:"فيلوباتير", recipient_phone:"01507992457", delivery_address:"105 ش المكس القباري - اسكندرية", cod_amount:610, collected_amount:0, status:"out_for_delivery", courier_id:"ahmed" }
       ];
       const { error } = await db.from('shipments').insert(samples);
-      if (error) alert(error.message);
-      else fetchShipments();
+      if (error) alert('خطأ: ' + error.message);
+      else await fetchShipments();
     }
 
     function renderList() {
@@ -245,7 +245,7 @@
 
       if (!html) {
         html = `<div style="text-align:center;color:var(--m);margin-top:30px;padding:15px;">
-          <p style="margin-bottom:12px;">قاعدة البيانات السحابية متصلة وجاهزة، ولا توجد شحنات حالياً.</p>
+          <p style="margin-bottom:12px;">لا توجد شحنات معروضة حالياً.</p>
           <button type="button" class="btn-s" style="background:#0284c7;padding:10px 16px;" onclick="addSampleData()">+ إضافة شحنات تجريبية للاختبار</button>
         </div>`;
       }
@@ -282,22 +282,32 @@
     function uploadCSVToCloud() {
       const file = document.getElementById('csvFile').files[0];
       if (!file) return alert('اختر ملف CSV أولاً');
+      if (file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls')) {
+        return alert('يرجى حفظ الملف من الإكسل بصيغة CSV UTF-8 أولاً قبل الرفع.');
+      }
       const courier = document.getElementById('csvCourier').value;
 
       const reader = new FileReader();
       reader.onload = async function(e) {
-        const lines = e.target.result.split(/\r?\n/).filter(r => r.trim());
+        const buffer = e.target.result;
+        let text = new TextDecoder('utf-8').decode(buffer);
+        if (text.includes('\uFFFD')) {
+          text = new TextDecoder('windows-1256').decode(buffer);
+        }
+
+        const lines = text.split(/\r?\n/).filter(r => r.trim());
         const rowsToInsert = [];
 
         for (let i = 1; i < lines.length; i++) {
-          const cols = lines[i].split(',');
+          const sep = lines[i].includes(';') ? ';' : ',';
+          const cols = lines[i].split(sep);
           if (cols.length >= 4) {
             rowsToInsert.push({
-              tracking_code: cols[0].replace(/["']/g, '').trim(),
-              recipient_name: cols[1].replace(/["']/g, '').trim(),
-              recipient_phone: cols[2].replace(/["']/g, '').trim(),
-              delivery_address: cols[3].replace(/["']/g, '').trim(),
-              cod_amount: Number(cols[4]) || 0,
+              tracking_code: cleanText(cols[0]),
+              recipient_name: cleanText(cols[1]),
+              recipient_phone: cleanText(cols[2]),
+              delivery_address: cleanText(cols[3]),
+              cod_amount: Number(cleanText(cols[4]).replace(/[^0-9.]/g, '')) || 0,
               courier_id: courier,
               status: 'out_for_delivery',
               collected_amount: 0
@@ -312,11 +322,13 @@
           } else {
             alert('تم رفع وتوزيع ' + rowsToInsert.length + ' شحنة في السحابة بنجاح!');
             closeM('mX');
-            fetchShipments();
+            await fetchShipments();
           }
+        } else {
+          alert('لم يتم العثور على صفوف صالحة في الملف.');
         }
       };
-      reader.readAsText(file);
+      reader.readAsArrayBuffer(file);
     }
 
     function switchRole() {
