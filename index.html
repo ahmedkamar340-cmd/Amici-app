@@ -8,11 +8,16 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0f172a">
 <title>أميتشي إكسبريس</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230284c7'/><text x='50' y='66' font-size='55' text-anchor='middle' fill='white'>🚚</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230284c7'/><text x='50' y='66' font-size='55' text-anchor='middle' fill='white'>🚚</text></svg>">
 <link rel="manifest" href='data:application/manifest+json,{"name":"أميتشي إكسبريس","short_name":"أميتشي","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a"}'>
 <style>
 :root{--bg:#0f172a;--c:#1e293b;--b:#334155;--m:#94a3b8;--s:#16a34a;--w:#d97706;--d:#dc2626}
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
 body{background:var(--bg);color:#f8fafc;padding-bottom:80px}
+#splash{position:fixed;inset:0;background:radial-gradient(circle at center,#1e293b 0%,#0f172a 100%);z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;transition:opacity .4s ease}
+.logo-box{width:96px;height:96px;background:linear-gradient(135deg,#0284c7,#38bdf8);border-radius:26px;display:flex;justify-content:center;align-items:center;box-shadow:0 12px 30px rgba(56,189,248,.35);margin-bottom:16px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
 header{background:var(--c);padding:10px;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:50}
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .btns{display:flex;gap:4px;overflow-x:auto}
@@ -35,9 +40,21 @@ header{background:var(--c);padding:10px;border-bottom:1px solid var(--b);positio
 </style>
 </head>
 <body>
+
+<div id="splash">
+  <div class="logo-box">
+    <svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+    </svg>
+  </div>
+  <div style="font-size:1.75rem;font-weight:900;color:#fff;letter-spacing:.5px">أميتشي</div>
+  <div style="font-size:.82rem;color:#38bdf8;font-weight:700;margin-top:4px;letter-spacing:1.5px">AMICI EXPRESS</div>
+  <div style="font-size:.75rem;color:#94a3b8;margin-top:10px">للشحن والتوصيل السريع</div>
+</div>
+
 <header>
   <div class="top">
-    <h1 style="font-size:.95rem;color:#38bdf8">أميتشي <span id="st" style="font-size:.65rem;color:#eab308">⏳ اتصال...</span></h1>
+    <h1 style="font-size:.95rem;color:#38bdf8;display:flex;align-items:center;gap:5px">🚚 أميتشي <span id="st" style="font-size:.65rem;color:#eab308">⏳ اتصال...</span></h1>
     <div class="btns">
       <label class="bh" style="background:#0284c7">📷<input type="file" accept="image/*" capture="environment" style="display:none" onchange="doScan(this)"></label>
       <button class="bh" style="background:#059669" id="bX" onclick="oM('mX')">📁 شيت</button>
@@ -72,6 +89,8 @@ header{background:var(--c);padding:10px;border-bottom:1px solid var(--b);positio
 <div class="m" id="mL"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🔐 تسجيل الدخول</b><span onclick="cM('mL')">✕</span></div><select id="rSel" class="in" style="margin-bottom:8px"></select><input type="password" id="pinIn" class="in" placeholder="الرقم السري PIN" inputmode="numeric" style="margin-bottom:8px"><button class="bs" style="background:#2563eb;width:100%" onclick="login()">دخول</button></div></div>
 
 <script>
+setTimeout(()=>{const s=document.getElementById('splash');if(s){s.style.opacity='0';setTimeout(()=>s.style.display='none',400);}},1600);
+
 const BASE='https://difabkjpyypaylnofbcl.supabase.co/rest/v1/';
 const API=BASE+'shipments',COUR=BASE+'couriers',LOC=BASE+'courier_locations';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
