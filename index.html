@@ -32,7 +32,7 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:4px}
 .bs{border:none;padding:7px;border-radius:5px;font-weight:700;font-size:.74rem;cursor:pointer;color:#fff}
 .ab{display:flex;gap:4px;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b)}
-.badm{flex:1;border:none;color:#fff;padding:5px;border-radius:4px;font-size:.7rem;cursor:pointer;font-weight:700}
+.badm{flex:1;border:none;color:#fff;padding:5px;border-radius:4px;font-size:.68rem;cursor:pointer;font-weight:700}
 .srt{background:#081220;border:1px solid var(--b);color:#60a5fa;padding:2px 5px;border-radius:4px;font-size:.7rem;cursor:pointer}
 .m{display:none;position:fixed;inset:0;background:rgba(4,10,20,.88);z-index:100;justify-content:center;align-items:center;padding:12px}
 .mb{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:350px;padding:11px;max-height:90vh;overflow-y:auto}
@@ -85,27 +85,43 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 </div>
 <div id="lst"><p style="text-align:center;color:var(--m);margin-top:30px">جاري التحميل...</p></div>
 
-<!-- بوليصة الشحن للطباعة -->
-<div class="m" id="mLbl">
-  <div class="mb" style="max-width:380px">
-    <div class="no-pr" style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🖨️ بوليصة شحن أميتشي</b><span onclick="cM('mLbl')">✕</span></div>
-    <div id="lblContent" class="lbl-box"></div>
-    <button class="bs no-pr" style="background:#2563eb;width:100%;margin-top:8px" onclick="window.print()">🖨️ طباعة البوليصة الآن</button>
-  </div>
-</div>
+<div class="m" id="mLbl"><div class="mb" style="max-width:380px"><div class="no-pr" style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🖨️ بوليصة شحن أميتشي</b><span onclick="cM('mLbl')">✕</span></div><div id="lblContent" class="lbl-box"></div><button class="bs no-pr" style="background:#2563eb;width:100%;margin-top:8px" onclick="window.print()">🖨️ طباعة البوليصة الآن</button></div></div>
+
+<div class="m" id="mImg"><div class="mb" style="text-align:center"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🖼️ إثبات المرتجع المصور</b><span onclick="cM('mImg')">✕</span></div><img id="vImg" src="" style="width:100%;border-radius:6px;border:1px solid var(--b)"></div></div>
 
 <div class="m" id="mQrSend"><div class="mb" style="text-align:center"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📲 كود العميل (QR)</b><span onclick="cM('mQrSend')">✕</span></div><div id="qrInfo" style="font-size:.8rem;color:#93c5fd;margin-bottom:8px;font-weight:700"></div><div style="background:#fff;padding:10px;border-radius:10px;display:inline-block;margin-bottom:8px"><img id="qrImg" src="" style="width:170px;height:170px;display:block"></div><a id="qrWa" href="#" target="_blank" class="bs" style="background:#16a34a;display:block;text-decoration:none">💬 إرسال الكود للعميل واتساب</a></div></div>
 
 <div class="m" id="mQrScan"><div class="mb" style="text-align:center"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📷 مسح QR العميل / البوليصة</b><span onclick="stSc()">✕</span></div><video id="qrVid" playsinline style="width:100%;border-radius:8px;background:#000;max-height:200px;margin-bottom:8px"></video><div id="qrMsg" style="font-size:.74rem;color:#93c5fd;margin-bottom:8px">وجّه الكاميرا نحو كود QR</div><div style="display:flex;gap:4px"><input id="qrMan" class="in" placeholder="أو اكتب رقم الشحنة..."><button class="bs" style="background:#2563eb;white-space:nowrap" onclick="vQr(document.getElementById('qrMan').value)">تأكيد ✓</button></div></div></div>
 
-<div class="m" id="mRep"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📈 التقرير وكشف حساب التاجر</b><span onclick="cM('mRep')">✕</span></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:8px"><input type="month" id="rMo" class="in" onchange="cRep()"><select id="rCo" class="in" onchange="cRep()"></select><select id="rMr" class="in" onchange="cRep()"></select></div><div id="rSum"></div><button class="bs" style="background:#059669;width:100%;margin-top:6px" onclick="expMo()">📥 تحميل كشف الحساب (Excel)</button></div></div>
+<div class="m" id="mRep">
+  <div class="mb">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📈 التقرير وكشف حساب التاجر</b><span onclick="cM('mRep')">✕</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:8px"><input type="month" id="rMo" class="in" onchange="cRep()"><select id="rCo" class="in" onchange="cRep()"></select><select id="rMr" class="in" onchange="cRep()"></select></div>
+    <div id="rSum"></div>
+    <a id="waMerBtn" href="#" target="_blank" class="bs" style="background:#16a34a;display:block;text-align:center;text-decoration:none;margin-top:6px">💬 إرسال التقفيل للتاجر واتساب</a>
+    <button class="bs" style="background:#2563eb;width:100%;margin-top:5px" onclick="expMo()">📥 تحميل كشف الحساب (Excel)</button>
+    <button class="bs" style="background:#7f1d1d;width:100%;margin-top:5px;font-size:.7rem" onclick="cleanArchImgs()">🧹 مسح صور الأرشيف لتوفير المساحة</button>
+  </div>
+</div>
+
+<div class="m" id="mRet">
+  <div class="mb">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>❌ سبب المرتجع</b><span onclick="cM('mRet')">✕</span></div>
+    <div style="background:#081220;padding:6px;border-radius:6px;margin-bottom:6px;border:1px dashed #3b82f6;text-align:center">
+      <label style="font-size:.75rem;color:#60a5fa;cursor:pointer;display:block;font-weight:700">📸 التقط صورة إثبات للمرتجع (اختياري)<input type="file" id="retPic" accept="image/*" capture="environment" style="display:none" onchange="compImg(this)"></label>
+      <span id="picSt" style="font-size:.66rem;color:#93c5fd"></span>
+    </div>
+    <button class="ob" onclick="okRet('لا يرد')">📵 لا يرد</button>
+    <button class="ob" onclick="okRet('مغلق / غير متاح')">📴 مغلق / غير متاح</button>
+    <button class="ob" onclick="okRet('رفض الاستلام')">🚫 رفض الاستلام</button>
+    <button class="ob" onclick="okRet('عنوان خاطئ')">📍 عنوان خاطئ</button>
+    <div style="display:flex;gap:4px"><input id="cRt" class="in" placeholder="سبب آخر..."><button class="bs" style="background:var(--d)" onclick="okRet(document.getElementById('cRt').value||'مرتجع')">حفظ</button></div>
+  </div>
+</div>
 
 <div class="m" id="mAdd"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>➕ أوردر سريع</b><span onclick="cM('mAdd')">✕</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px"><select id="aC" class="in"></select><input id="aMr" class="in" placeholder="اسم التاجر (مثلاً Girly)"></div><input id="aCd" class="in" placeholder="رقم الشحنة" style="margin-bottom:5px"><input id="aNm" class="in" placeholder="اسم العميل" style="margin-bottom:5px"><input id="aPh" class="in" placeholder="الهاتف" style="margin-bottom:5px"><input id="aAd" class="in" placeholder="العنوان" style="margin-bottom:5px"><input id="aAm" type="number" class="in" placeholder="المبلغ" style="margin-bottom:7px"><button class="bs" style="background:var(--s);width:100%" onclick="add1()">حفظ ✓</button></div></div>
-
 <div class="m" id="mX"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📁 رفع إكسل أو لصق</b><span onclick="cM('mX')">✕</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px"><input type="date" id="cD2" class="in"><select id="cC2" class="in"></select></div><input id="cMr2" class="in" placeholder="اسم التاجر / الصفحة (اختياري)" style="margin-bottom:5px"><input type="file" id="cF2" accept=".xlsx,.xls,.csv,.txt" class="in" style="margin-bottom:5px"><button class="bs" style="background:var(--s);width:100%;margin-bottom:7px" onclick="upF()">رفع ملف الإكسل ⬆️</button><textarea id="pBx" class="in" rows="3" placeholder="أو الصق السطور هنا..." style="margin-bottom:5px"></textarea><button class="bs" style="background:#2563eb;width:100%" onclick="upP()">رفع النص الملصوق 📋</button></div></div>
-
 <div class="m" id="mDel"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>✅ طريقة التسليم</b><span onclick="cM('mDel')">✕</span></div><button class="ob" onclick="okDel('كاش')">💵 كاش</button><button class="ob" onclick="okDel('إنستاباي / محفظة')">📱 إنستاباي / محفظة</button><button class="ob" onclick="okDel('بالفرع')">🏢 بالفرع</button></div></div>
-<div class="m" id="mRet"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>❌ سبب المرتجع</b><span onclick="cM('mRet')">✕</span></div><button class="ob" onclick="okRet('لا يرد')">📵 لا يرد</button><button class="ob" onclick="okRet('مغلق / غير متاح')">📴 مغلق / غير متاح</button><button class="ob" onclick="okRet('رفض الاستلام')">🚫 رفض الاستلام</button><button class="ob" onclick="okRet('عنوان خاطئ')">📍 عنوان خاطئ</button><div style="display:flex;gap:4px"><input id="cRt" class="in" placeholder="سبب آخر..."><button class="bs" style="background:var(--d)" onclick="okRet(document.getElementById('cRt').value||'مرتجع')">حفظ</button></div></div></div>
 <div class="m" id="mC"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>👥 المناديب</b><span onclick="cM('mC')">✕</span></div><input id="nCN" class="in" placeholder="اسم المندوب" style="margin-bottom:5px"><input id="nCP" class="in" placeholder="PIN" inputmode="numeric" style="margin-bottom:7px"><button class="bs" style="background:var(--s);width:100%;margin-bottom:7px" onclick="addC()">+ إضافة</button><div id="cBx" style="max-height:140px;overflow-y:auto;font-size:.76rem"></div></div></div>
 <div class="m" id="mTr"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🔄 نقل الأوردر</b><span onclick="cM('mTr')">✕</span></div><select id="tC" class="in" style="margin-bottom:7px"></select><button class="bs" style="background:#2563eb;width:100%" onclick="okTr()">نقل ➜</button></div></div>
 <div class="m" id="mLoc"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📍 المواقع</b><span onclick="cM('mLoc')">✕</span></div><div id="lBx" style="max-height:200px;overflow-y:auto;font-size:.78rem"></div></div></div>
@@ -118,13 +134,36 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 const BASE='https://difabkjpyypaylnofbcl.supabase.co/rest/v1/',API=BASE+'shipments',COUR=BASE+'couriers',LOC=BASE+'courier_locations';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
 const HDR={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'};
-let orders=[],cMap={ahmed:{name:'أحمد',pin:'1111'},biko:{name:'بيكو',pin:'2222'},mina:{name:'مينا عبد النور',pin:'3333'}},role='admin',myId='',sIdx=-1,tab='p',ar=false,cam=null,tmr=null;
+let orders=[],cMap={ahmed:{name:'أحمد',pin:'1111'},biko:{name:'بيكو',pin:'2222'},mina:{name:'مينا عبد النور',pin:'3333'}},role='admin',myId='',sIdx=-1,tab='p',ar=false,cam=null,tmr=null,tmpPic='';
 const td=new Date().toISOString().split('T')[0];document.getElementById('cD2').value=td;document.getElementById('rMo').value=td.slice(0,7);
 const oM=i=>document.getElementById(i).style.display='flex',cM=i=>document.getElementById(i).style.display='none';
 const cln=s=>String(s||'').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD]/g,'').replace(/["']/g,'').trim();
 
 function sTab(t){tab=t;['p','d','i'].forEach(k=>document.getElementById('tb_'+k).classList.toggle('act',k===t));ren();}
 function tgAr(){ar=!ar;document.getElementById('arBn').style.display=ar?'block':'none';document.getElementById('bArT').style.color=ar?'#fbbf24':'#93c5fd';ren();}
+
+// ضغط الصورة على هاتف المندوب إلى ~40 كيلوبايت قبل الرفع
+function compImg(inp){
+  const f=inp.files[0];if(!f)return;
+  document.getElementById('picSt').innerText='⏳ جاري ضغط الصورة...';
+  const rd=new FileReader();
+  rd.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const cv=document.createElement('canvas'),sc=Math.min(1,640/img.width);
+      cv.width=img.width*sc;cv.height=img.height*sc;
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      tmpPic=cv.toDataURL('image/jpeg',0.55);
+      document.getElementById('picSt').innerText='✅ تم تجهيز الصورة ('+Math.round(tmpPic.length/1024)+' KB)';
+    };img.src=e.target.result;
+  };rd.readAsDataURL(f);
+}
+function vwImg(i){document.getElementById('vImg').src=orders[i].proof_img;oM('mImg');}
+async function cleanArchImgs(){
+  if(!confirm('مسح صور الشحنات المؤرشفة لتوفير مساحة السيرفر (مع الاحتفاظ بكافة الأرقام والبيانات)؟'))return;
+  const r=await fetch(API+'?archived=eq.true',{method:'PATCH',headers:HDR,body:JSON.stringify({proof_img:''})});
+  if(r.ok){alert('تم مسح صور الأرشيف وتوفير المساحة بنجاح!');await getS();}
+}
 
 function prLbl(i){
   const s=orders[i];if(!s)return;
@@ -199,7 +238,7 @@ async function upd(i,u,lbl){
   if(lbl&&!confirm('تأكيد الحالة:\n['+lbl+']\nللعميل: '+(it.recipient_name||'')+' ('+(it.tracking_code||'')+')؟'))return;
   document.getElementById('st').innerText='⏳...';
   let r=await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'PATCH',headers:HDR,body:JSON.stringify(u)});
-  if(!r.ok&&u.reason!==undefined){delete u.reason;r=await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'PATCH',headers:HDR,body:JSON.stringify(u)});}
+  if(!r.ok){delete u.reason;delete u.proof_img;r=await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'PATCH',headers:HDR,body:JSON.stringify(u)});}
   if(r.ok)await getS();
 }
 async function delS(i){const it=orders[i];if(it&&confirm('حذف نهائي؟')){await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'DELETE',headers:HDR});await getS();}}
@@ -218,8 +257,8 @@ async function unAr(i){const it=orders[i];if(it){await fetch(API+'?id=eq.'+encod
 
 function oDel(i){sIdx=i;oM('mDel');}
 function okDel(m){cM('mDel');const c=Number(orders[sIdx]?.cod_amount)||0;upd(sIdx,{status:'delivered',collected_amount:c,reason:m},'تم التسليم ('+m+') - '+c+'ج');}
-function oRet(i){sIdx=i;document.getElementById('cRt').value='';oM('mRet');}
-function okRet(r){cM('mRet');upd(sIdx,{status:'returned',collected_amount:0,reason:r},'مرتجع ('+r+')');}
+function oRet(i){sIdx=i;tmpPic='';document.getElementById('cRt').value='';document.getElementById('retPic').value='';document.getElementById('picSt').innerText='';oM('mRet');}
+function okRet(r){cM('mRet');const p={status:'returned',collected_amount:0,reason:r};if(tmpPic)p.proof_img=tmpPic;upd(sIdx,p,'مرتجع ('+r+')');}
 function oTr(i){sIdx=i;oM('mTr');}
 function okTr(){cM('mTr');const c=document.getElementById('tC').value;upd(sIdx,{courier_id:c},'تحويل إلى '+(cMap[c]?.name||c));}
 function oShp(i){sIdx=i;oM('mShp');}
@@ -254,13 +293,13 @@ function ren(){
     const wa=ph?'https://wa.me/2'+ph+'?text='+encodeURIComponent('السلام عليكم '+s.recipient_name+'، شحنتك ('+s.tracking_code+') مطلوب '+cod+' ج.م'):'#';
     const qrB=role==='admin'?'<button class="ba" style="border-color:#38bdf8;color:#38bdf8" onclick="shQr('+idx+')">📲 QR</button>':'';
     const mrTag=s.merchant?'<span style="background:#0f172a;color:#fbbf24;padding:1px 5px;border-radius:4px;font-size:.65rem;margin-right:4px">🏪 '+s.merchant+'</span>':'';
-    // قفل أزرار الحالة على المندوب بمجرد تسجيل حالة للأوردر
+    const picBtn=s.proof_img?'<button class="badm" style="background:#d97706" onclick="vwImg('+idx+')">🖼️ صورة</button>':'';
     const canAct=!ar&&(role==='admin'||isP);
     const lockMsg=(!ar&&role==='courier'&&!isP)?'<div style="text-align:center;font-size:.7rem;color:#93c5fd;background:rgba(8,18,32,.5);padding:4px;border-radius:4px">🔒 تم تسجيل الحالة (التعديل متاح للمدير فقط)</div>':'';
 
     h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:3px"><span style="color:#60a5fa">#'+n+' 🏷️ '+(s.tracking_code||'')+' <small style="color:var(--m)">['+cn+']</small>'+mrTag+'</span><div style="display:flex;gap:3px;align-items:center">'+(isP&&!ar?'<button class="srt" onclick="mv('+idx+',-1)">⬆️</button><button class="srt" onclick="mv('+idx+',1)">⬇️</button>':'')+'<span style="font-size:.66rem;padding:2px 5px;border-radius:4px;background:#1e3a8a">'+bg+'</span></div></div><div style="display:flex;justify-content:space-between"><span style="font-weight:600">'+(s.recipient_name||'')+'</span><span style="font-size:.64rem;color:var(--m)">📅 '+dt+'</span></div><div style="font-size:.74rem;color:var(--m);margin:2px 0">'+(s.delivery_address||'')+'</div><div style="display:flex;justify-content:space-between;background:rgba(8,18,32,.5);padding:4px 8px;border-radius:4px;margin:5px 0;font-size:.78rem"><span>المطلوب: <b>'+cod+'ج</b></span><span>المحصل: <b style="color:#60a5fa">'+col+'ج</b></span></div><div class="'+(role==='admin'?'acts4':'acts3')+'"><a href="tel:'+s.recipient_phone+'" class="ba">📞 اتصال</a><a href="'+wa+'" target="_blank" class="ba" style="border-color:#25d366;color:#25d366">💬 واتساب</a>'+qrB+'<a href="https://maps.google.com/?q='+encodeURIComponent(s.delivery_address||'')+'" target="_blank" class="ba">🗺️ خريطة</a></div>'
       +(canAct?'<div class="sg"><button class="bs" style="background:var(--s);grid-column:span 2" onclick="oDel('+idx+')">تم التسليم ✓</button><button class="bs" style="background:#8b5cf6" onclick="oP('+idx+')">جزئي</button><button class="bs" style="background:#0d9488" onclick="oShp('+idx+')">شحن فقط 🚚</button><button class="bs" style="background:var(--w)" onclick="oR('+idx+')">تأجيل 📅</button><button class="bs" style="background:var(--d)" onclick="oRet('+idx+')">مرتجع ✕</button></div>':lockMsg)
-      +(role==='admin'?'<div class="ab"><button class="badm" style="background:#475569" onclick="prLbl('+idx+')">🖨️ بوليصة</button>'+(ar?'<button class="badm" style="background:#059669" onclick="unAr('+idx+')">↩️ إعادة</button>':'<button class="badm" style="background:#2563eb" onclick="oTr('+idx+')">🔄 تحويل</button>')+'<button class="badm" style="background:#b91c1c" onclick="delS('+idx+')">🗑️ حذف</button></div>':'')+'</div>';
+      +(role==='admin'?'<div class="ab">'+picBtn+'<button class="badm" style="background:#475569" onclick="prLbl('+idx+')">🖨️ بوليصة</button>'+(ar?'<button class="badm" style="background:#059669" onclick="unAr('+idx+')">↩️ إعادة</button>':'<button class="badm" style="background:#2563eb" onclick="oTr('+idx+')">🔄 تحويل</button>')+'<button class="badm" style="background:#b91c1c" onclick="delS('+idx+')">🗑️ حذف</button></div>':'')+'</div>';
   });
   document.getElementById('cP').innerText=cP;document.getElementById('cD').innerText=cD;document.getElementById('cI').innerText=cI;
   document.getElementById('kC').innerText=cD;document.getElementById('kM').innerText=mon+' ج.م';
@@ -274,9 +313,13 @@ function oRep(){
   oM('mRep');cRep();
 }
 function cRep(){
-  const ls=getMo();let t=ls.length,d=0,r=0,p=0,cs=0;
+  const ls=getMo(),m=document.getElementById('rMo').value,mr=document.getElementById('rMr').value;
+  let t=ls.length,d=0,r=0,p=0,cs=0;
   ls.forEach(s=>{if(['delivered','shipping_only','partial'].includes(s.status)){d++;cs+=Number(s.collected_amount||0);}else if(['returned','rescheduled'].includes(s.status))r++;else p++;});
   document.getElementById('rSum').innerHTML='<div style="background:#081220;padding:8px;border-radius:6px;font-size:.78rem"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>إجمالي الأوردرات:</span><b>'+t+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>التسليمات:</span><b>'+d+' ('+(t?Math.round(d/t*100):0)+'%)</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#f87171"><span>مرتجع/تأجيل:</span><b>'+r+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#eab308"><span>قيد التوصيل:</span><b>'+p+'</b></div><div style="display:flex;justify-content:space-between;border-top:1px solid #1e40af;padding-top:4px;color:#60a5fa"><span>إجمالي التحصيل:</span><b>'+cs+' ج.م</b></div></div>';
+  const title=mr==='all'?'أميتشي إكسبريس':'تاجر: '+mr;
+  const waTxt='📊 *تقفيل حساب ('+title+')*\n📅 الشهر: '+m+'\n📦 إجمالي الشحنات: '+t+'\n✅ تم التسليم: '+d+'\n❌ مرتجع/تأجيل: '+r+'\n⏳ قيد التوصيل: '+p+'\n💰 إجمالي التحصيل: *'+cs+' ج.م*';
+  document.getElementById('waMerBtn').href='https://wa.me/?text='+encodeURIComponent(waTxt);
 }
 function expMo(){
   const ls=getMo();if(!ls.length)return alert('لا توجد بيانات');
