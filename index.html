@@ -26,7 +26,8 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 .kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:7px 10px}
 .kb{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:6px;text-align:center}
 .card{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:9px;margin:7px 10px}
-.acts{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin:5px 0}
+.acts4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin:5px 0}
+.acts3{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:4px;margin:5px 0}
 .ba{border:1px solid var(--b);color:#fff;padding:5px 2px;border-radius:5px;text-decoration:none;text-align:center;font-size:.7rem;font-weight:700;background:rgba(8,18,32,.35);cursor:pointer}
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:4px}
 .bs{border:none;padding:7px;border-radius:5px;font-weight:700;font-size:.74rem;cursor:pointer;color:#fff}
@@ -82,7 +83,6 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 </div>
 <div id="lst"><p style="text-align:center;color:var(--m);margin-top:30px">جاري التحميل...</p></div>
 
-<!-- نافذة عرض وإرسال QR Code للعميل -->
 <div class="m" id="mQrSend">
   <div class="mb" style="text-align:center">
     <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📲 كود استلام العميل (QR)</b><span onclick="cM('mQrSend')">✕</span></div>
@@ -95,7 +95,6 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
   </div>
 </div>
 
-<!-- نافذة مسح QR العميل لتأكيد التسليم -->
 <div class="m" id="mQrScan">
   <div class="mb" style="text-align:center">
     <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📷 مسح QR العميل للتسليم</b><span onclick="stopScan()">✕</span></div>
@@ -133,8 +132,8 @@ const cln=s=>String(s||'').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD]/g,'').rep
 function sTab(t){tab=t;['p','d','i'].forEach(k=>document.getElementById('tb_'+k).classList.toggle('act',k===t));ren();}
 function tgAr(){ar=!ar;document.getElementById('arBn').style.display=ar?'block':'none';document.getElementById('bArT').style.color=ar?'#fbbf24':'#93c5fd';ren();}
 
-// عرض وإرسال QR Code للعميل
 function showCustomerQr(idx){
+  if(role!=='admin')return;
   const s=orders[idx];if(!s)return;
   const code=String(s.tracking_code||'').trim();
   const qrPayload='AMICI:'+code;
@@ -147,7 +146,6 @@ function showCustomerQr(idx){
   oM('mQrSend');
 }
 
-// مسح QR من هاتف العميل لتأكيد التسليم
 async function openQrScan(){
   document.getElementById('qrManual').value='';
   oM('mQrScan');
@@ -268,7 +266,8 @@ function ren(){
     const bg=st==='delivered'?'تم التسليم'+rsn+' ✓':st==='shipping_only'?'شحن ('+col+'ج)':st==='partial'?'جزئي ('+col+'ج)':st==='rescheduled'?'مؤجل: '+(s.rescheduled_date||''):st==='returned'?'مرتجع'+rsn+' ✕':'قيد التوصيل';
     const cn=cMap[s.courier_id]?cMap[s.courier_id].name:(s.courier_id||''),ph=String(s.recipient_phone||'').replace(/[^0-9]/g,'');
     const wa=ph?'https://wa.me/2'+ph+'?text='+encodeURIComponent('السلام عليكم '+s.recipient_name+'، شحنتك ('+s.tracking_code+') مطلوب '+cod+' ج.م'):'#';
-    h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:3px"><span style="color:#60a5fa">#'+n+' 🏷️ '+(s.tracking_code||'')+' <small style="color:var(--m)">['+cn+']</small></span><div style="display:flex;gap:3px;align-items:center">'+(isP&&!ar?'<button class="srt" onclick="mv('+idx+',-1)">⬆️</button><button class="srt" onclick="mv('+idx+',1)">⬇️</button>':'')+'<span style="font-size:.66rem;padding:2px 5px;border-radius:4px;background:#1e3a8a">'+bg+'</span></div></div><div style="display:flex;justify-content:space-between"><span style="font-weight:600">'+(s.recipient_name||'')+'</span><span style="font-size:.64rem;color:var(--m)">📅 '+dt+'</span></div><div style="font-size:.74rem;color:var(--m);margin:2px 0">'+(s.delivery_address||'')+'</div><div style="display:flex;justify-content:space-between;background:rgba(8,18,32,.5);padding:4px 8px;border-radius:4px;margin:5px 0;font-size:.78rem"><span>المطلوب: <b>'+cod+'ج</b></span><span>المحصل: <b style="color:#60a5fa">'+col+'ج</b></span></div><div class="acts"><a href="tel:'+s.recipient_phone+'" class="ba">📞 اتصال</a><a href="'+wa+'" target="_blank" class="ba" style="border-color:#25d366;color:#25d366">💬 واتساب</a><button class="ba" style="border-color:#38bdf8;color:#38bdf8" onclick="showCustomerQr('+idx+')">📲 QR</button><a href="https://maps.google.com/?q='+encodeURIComponent(s.delivery_address||'')+'" target="_blank" class="ba">🗺️ خريطة</a></div>'
+    const qrBtn=role==='admin'?'<button class="ba" style="border-color:#38bdf8;color:#38bdf8" onclick="showCustomerQr('+idx+')">📲 QR</button>':'';
+    h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:3px"><span style="color:#60a5fa">#'+n+' 🏷️ '+(s.tracking_code||'')+' <small style="color:var(--m)">['+cn+']</small></span><div style="display:flex;gap:3px;align-items:center">'+(isP&&!ar?'<button class="srt" onclick="mv('+idx+',-1)">⬆️</button><button class="srt" onclick="mv('+idx+',1)">⬇️</button>':'')+'<span style="font-size:.66rem;padding:2px 5px;border-radius:4px;background:#1e3a8a">'+bg+'</span></div></div><div style="display:flex;justify-content:space-between"><span style="font-weight:600">'+(s.recipient_name||'')+'</span><span style="font-size:.64rem;color:var(--m)">📅 '+dt+'</span></div><div style="font-size:.74rem;color:var(--m);margin:2px 0">'+(s.delivery_address||'')+'</div><div style="display:flex;justify-content:space-between;background:rgba(8,18,32,.5);padding:4px 8px;border-radius:4px;margin:5px 0;font-size:.78rem"><span>المطلوب: <b>'+cod+'ج</b></span><span>المحصل: <b style="color:#60a5fa">'+col+'ج</b></span></div><div class="'+(role==='admin'?'acts4':'acts3')+'"><a href="tel:'+s.recipient_phone+'" class="ba">📞 اتصال</a><a href="'+wa+'" target="_blank" class="ba" style="border-color:#25d366;color:#25d366">💬 واتساب</a>'+qrBtn+'<a href="https://maps.google.com/?q='+encodeURIComponent(s.delivery_address||'')+'" target="_blank" class="ba">🗺️ خريطة</a></div>'
       +(!ar?'<div class="sg"><button class="bs" style="background:var(--s);grid-column:span 2" onclick="oDel('+idx+')">تم التسليم ✓</button><button class="bs" style="background:#8b5cf6" onclick="oP('+idx+')">جزئي</button><button class="bs" style="background:#0d9488" onclick="oShp('+idx+')">شحن فقط 🚚</button><button class="bs" style="background:var(--w)" onclick="oR('+idx+')">تأجيل 📅</button><button class="bs" style="background:var(--d)" onclick="oRet('+idx+')">مرتجع ✕</button></div>':'')
       +(role==='admin'?'<div class="ab">'+(ar?'<button class="badm" style="background:#059669" onclick="unAr('+idx+')">↩️ إعادة للنشط</button>':'<button class="badm" style="background:#2563eb" onclick="oTr('+idx+')">🔄 تحويل</button>')+'<button class="badm" style="background:#b91c1c" onclick="delS('+idx+')">🗑️ حذف</button></div>':'')+'</div>';
   });
