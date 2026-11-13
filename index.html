@@ -26,8 +26,8 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 .kpi{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:7px 10px}
 .kb{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:6px;text-align:center}
 .card{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:9px;margin:7px 10px}
-.acts{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:4px;margin:5px 0}
-.ba{border:1px solid var(--b);color:#fff;padding:5px;border-radius:5px;text-decoration:none;text-align:center;font-size:.74rem;font-weight:700;background:rgba(8,18,32,.35)}
+.acts{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:4px;margin:5px 0}
+.ba{border:1px solid var(--b);color:#fff;padding:5px 2px;border-radius:5px;text-decoration:none;text-align:center;font-size:.7rem;font-weight:700;background:rgba(8,18,32,.35);cursor:pointer}
 .sg{display:grid;grid-template-columns:1fr 1fr;gap:4px}
 .bs{border:none;padding:7px;border-radius:5px;font-weight:700;font-size:.74rem;cursor:pointer;color:#fff}
 .ab{display:flex;gap:4px;margin-top:5px;padding-top:5px;border-top:1px dashed var(--b)}
@@ -46,7 +46,7 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
   <div class="top">
     <h1 style="font-size:.86rem;color:#60a5fa">🚚 أميتشي <span id="st" style="font-size:.6rem;color:#eab308">⏳...</span></h1>
     <div class="btns">
-      <label class="bh" style="background:#0284c7" title="مسح باركود">📷<input type="file" accept="image/*" capture="environment" style="display:none" onchange="doScan(this)"></label>
+      <button class="bh" style="background:#0284c7" onclick="openQrScan()" title="مسح QR العميل للتسليم">📷 QR</button>
       <button class="bh" style="background:#2563eb" id="bAO" onclick="oM('mAdd')">+ أوردر</button>
       <button class="bh" style="background:#059669" id="bX" onclick="oM('mX')">📁 إكسل</button>
       <button class="bh" style="background:#7c3aed" id="bRep" onclick="oRep()">📈 تقارير</button>
@@ -82,6 +82,32 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 </div>
 <div id="lst"><p style="text-align:center;color:var(--m);margin-top:30px">جاري التحميل...</p></div>
 
+<!-- نافذة عرض وإرسال QR Code للعميل -->
+<div class="m" id="mQrSend">
+  <div class="mb" style="text-align:center">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📲 كود استلام العميل (QR)</b><span onclick="cM('mQrSend')">✕</span></div>
+    <div id="qrCustInfo" style="font-size:.8rem;color:#93c5fd;margin-bottom:8px;font-weight:700"></div>
+    <div style="background:#fff;padding:10px;border-radius:10px;display:inline-block;margin-bottom:8px">
+      <img id="qrImg" src="" alt="QR" style="width:180px;height:180px;display:block">
+    </div>
+    <div style="font-size:.72rem;color:var(--m);margin-bottom:10px">يمسح المندوب هذا الكود من هاتف العميل عند الاستلام</div>
+    <a id="qrWaBtn" href="#" target="_blank" class="bs" style="background:#16a34a;display:block;text-decoration:none">💬 إرسال كود الاستلام للعميل واتساب</a>
+  </div>
+</div>
+
+<!-- نافذة مسح QR العميل لتأكيد التسليم -->
+<div class="m" id="mQrScan">
+  <div class="mb" style="text-align:center">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📷 مسح QR العميل للتسليم</b><span onclick="stopScan()">✕</span></div>
+    <video id="qrVid" playsinline style="width:100%;border-radius:8px;background:#000;max-height:220px;margin-bottom:8px"></video>
+    <div id="qrScanMsg" style="font-size:.75rem;color:#93c5fd;margin-bottom:8px">وجّه الكاميرا نحو كود QR على هاتف العميل</div>
+    <div style="display:flex;gap:4px">
+      <input id="qrManual" class="in" placeholder="أو اكتب كود الشحنة هنا...">
+      <button class="bs" style="background:#2563eb;white-space:nowrap" onclick="verifyQrCode(document.getElementById('qrManual').value)">تأكيد ✓</button>
+    </div>
+  </div>
+</div>
+
 <div class="m" id="mRep"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📈 التقرير الشهري</b><span onclick="cM('mRep')">✕</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px"><input type="month" id="rMo" class="in" onchange="cRep()"><select id="rCo" class="in" onchange="cRep()"></select></div><div id="rSum"></div><button class="bs" style="background:#059669;width:100%;margin-top:6px" onclick="expMo()">📥 تحميل إكسل الشهر</button></div></div>
 <div class="m" id="mAdd"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>➕ أوردر سريع</b><span onclick="cM('mAdd')">✕</span></div><select id="aC" class="in" style="margin-bottom:5px"></select><input id="aCd" class="in" placeholder="رقم الشحنة" style="margin-bottom:5px"><input id="aNm" class="in" placeholder="اسم العميل" style="margin-bottom:5px"><input id="aPh" class="in" placeholder="الهاتف" style="margin-bottom:5px"><input id="aAd" class="in" placeholder="العنوان" style="margin-bottom:5px"><input id="aAm" type="number" class="in" placeholder="المبلغ" style="margin-bottom:7px"><button class="bs" style="background:var(--s);width:100%" onclick="add1()">حفظ ✓</button></div></div>
 <div class="m" id="mX"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📁 رفع إكسل أو لصق</b><span onclick="cM('mX')">✕</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px"><input type="date" id="cD2" class="in"><select id="cC2" class="in"></select></div><input type="file" id="cF2" accept=".xlsx,.xls,.csv,.txt" class="in" style="margin-bottom:5px"><button class="bs" style="background:var(--s);width:100%;margin-bottom:7px" onclick="upF()">رفع ملف الإكسل ⬆️</button><textarea id="pBx" class="in" rows="3" placeholder="أو الصق السطور هنا..." style="margin-bottom:5px"></textarea><button class="bs" style="background:#2563eb;width:100%" onclick="upP()">رفع النص الملصوق 📋</button></div></div>
@@ -99,13 +125,61 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 const BASE='https://difabkjpyypaylnofbcl.supabase.co/rest/v1/',API=BASE+'shipments',COUR=BASE+'couriers',LOC=BASE+'courier_locations';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
 const HDR={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'};
-let orders=[],cMap={ahmed:{name:'أحمد',pin:'1111'},biko:{name:'بيكو',pin:'2222'},mina:{name:'مينا عبد النور',pin:'3333'}},role='admin',myId='',sIdx=-1,tab='p',ar=false;
+let orders=[],cMap={ahmed:{name:'أحمد',pin:'1111'},biko:{name:'بيكو',pin:'2222'},mina:{name:'مينا عبد النور',pin:'3333'}},role='admin',myId='',sIdx=-1,tab='p',ar=false,camStream=null,scanTimer=null;
 const td=new Date().toISOString().split('T')[0];document.getElementById('cD2').value=td;document.getElementById('rMo').value=td.slice(0,7);
 const oM=i=>document.getElementById(i).style.display='flex',cM=i=>document.getElementById(i).style.display='none';
 const cln=s=>String(s||'').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD]/g,'').replace(/["']/g,'').trim();
 
 function sTab(t){tab=t;['p','d','i'].forEach(k=>document.getElementById('tb_'+k).classList.toggle('act',k===t));ren();}
 function tgAr(){ar=!ar;document.getElementById('arBn').style.display=ar?'block':'none';document.getElementById('bArT').style.color=ar?'#fbbf24':'#93c5fd';ren();}
+
+// عرض وإرسال QR Code للعميل
+function showCustomerQr(idx){
+  const s=orders[idx];if(!s)return;
+  const code=String(s.tracking_code||'').trim();
+  const qrPayload='AMICI:'+code;
+  const qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=260x260&data='+encodeURIComponent(qrPayload);
+  document.getElementById('qrCustInfo').innerText=(s.recipient_name||'')+' — شحنة #' + code + ' ('+(s.cod_amount||0)+' ج.م)';
+  document.getElementById('qrImg').src=qrUrl;
+  const ph=String(s.recipient_phone||'').replace(/[^0-9]/g,'');
+  const msg='السلام عليكم أستاذ '+(s.recipient_name||'')+'، كود استلام شحنتك من أميتشي إكسبريس رقم ('+code+') والمطلوب '+(s.cod_amount||0)+' ج.م.\nيرجى إظهار هذا الكود للمندوب عند التسليم:\n'+qrUrl;
+  document.getElementById('qrWaBtn').href=ph?'https://wa.me/2'+ph+'?text='+encodeURIComponent(msg):'https://wa.me/?text='+encodeURIComponent(msg);
+  oM('mQrSend');
+}
+
+// مسح QR من هاتف العميل لتأكيد التسليم
+async function openQrScan(){
+  document.getElementById('qrManual').value='';
+  oM('mQrScan');
+  const vid=document.getElementById('qrVid'),msg=document.getElementById('qrScanMsg');
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg.innerText='اكتب رقم الشحنة من كود العميل بالأسفل:';return;}
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    vid.srcObject=camStream;await vid.play();
+    if('BarcodeDetector' in window){
+      const det=new BarcodeDetector({formats:['qr_code','code_128','ean_13']});
+      scanTimer=setInterval(async()=>{
+        try{const bars=await det.detect(vid);if(bars.length){verifyQrCode(bars[0].rawValue);}}catch(e){}
+      },500);
+    }else{msg.innerText='أدخل رقم الشحنة الظاهر أسفل كود العميل:';}
+  }catch(e){msg.innerText='تعذر فتح الكاميرا، اكتب رقم الشحنة بالأسفل:';}
+}
+function stopScan(){
+  if(scanTimer){clearInterval(scanTimer);scanTimer=null;}
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  cM('mQrScan');
+}
+function verifyQrCode(raw){
+  const code=String(raw||'').replace('AMICI:','').trim();
+  if(!code)return;
+  const idx=orders.findIndex(o=>String(o.tracking_code||'').trim()===code&&!o.archived);
+  if(idx===-1){alert('الشحنة رقم ('+code+') غير موجودة في القائمة النشطة!');return;}
+  stopScan();
+  const s=orders[idx],cod=Number(s.cod_amount)||0;
+  if(confirm('✅ تم التحقق من QR الشحنة ('+code+')\nالعميل: '+(s.recipient_name||'')+'\nالمبلغ: '+cod+' ج.م\n\nهل تريد تأكيد التسليم الآن؟')){
+    upd(idx,{status:'delivered',collected_amount:cod,reason:'تحقق QR ✓'});
+  }
+}
 
 async function getC(){
   try{const r=await fetch(COUR+'?select=*',{headers:HDR});if(r.ok){const d=await r.json();if(d.length){cMap={};d.forEach(x=>cMap[x.id]={name:x.name,pin:x.pin});}}}catch(e){}
@@ -194,7 +268,7 @@ function ren(){
     const bg=st==='delivered'?'تم التسليم'+rsn+' ✓':st==='shipping_only'?'شحن ('+col+'ج)':st==='partial'?'جزئي ('+col+'ج)':st==='rescheduled'?'مؤجل: '+(s.rescheduled_date||''):st==='returned'?'مرتجع'+rsn+' ✕':'قيد التوصيل';
     const cn=cMap[s.courier_id]?cMap[s.courier_id].name:(s.courier_id||''),ph=String(s.recipient_phone||'').replace(/[^0-9]/g,'');
     const wa=ph?'https://wa.me/2'+ph+'?text='+encodeURIComponent('السلام عليكم '+s.recipient_name+'، شحنتك ('+s.tracking_code+') مطلوب '+cod+' ج.م'):'#';
-    h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:3px"><span style="color:#60a5fa">#'+n+' 🏷️ '+(s.tracking_code||'')+' <small style="color:var(--m)">['+cn+']</small></span><div style="display:flex;gap:3px;align-items:center">'+(isP&&!ar?'<button class="srt" onclick="mv('+idx+',-1)">⬆️</button><button class="srt" onclick="mv('+idx+',1)">⬇️</button>':'')+'<span style="font-size:.66rem;padding:2px 5px;border-radius:4px;background:#1e3a8a">'+bg+'</span></div></div><div style="display:flex;justify-content:space-between"><span style="font-weight:600">'+(s.recipient_name||'')+'</span><span style="font-size:.64rem;color:var(--m)">📅 '+dt+'</span></div><div style="font-size:.74rem;color:var(--m);margin:2px 0">'+(s.delivery_address||'')+'</div><div style="display:flex;justify-content:space-between;background:rgba(8,18,32,.5);padding:4px 8px;border-radius:4px;margin:5px 0;font-size:.78rem"><span>المطلوب: <b>'+cod+'ج</b></span><span>المحصل: <b style="color:#60a5fa">'+col+'ج</b></span></div><div class="acts"><a href="tel:'+s.recipient_phone+'" class="ba">📞 اتصال</a><a href="'+wa+'" target="_blank" class="ba" style="border-color:#25d366;color:#25d366">💬 واتساب</a><a href="https://maps.google.com/?q='+encodeURIComponent(s.delivery_address||'')+'" target="_blank" class="ba">🗺️ خريطة</a></div>'
+    h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:3px"><span style="color:#60a5fa">#'+n+' 🏷️ '+(s.tracking_code||'')+' <small style="color:var(--m)">['+cn+']</small></span><div style="display:flex;gap:3px;align-items:center">'+(isP&&!ar?'<button class="srt" onclick="mv('+idx+',-1)">⬆️</button><button class="srt" onclick="mv('+idx+',1)">⬇️</button>':'')+'<span style="font-size:.66rem;padding:2px 5px;border-radius:4px;background:#1e3a8a">'+bg+'</span></div></div><div style="display:flex;justify-content:space-between"><span style="font-weight:600">'+(s.recipient_name||'')+'</span><span style="font-size:.64rem;color:var(--m)">📅 '+dt+'</span></div><div style="font-size:.74rem;color:var(--m);margin:2px 0">'+(s.delivery_address||'')+'</div><div style="display:flex;justify-content:space-between;background:rgba(8,18,32,.5);padding:4px 8px;border-radius:4px;margin:5px 0;font-size:.78rem"><span>المطلوب: <b>'+cod+'ج</b></span><span>المحصل: <b style="color:#60a5fa">'+col+'ج</b></span></div><div class="acts"><a href="tel:'+s.recipient_phone+'" class="ba">📞 اتصال</a><a href="'+wa+'" target="_blank" class="ba" style="border-color:#25d366;color:#25d366">💬 واتساب</a><button class="ba" style="border-color:#38bdf8;color:#38bdf8" onclick="showCustomerQr('+idx+')">📲 QR</button><a href="https://maps.google.com/?q='+encodeURIComponent(s.delivery_address||'')+'" target="_blank" class="ba">🗺️ خريطة</a></div>'
       +(!ar?'<div class="sg"><button class="bs" style="background:var(--s);grid-column:span 2" onclick="oDel('+idx+')">تم التسليم ✓</button><button class="bs" style="background:#8b5cf6" onclick="oP('+idx+')">جزئي</button><button class="bs" style="background:#0d9488" onclick="oShp('+idx+')">شحن فقط 🚚</button><button class="bs" style="background:var(--w)" onclick="oR('+idx+')">تأجيل 📅</button><button class="bs" style="background:var(--d)" onclick="oRet('+idx+')">مرتجع ✕</button></div>':'')
       +(role==='admin'?'<div class="ab">'+(ar?'<button class="badm" style="background:#059669" onclick="unAr('+idx+')">↩️ إعادة للنشط</button>':'<button class="badm" style="background:#2563eb" onclick="oTr('+idx+')">🔄 تحويل</button>')+'<button class="badm" style="background:#b91c1c" onclick="delS('+idx+')">🗑️ حذف</button></div>':'')+'</div>';
   });
@@ -234,7 +308,6 @@ async function insR(g){
 }
 function upF(){const f=document.getElementById('cF2').files[0];if(!f)return alert('اختر ملفاً');const rd=new FileReader();rd.onload=async e=>{const wb=XLSX.read(e.target.result,{type:'array'});await insR(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));};rd.readAsArrayBuffer(f);}
 async function upP(){const txt=document.getElementById('pBx').value.trim();if(!txt)return alert('الصق النص');await insR(txt.split(/\r?\n/).map(l=>l.split(l.includes('\t')?'\t':l.includes(';')?';':',')));}
-function doScan(i){if(i.files&&i.files[0]){const c=prompt('أدخل كود الشحنة الممسوح:');if(c){document.getElementById('q').value=c.trim();ren();}}}
 
 function sSess(r){
   const cf=document.getElementById('cF'),ids=['bAO','bX','bRep','bLoc','bAC','bArT'];
