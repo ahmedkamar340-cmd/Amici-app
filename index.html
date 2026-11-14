@@ -6,6 +6,7 @@
 <title>أميتشي إكسبريس</title>
 <link rel="manifest" href="manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');</script>
 <style>
 :root{--bg:#0b192c;--c:#132a4a;--b:#1e40af;--m:#93c5fd;--s:#16a34a;--w:#d97706;--d:#dc2626}
@@ -16,7 +17,7 @@ body{background:var(--bg);color:#f8fafc;padding-bottom:80px}
 header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:50}
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
 .btns{display:flex;gap:3px;overflow-x:auto}
-.bh{background:#1e3a8a;border:1px solid #3b82f6;color:#fff;padding:5px 6px;border-radius:5px;font-size:.68rem;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center}
+.bh{background:#1e3a8a;border:1px solid #3b82f6;color:#fff;padding:5px 6px;border-radius:5px;font-size:.67rem;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center}
 .in{width:100%;background:#081220;color:#fff;border:1px solid var(--b);padding:5px;border-radius:5px;font-size:.74rem;outline:none}
 .g3{display:grid;grid-template-columns:1fr 1.2fr .8fr;gap:4px;margin-top:5px}
 .sb{background:rgba(8,18,32,.5);padding:4px;border-radius:6px;border:1px solid var(--b)}
@@ -35,11 +36,13 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 .badm{flex:1;border:none;color:#fff;padding:5px;border-radius:4px;font-size:.68rem;cursor:pointer;font-weight:700}
 .srt{background:#081220;border:1px solid var(--b);color:#60a5fa;padding:2px 5px;border-radius:4px;font-size:.7rem;cursor:pointer}
 .m{display:none;position:fixed;inset:0;background:rgba(4,10,20,.88);z-index:100;justify-content:center;align-items:center;padding:12px}
-.mb{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:350px;padding:11px;max-height:90vh;overflow-y:auto}
+.mb{background:var(--c);border:1px solid var(--b);border-radius:8px;width:100%;max-width:360px;padding:11px;max-height:90vh;overflow-y:auto}
 .ob{width:100%;text-align:right;background:#081220;border:1px solid var(--b);color:#fff;padding:8px;border-radius:6px;margin-bottom:5px;font-size:.78rem;cursor:pointer}
-.lbl-box{background:#fff;color:#000;padding:12px;border-radius:6px;border:2px solid #000;text-align:right;font-size:.82rem}
+.lbl-box{background:#fff;color:#000;padding:10px;border-radius:6px;border:2px solid #000;text-align:right;font-size:.78rem}
 .clog{background:rgba(22,163,74,.15);border:1px solid rgba(34,197,94,.35);color:#86efac;padding:3px 7px;border-radius:4px;font-size:.68rem;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
-@media print{body *{visibility:hidden}#mLbl,#mLbl *{visibility:visible}#mLbl{position:fixed;inset:0;background:#fff;padding:0;display:flex;align-items:flex-start}#mLbl .no-pr{display:none}}
+.ptbl{width:100%;border-collapse:collapse;font-size:.72rem;margin-top:6px}
+.ptbl th,.ptbl td{border:1px solid #000;padding:4px;text-align:right}
+@media print{body *{visibility:hidden}#mLbl,#mLbl *{visibility:visible}#mLbl{position:fixed;inset:0;background:#fff;padding:0;display:block;overflow:visible}#mLbl .mb{max-width:100%;border:none;background:#fff}#mLbl .no-pr{display:none}}
 </style>
 </head>
 <body>
@@ -48,11 +51,12 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 
 <header>
   <div class="top">
-    <h1 style="font-size:.86rem;color:#60a5fa">🚚 أميتشي <span id="st" style="font-size:.6rem;color:#eab308">⏳...</span></h1>
+    <h1 style="font-size:.84rem;color:#60a5fa">🚚 أميتشي <span id="st" style="font-size:.58rem;color:#eab308">⏳...</span></h1>
     <div class="btns">
       <button class="bh" style="background:#0284c7" onclick="oQrSc()">📷 QR</button>
       <button class="bh" style="background:#2563eb" id="bAO" onclick="oM('mAdd')">+ أوردر</button>
-      <button class="bh" style="background:#059669" id="bX" onclick="oM('mX')">📁 إكسل</button>
+      <button class="bh" style="background:#059669" id="bX" onclick="oM('mX')">📁 ملف/PDF</button>
+      <button class="bh" style="background:#d97706" id="bPdf" onclick="prSheetPdf()">🖨️ PDF</button>
       <button class="bh" style="background:#7c3aed" id="bRep" onclick="oRep()">📈 تقارير</button>
       <button class="bh" style="background:#0284c7" id="bLoc" onclick="oLocs()">📍 المواقع</button>
       <button class="bh" id="bAC" onclick="oM('mC')">👥 مناديب</button>
@@ -86,14 +90,11 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 </div>
 <div id="lst"><p style="text-align:center;color:var(--m);margin-top:30px">جاري التحميل...</p></div>
 
-<div class="m" id="mLbl"><div class="mb" style="max-width:380px"><div class="no-pr" style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🖨️ بوليصة شحن أميتشي</b><span onclick="cM('mLbl')">✕</span></div><div id="lblContent" class="lbl-box"></div><button class="bs no-pr" style="background:#2563eb;width:100%;margin-top:8px" onclick="window.print()">🖨️ طباعة البوليصة الآن</button></div></div>
+<div class="m" id="mLbl"><div class="mb" style="max-width:420px"><div class="no-pr" style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🖨️ معاينة للطباعة أو الحفظ كـ PDF</b><span onclick="cM('mLbl')">✕</span></div><div id="lblContent" class="lbl-box"></div><button class="bs no-pr" style="background:#2563eb;width:100%;margin-top:8px" onclick="window.print()">🖨️ طباعة / حفظ كـ PDF للإرسال واتساب</button></div></div>
 
 <div class="m" id="mImg"><div class="mb" style="text-align:center"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🖼️ إثبات المرتجع المصور</b><span onclick="cM('mImg')">✕</span></div><img id="vImg" src="" style="width:100%;border-radius:6px;border:1px solid var(--b)"></div></div>
-
 <div class="m" id="mCalls"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📞 سجل محاولات الاتصال</b><span onclick="cM('mCalls')">✕</span></div><div id="callListBox" style="font-size:.78rem;line-height:1.7"></div></div></div>
-
 <div class="m" id="mQrSend"><div class="mb" style="text-align:center"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📲 كود العميل (QR)</b><span onclick="cM('mQrSend')">✕</span></div><div id="qrInfo" style="font-size:.8rem;color:#93c5fd;margin-bottom:8px;font-weight:700"></div><div style="background:#fff;padding:10px;border-radius:10px;display:inline-block;margin-bottom:8px"><img id="qrImg" src="" style="width:170px;height:170px;display:block"></div><a id="qrWa" href="#" target="_blank" class="bs" style="background:#16a34a;display:block;text-decoration:none">💬 إرسال الكود للعميل واتساب</a></div></div>
-
 <div class="m" id="mQrScan"><div class="mb" style="text-align:center"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📷 مسح QR العميل / البوليصة</b><span onclick="stSc()">✕</span></div><video id="qrVid" playsinline style="width:100%;border-radius:8px;background:#000;max-height:200px;margin-bottom:8px"></video><div id="qrMsg" style="font-size:.74rem;color:#93c5fd;margin-bottom:8px">وجّه الكاميرا نحو كود QR</div><div style="display:flex;gap:4px"><input id="qrMan" class="in" placeholder="أو اكتب رقم الشحنة..."><button class="bs" style="background:#2563eb;white-space:nowrap" onclick="vQr(document.getElementById('qrMan').value)">تأكيد ✓</button></div></div></div>
 
 <div class="m" id="mRep">
@@ -123,7 +124,9 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 </div>
 
 <div class="m" id="mAdd"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>➕ أوردر سريع</b><span onclick="cM('mAdd')">✕</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px"><select id="aC" class="in"></select><input id="aMr" class="in" placeholder="اسم التاجر (مثلاً Girly)"></div><input id="aCd" class="in" placeholder="رقم الشحنة" style="margin-bottom:5px"><input id="aNm" class="in" placeholder="اسم العميل" style="margin-bottom:5px"><input id="aPh" class="in" placeholder="الهاتف" style="margin-bottom:5px"><input id="aAd" class="in" placeholder="العنوان" style="margin-bottom:5px"><input id="aAm" type="number" class="in" placeholder="المبلغ" style="margin-bottom:7px"><button class="bs" style="background:var(--s);width:100%" onclick="add1()">حفظ ✓</button></div></div>
-<div class="m" id="mX"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📁 رفع إكسل أو لصق</b><span onclick="cM('mX')">✕</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px"><input type="date" id="cD2" class="in"><select id="cC2" class="in"></select></div><input id="cMr2" class="in" placeholder="اسم التاجر / الصفحة (اختياري)" style="margin-bottom:5px"><input type="file" id="cF2" accept=".xlsx,.xls,.csv,.txt" class="in" style="margin-bottom:5px"><button class="bs" style="background:var(--s);width:100%;margin-bottom:7px" onclick="upF()">رفع ملف الإكسل ⬆️</button><textarea id="pBx" class="in" rows="3" placeholder="أو الصق السطور هنا..." style="margin-bottom:5px"></textarea><button class="bs" style="background:#2563eb;width:100%" onclick="upP()">رفع النص الملصوق 📋</button></div></div>
+
+<div class="m" id="mX"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📁 رفع إكسل أو PDF أو لصق</b><span onclick="cM('mX')">✕</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px"><input type="date" id="cD2" class="in"><select id="cC2" class="in"></select></div><input id="cMr2" class="in" placeholder="اسم التاجر / الصفحة (اختياري)" style="margin-bottom:5px"><input type="file" id="cF2" accept=".xlsx,.xls,.csv,.txt,.pdf" class="in" style="margin-bottom:5px"><button class="bs" style="background:var(--s);width:100%;margin-bottom:7px" onclick="upF()">رفع ملف الإكسل أو PDF ⬆️</button><textarea id="pBx" class="in" rows="3" placeholder="أو الصق السطور هنا..." style="margin-bottom:5px"></textarea><button class="bs" style="background:#2563eb;width:100%" onclick="upP()">رفع النص الملصوق 📋</button></div></div>
+
 <div class="m" id="mDel"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>✅ طريقة التسليم</b><span onclick="cM('mDel')">✕</span></div><button class="ob" onclick="okDel('كاش')">💵 كاش</button><button class="ob" onclick="okDel('إنستاباي / محفظة')">📱 إنستاباي / محفظة</button><button class="ob" onclick="okDel('بالفرع')">🏢 بالفرع</button></div></div>
 <div class="m" id="mC"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>👥 المناديب</b><span onclick="cM('mC')">✕</span></div><input id="nCN" class="in" placeholder="اسم المندوب" style="margin-bottom:5px"><input id="nCP" class="in" placeholder="PIN" inputmode="numeric" style="margin-bottom:7px"><button class="bs" style="background:var(--s);width:100%;margin-bottom:7px" onclick="addC()">+ إضافة</button><div id="cBx" style="max-height:140px;overflow-y:auto;font-size:.76rem"></div></div></div>
 <div class="m" id="mTr"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🔄 نقل الأوردر</b><span onclick="cM('mTr')">✕</span></div><select id="tC" class="in" style="margin-bottom:7px"></select><button class="bs" style="background:#2563eb;width:100%" onclick="okTr()">نقل ➜</button></div></div>
@@ -137,6 +140,7 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 const BASE='https://difabkjpyypaylnofbcl.supabase.co/rest/v1/',API=BASE+'shipments',COUR=BASE+'couriers',LOC=BASE+'courier_locations';
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
 const HDR={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 let orders=[],cMap={ahmed:{name:'أحمد',pin:'1111'},biko:{name:'بيكو',pin:'2222'},mina:{name:'مينا عبد النور',pin:'3333'}},role='admin',myId='',sIdx=-1,tab='p',ar=false,cam=null,tmr=null,tmpPic='';
 const td=new Date().toISOString().split('T')[0];document.getElementById('cD2').value=td;document.getElementById('rMo').value=td.slice(0,7);
 const oM=i=>document.getElementById(i).style.display='flex',cM=i=>document.getElementById(i).style.display='none';
@@ -145,21 +149,42 @@ const cln=s=>String(s||'').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD]/g,'').rep
 function sTab(t){tab=t;['p','d','i'].forEach(k=>document.getElementById('tb_'+k).classList.toggle('act',k===t));ren();}
 function tgAr(){ar=!ar;document.getElementById('arBn').style.display=ar?'block':'none';document.getElementById('bArT').style.color=ar?'#fbbf24':'#93c5fd';ren();}
 
-// توثيق محاولة الاتصال تلقائياً عند الضغط على زر الاتصال
+// توليد كشف PDF حسب فلتر التاريخ والمندوب الحالي للطباعة أو الإرسال واتساب
+function prSheetPdf(){
+  const cid=document.getElementById('cF').value||'all',df=document.getElementById('dF').value,q=(document.getElementById('q').value||'').trim().toLowerCase();
+  const flt=orders.filter(s=>{
+    if(Boolean(s.archived)!==ar)return false;
+    if(cid!=='all'&&s.courier_id!==cid)return false;
+    const dt=(s.created_at||'').slice(0,10);
+    if(df&&dt&&dt!==df&&s.rescheduled_date!==df)return false;
+    if(q&&!String(s.tracking_code||'').toLowerCase().includes(q)&&!String(s.recipient_name||'').toLowerCase().includes(q)&&!String(s.merchant||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+  if(!flt.length)return alert('لا توجد شحنات في هذا التاريخ/الفلتر');
+  const stN={out_for_delivery:'قيد التوصيل',delivered:'تم التسليم',shipping_only:'شحن فقط',partial:'جزئي',rescheduled:'مؤجل',returned:'مرتجع'};
+  let tCod=0,tCol=0,rows='';
+  flt.forEach((s,k)=>{
+    const c=Number(s.cod_amount||0),m=Number(s.collected_amount||0);tCod+=c;tCol+=m;
+    rows+='<tr><td>'+(k+1)+'</td><td>'+(s.tracking_code||'')+'</td><td>'+(s.recipient_name||'')+'<br><small>'+(s.recipient_phone||'')+'</small></td><td>'+(s.delivery_address||'')+'</td><td>'+(stN[s.status]||s.status)+'</td><td>'+c+'</td><td>'+m+'</td></tr>';
+  });
+  const title='كشف شحنات أميتشي إكسبريس'+(df?' — تاريخ: '+df:'')+(cid!=='all'?' — مندوب: '+(cMap[cid]?.name||cid):'');
+  document.getElementById('lblContent').innerHTML='<div style="display:flex;justify-content:space-between;border-bottom:2px solid #000;padding-bottom:5px;margin-bottom:5px"><b>🚚 '+title+'</b><span>العدد: '+flt.length+'</span></div>'
+    +'<table class="ptbl"><thead><tr><th>#</th><th>الكود</th><th>العميل</th><th>العنوان</th><th>الحالة</th><th>المطلوب</th><th>المحصل</th></tr></thead><tbody>'+rows+'</tbody>'
+    +'<tfoot><tr style="font-weight:bold;background:#eee"><td colspan="5">الإجمالي</td><td>'+tCod+' ج</td><td>'+tCol+' ج</td></tr></tfoot></table>';
+  oM('mLbl');
+}
+
 async function logCall(idx){
   const s=orders[idx];if(!s)return;
   const who=role==='admin'?'المدير':(cMap[myId]?.name||'مندوب');
   const now=new Date(),tm=now.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}),dt=(now.getMonth()+1)+'/'+now.getDate();
-  const entry=who+' ('+dt+' '+tm+')';
-  const prev=s.call_logs?s.call_logs+' | ':'';
-  const updated=prev+entry;
+  const updated=(s.call_logs?s.call_logs+' | ':'')+who+' ('+dt+' '+tm+')';
   s.call_logs=updated;ren();
   fetch(API+'?id=eq.'+encodeURIComponent(s.id),{method:'PATCH',headers:HDR,body:JSON.stringify({call_logs:updated})});
 }
 function showCalls(idx){
   const s=orders[idx];if(!s||!s.call_logs)return;
-  const items=s.call_logs.split(' | ').map((x,k)=>'<div style="background:#081220;padding:6px 8px;border-radius:5px;margin-bottom:4px;border-right:3px solid #22c55e"><b>'+(k+1)+'.</b> 📞 '+x+'</div>').join('');
-  document.getElementById('callListBox').innerHTML=items;
+  document.getElementById('callListBox').innerHTML=s.call_logs.split(' | ').map((x,k)=>'<div style="background:#081220;padding:6px 8px;border-radius:5px;margin-bottom:4px;border-right:3px solid #22c55e"><b>'+(k+1)+'.</b> 📞 '+x+'</div>').join('');
   oM('mCalls');
 }
 
@@ -167,22 +192,13 @@ function compImg(inp){
   const f=inp.files[0];if(!f)return;
   document.getElementById('picSt').innerText='⏳ جاري ضغط الصورة...';
   const rd=new FileReader();
-  rd.onload=e=>{
-    const img=new Image();
-    img.onload=()=>{
-      const cv=document.createElement('canvas'),sc=Math.min(1,640/img.width);
-      cv.width=img.width*sc;cv.height=img.height*sc;
-      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
-      tmpPic=cv.toDataURL('image/jpeg',0.55);
-      document.getElementById('picSt').innerText='✅ تم تجهيز الصورة ('+Math.round(tmpPic.length/1024)+' KB)';
-    };img.src=e.target.result;
-  };rd.readAsDataURL(f);
+  rd.onload=e=>{const img=new Image();img.onload=()=>{const cv=document.createElement('canvas'),sc=Math.min(1,640/img.width);cv.width=img.width*sc;cv.height=img.height*sc;cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);tmpPic=cv.toDataURL('image/jpeg',0.55);document.getElementById('picSt').innerText='✅ تم تجهيز الصورة ('+Math.round(tmpPic.length/1024)+' KB)';};img.src=e.target.result;};rd.readAsDataURL(f);
 }
 function vwImg(i){document.getElementById('vImg').src=orders[i].proof_img;oM('mImg');}
 async function cleanArchImgs(){
-  if(!confirm('مسح صور الشحنات المؤرشفة لتوفير مساحة السيرفر (مع الاحتفاظ بكافة الأرقام والبيانات)؟'))return;
+  if(!confirm('مسح صور الشحنات المؤرشفة لتوفير مساحة السيرفر؟'))return;
   const r=await fetch(API+'?archived=eq.true',{method:'PATCH',headers:HDR,body:JSON.stringify({proof_img:''})});
-  if(r.ok){alert('تم مسح صور الأرشيف وتوفير المساحة بنجاح!');await getS();}
+  if(r.ok){alert('تم مسح صور الأرشيف!');await getS();}
 }
 
 function prLbl(i){
@@ -329,11 +345,7 @@ function ren(){
 }
 
 function getMo(){const m=document.getElementById('rMo').value,c=document.getElementById('rCo').value,mr=document.getElementById('rMr').value;return orders.filter(s=>(!m||(s.created_at||'').startsWith(m))&&(c==='all'||s.courier_id===c)&&(mr==='all'||(s.merchant||'')===mr));}
-function oRep(){
-  const mrs=[...new Set(orders.map(o=>o.merchant).filter(Boolean))];
-  document.getElementById('rMr').innerHTML='<option value="all">كل التجار</option>'+mrs.map(x=>'<option value="'+x+'">🏪 '+x+'</option>').join('');
-  oM('mRep');cRep();
-}
+function oRep(){const mrs=[...new Set(orders.map(o=>o.merchant).filter(Boolean))];document.getElementById('rMr').innerHTML='<option value="all">كل التجار</option>'+mrs.map(x=>'<option value="'+x+'">🏪 '+x+'</option>').join('');oM('mRep');cRep();}
 function cRep(){
   const ls=getMo(),m=document.getElementById('rMo').value,mr=document.getElementById('rMr').value;
   let t=ls.length,d=0,r=0,p=0,cs=0;
@@ -366,11 +378,26 @@ async function insR(g){
   const r=await fetch(API,{method:'POST',headers:HDR,body:JSON.stringify(rows)});
   if(r.ok){alert('تم رفع '+rows.length+' شحنة!');cM('mX');document.getElementById('pBx').value='';await getS();}
 }
-function upF(){const f=document.getElementById('cF2').files[0];if(!f)return alert('اختر ملفاً');const rd=new FileReader();rd.onload=async e=>{const wb=XLSX.read(e.target.result,{type:'array'});await insR(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));};rd.readAsArrayBuffer(f);}
+async function upF(){
+  const f=document.getElementById('cF2').files[0];if(!f)return alert('اختر ملفاً');
+  if(f.name.toLowerCase().endsWith('.pdf')){
+    const buf=await f.arrayBuffer(),pdf=await pdfjsLib.getDocument({data:buf}).promise,grid=[];
+    for(let p=1;p<=pdf.numPages;p++){
+      const pg=await pdf.getPage(p),tc=await pg.getTextContent(),lines={};
+      tc.items.forEach(it=>{const y=Math.round(it.transform[5]/5)*5;lines[y]=(lines[y]||[]).concat(it.str);});
+      Object.keys(lines).sort((a,b)=>b-a).forEach(y=>{
+        const row=lines[y].join(' ').trim(),ph=row.match(/01[0125][0-9]{8}/);
+        if(ph){const pts=row.split(ph[0]),cd=(pts[0].match(/[0-9]{4,}/)||['SHP'+Math.floor(Math.random()*9000)])[0],nm=pts[0].replace(cd,'').trim()||'عميل',am=(pts[1].match(/[0-9]+(\.[0-9]+)?/)||['0'])[0],ad=pts[1].replace(am,'').trim();grid.push([cd,nm,ph[0],ad,am]);}
+      });
+    }
+    return insR(grid);
+  }
+  const rd=new FileReader();rd.onload=async e=>{const wb=XLSX.read(e.target.result,{type:'array'});await insR(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));};rd.readAsArrayBuffer(f);
+}
 async function upP(){const txt=document.getElementById('pBx').value.trim();if(!txt)return alert('الصق النص');await insR(txt.split(/\r?\n/).map(l=>l.split(l.includes('\t')?'\t':l.includes(';')?';':',')));}
 
 function sSess(r){
-  const cf=document.getElementById('cF'),ids=['bAO','bX','bRep','bLoc','bAC','bArT'];
+  const cf=document.getElementById('cF'),ids=['bAO','bX','bPdf','bRep','bLoc','bAC','bArT'];
   if(r==='admin'){role='admin';myId='';document.getElementById('uN').innerText='👑 المدير';cf.value='all';cf.disabled=false;ids.forEach(i=>document.getElementById(i).style.display='inline-flex');}
   else if(cMap[r]){role='courier';myId=r;ar=false;document.getElementById('arBn').style.display='none';document.getElementById('uN').innerText='🚴 '+cMap[r].name;cf.value=r;cf.disabled=true;ids.forEach(i=>document.getElementById(i).style.display='none');sLoc(r);}
   ren();
