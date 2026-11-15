@@ -19,7 +19,7 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 .btns{display:flex;gap:3px;overflow-x:auto}
 .bh{background:#1e3a8a;border:1px solid #3b82f6;color:#fff;padding:5px 6px;border-radius:5px;font-size:.67rem;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center}
 .in{width:100%;background:#081220;color:#fff;border:1px solid var(--b);padding:5px;border-radius:5px;font-size:.74rem;outline:none}
-.g3{display:grid;grid-template-columns:1.35fr 1fr .75fr;gap:4px;margin-top:5px}
+.g2{display:grid;grid-template-columns:1.3fr .7fr;gap:4px;margin-top:5px}
 .sb{background:rgba(8,18,32,.5);padding:4px;border-radius:6px;border:1px solid var(--b)}
 .tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;padding:7px 10px 0}
 .tab{background:var(--c);border:1px solid var(--b);color:var(--m);padding:6px 3px;border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;text-align:center}
@@ -71,16 +71,21 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
     <button class="bh" id="bArT" style="background:#081220;color:#93c5fd" onclick="tgAr()">📂 الأرشيف</button>
     <button class="bh" style="background:#081220;border-color:#60a5fa;color:#60a5fa" onclick="sNear()">📍 الأقرب</button>
   </div>
-  <div class="g3">
-    <div class="sb">
-      <label style="font-size:.58rem;color:var(--m)">التاريخ (<span id="dLbl" style="color:#fbbf24;font-weight:700">الكل</span>):</label>
-      <div style="display:flex;gap:2px">
-        <input type="date" id="dF" class="in" style="padding:4px 2px;font-size:.68rem" onchange="ren()">
-        <button class="bh" style="padding:2px 4px;font-size:.58rem;background:#059669;border-color:#10b981" onclick="document.getElementById('dF').value=td;ren()">اليوم</button>
-        <button class="bh" style="padding:2px 4px;font-size:.58rem" onclick="document.getElementById('dF').value='';ren()">الكل</button>
+  <div class="sb" style="margin-top:5px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+      <span style="font-size:.58rem;color:var(--m)">فترة الحساب: <b id="dLbl" style="color:#fbbf24">الكل</b></span>
+      <div style="display:flex;gap:3px">
+        <button class="bh" style="padding:1px 6px;font-size:.58rem;background:#059669;border-color:#10b981" onclick="setMainToday()">اليوم</button>
+        <button class="bh" style="padding:1px 6px;font-size:.58rem" onclick="setMainAll()">الكل</button>
       </div>
     </div>
-    <div class="sb"><label style="font-size:.58rem;color:var(--m)">المندوب:</label><div style="display:flex;gap:2px"><select id="cF" class="in" onchange="ren()"></select><button class="bh" id="bCD" style="background:#d97706;padding:2px 5px;font-size:.62rem;display:none" onclick="clsDay()">🔒 تقفيل</button></div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+      <div style="display:flex;align-items:center;gap:3px"><span style="font-size:.6rem;color:var(--m)">من:</span><input type="date" id="dF1" class="in" style="padding:3px;font-size:.68rem" onchange="ren()"></div>
+      <div style="display:flex;align-items:center;gap:3px"><span style="font-size:.6rem;color:var(--m)">إلى:</span><input type="date" id="dF2" class="in" style="padding:3px;font-size:.68rem" onchange="ren()"></div>
+    </div>
+  </div>
+  <div class="g2">
+    <div class="sb"><label style="font-size:.58rem;color:var(--m)">المندوب:</label><div style="display:flex;gap:2px"><select id="cF" class="in" onchange="ren()"></select><button class="bh" id="bCD" style="background:#d97706;padding:2px 6px;font-size:.62rem;display:none" onclick="clsDay()">🔒 تقفيل</button></div></div>
     <div class="sb"><label style="font-size:.58rem;color:var(--m)">الحساب:</label><div id="uN" style="font-size:.7rem;padding:4px;font-weight:700;color:#60a5fa;white-space:nowrap">👑 المدير</div></div>
   </div>
 </header>
@@ -94,9 +99,9 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 </div>
 
 <div class="kpi">
-  <div class="kb"><div id="kIn" style="font-size:.95rem;font-weight:700;color:#4ade80">0 ج</div><div style="font-size:.58rem;color:var(--m)">تحصيل <span class="kTag" style="color:#fbbf24"></span></div></div>
-  <div class="kb"><div id="kOut" style="font-size:.95rem;font-weight:700;color:#fbbf24">0 ج</div><div style="font-size:.58rem;color:var(--m)">بيك أب <span class="kTag" style="color:#fbbf24"></span></div></div>
-  <div class="kb"><div id="kNet" style="font-size:.95rem;font-weight:700;color:#60a5fa">0 ج</div><div style="font-size:.58rem;color:var(--m)">صافي العهدة <span class="kTag" style="color:#fbbf24"></span></div></div>
+  <div class="kb"><div id="kIn" style="font-size:.95rem;font-weight:700;color:#4ade80">0 ج</div><div style="font-size:.56rem;color:var(--m)">تحصيل <span class="kTag" style="color:#fbbf24"></span></div></div>
+  <div class="kb"><div id="kOut" style="font-size:.95rem;font-weight:700;color:#fbbf24">0 ج</div><div style="font-size:.56rem;color:var(--m)">بيك أب <span class="kTag" style="color:#fbbf24"></span></div></div>
+  <div class="kb"><div id="kNet" style="font-size:.95rem;font-weight:700;color:#60a5fa">0 ج</div><div style="font-size:.56rem;color:var(--m)">صافي العهدة <span class="kTag" style="color:#fbbf24"></span></div></div>
 </div>
 <div id="lst"><p style="text-align:center;color:var(--m);margin-top:30px">جاري التحميل...</p></div>
 
@@ -247,13 +252,26 @@ const cln=s=>String(s||'').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD]/g,'').rep
 const isPk=s=>String(s.tracking_code||'').startsWith('PK-')||s.status==='pickup_done';
 const isStaff=()=>role==='admin'||role==='supervisor';
 
+function setMainToday(){document.getElementById('dF1').value=td;document.getElementById('dF2').value=td;ren();}
+function setMainAll(){document.getElementById('dF1').value='';document.getElementById('dF2').value='';ren();}
+function inMainRange(s){
+  const f1=document.getElementById('dF1').value,f2=document.getElementById('dF2').value;
+  if(!f1&&!f2)return true;
+  const dt=(s.created_at||'').slice(0,10);
+  if(dt){if((!f1||dt>=f1)&&(!f2||dt<=f2))return true;}
+  if(s.rescheduled_date){if((!f1||s.rescheduled_date>=f1)&&(!f2||s.rescheduled_date<=f2))return true;}
+  return false;
+}
+
 function sTab(t){tab=t;['p','d','i'].forEach(k=>document.getElementById('tb_'+k).classList.toggle('act',k===t));ren();}
 function tgAr(){ar=!ar;document.getElementById('arBn').style.display=ar?'block':'none';document.getElementById('bArT').style.color=ar?'#fbbf24':'#93c5fd';ren();}
 
 function oPdfM(){
   const mrs=[...new Set(orders.map(o=>o.merchant).filter(Boolean))];
   document.getElementById('pMr').innerHTML='<option value="all">كل التجار</option>'+mrs.map(x=>'<option value="'+x+'">🏪 '+x+'</option>').join('');
-  document.getElementById('pFrom').value=td;document.getElementById('pTo').value=td;oM('mPdfFlt');
+  document.getElementById('pFrom').value=document.getElementById('dF1').value||td;
+  document.getElementById('pTo').value=document.getElementById('dF2').value||td;
+  oM('mPdfFlt');
 }
 function genRangePdf(){
   const mr=document.getElementById('pMr').value,fr=document.getElementById('pFrom').value,to=document.getElementById('pTo').value,cid=document.getElementById('pCo').value;
@@ -410,15 +428,16 @@ async function upd(i,u,lbl){
 async function delS(i){if(role!=='admin')return;const it=orders[i];if(it&&confirm('حذف نهائي؟')){await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'DELETE',headers:HDR});await getS();}}
 
 async function clsDay(){
-  const cid=document.getElementById('cF').value,df=document.getElementById('dF').value;
+  const cid=document.getElementById('cF').value,f1=document.getElementById('dF1').value,f2=document.getElementById('dF2').value;
   if(cid==='all'||!cMap[cid])return;
-  const act=orders.filter(s=>s.courier_id===cid&&!s.archived&&(!df||(s.created_at||'').slice(0,10)===df||s.rescheduled_date===df));
+  const act=orders.filter(s=>s.courier_id===cid&&!s.archived&&inMainRange(s));
   const done=act.filter(s=>['delivered','shipping_only','partial','pickup_done','returned','rescheduled'].includes(s.status));
   const open=act.length-done.length;
-  if(!done.length)return alert('لا توجد حركات منتهية لتقفيلها في هذا الفلتر.');
+  if(!done.length)return alert('لا توجد حركات منتهية لتقفيلها في هذه الفترة.');
   let tIn=0,tOut=0;
   done.forEach(s=>{const m=Number(s.collected_amount||0);if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;});
-  if(!confirm('تقفيل وأرشفة المنتهي لـ ['+cMap[cid].name+']'+(df?' ('+df+')':'')+'؟\nالمنتهي: '+done.length+' | سيظل مفتوح: '+open+'\nتحصيل: '+tIn+'ج | بيك أب: -'+tOut+'ج\nصافي العهدة المطلوبة: '+(tIn-tOut)+' ج.م'))return;
+  const pTxt=(f1||f2)?(' ('+(f1||'...')+' إلى '+(f2||'...')+')'):'';
+  if(!confirm('تقفيل وأرشفة المنتهي لـ ['+cMap[cid].name+']'+pTxt+'؟\nالمنتهي: '+done.length+' | سيظل مفتوح: '+open+'\nتحصيل: '+tIn+'ج | بيك أب: -'+tOut+'ج\nصافي العهدة المطلوبة: '+(tIn-tOut)+' ج.م'))return;
   for(const s of done){await fetch(API+'?id=eq.'+encodeURIComponent(s.id),{method:'PATCH',headers:HDR,body:JSON.stringify({archived:true})});}
   alert('تم التقفيل بنجاح! وبقيت الحركات المفتوحة ('+open+') ظاهرة للمتابعة.');await getS();
 }
@@ -448,17 +467,20 @@ async function oLocs(){
 }
 
 function ren(){
-  const cid=document.getElementById('cF').value||'all',q=(document.getElementById('q').value||'').trim().toLowerCase(),df=document.getElementById('dF').value;
-  const tagTxt=df?(df===td?'(اليوم)':'('+df+')'):'(الكل)';
-  document.getElementById('dLbl').innerText=df?(df===td?'اليوم':df):'الكل';
-  document.querySelectorAll('.kTag').forEach(el=>el.innerText=tagTxt);
+  const cid=document.getElementById('cF').value||'all',q=(document.getElementById('q').value||'').trim().toLowerCase(),f1=document.getElementById('dF1').value,f2=document.getElementById('dF2').value;
+  let lbl='الكل';
+  if(f1&&f2)lbl=(f1===td&&f2===td)?'اليوم':(f1===f2?f1:(f1.slice(5)+' إلى '+f2.slice(5)));
+  else if(f1)lbl='من '+f1.slice(5);
+  else if(f2)lbl='حتى '+f2.slice(5);
+  document.getElementById('dLbl').innerText=lbl;
+  document.querySelectorAll('.kTag').forEach(el=>el.innerText='('+lbl+')');
   document.getElementById('bCD').style.display=(isStaff()&&cid!=='all'&&!ar)?'inline-flex':'none';
   let cP=0,cD=0,cI=0,tIn=0,tOut=0,h='',n=0;
   orders.forEach((s,idx)=>{
     if(Boolean(s.archived)!==ar)return;
     const mQ=!q||String(s.tracking_code||'').toLowerCase().includes(q)||String(s.recipient_name||'').toLowerCase().includes(q)||String(s.delivery_address||'').toLowerCase().includes(q)||String(s.recipient_phone||'').includes(q)||String(s.merchant||'').toLowerCase().includes(q);
-    if(!mQ||(cid!=='all'&&s.courier_id!==cid))return;
-    const dt=(s.created_at||'').slice(0,10);if(df&&dt&&dt!==df&&s.rescheduled_date!==df)return;
+    if(!mQ||(cid!=='all'&&s.courier_id!==cid)||!inMainRange(s))return;
+    const dt=(s.created_at||'').slice(0,10);
     const st=s.status||'out_for_delivery',pk=isPk(s),isD=['delivered','shipping_only','partial','pickup_done'].includes(st),isI=['returned','rescheduled'].includes(st),isP=!isD&&!isI;
     if(isP)cP++;
     if(isD){cD++;const m=Number(s.collected_amount||0);if(st==='pickup_done')tOut+=m;else tIn+=m;}
@@ -509,7 +531,8 @@ function setRepMonth(){document.getElementById('rFrom').value=td.slice(0,7)+'-01
 function oRep(){
   const mrs=[...new Set(orders.map(o=>o.merchant).filter(Boolean))];
   document.getElementById('rMr').innerHTML='<option value="all">كل التجار</option>'+mrs.map(x=>'<option value="'+x+'">🏪 '+x+'</option>').join('');
-  document.getElementById('rFrom').value=td;document.getElementById('rTo').value=td;
+  document.getElementById('rFrom').value=document.getElementById('dF1').value||td;
+  document.getElementById('rTo').value=document.getElementById('dF2').value||td;
   document.getElementById('bCleanArch').style.display=role==='admin'?'block':'none';
   oM('mRep');cRep();
 }
