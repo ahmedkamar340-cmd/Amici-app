@@ -197,7 +197,7 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 <!-- نافذة الإدارة والمناديب وعمولات التجار -->
 <div class="m" id="mC">
   <div class="mb">
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>👥 الإدارة والمناديب والعمولات</b><span onclick="cM('mC')">✕</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>👥 الإدارة والأسعار والمناديب</b><span onclick="cM('mC')">✕</span></div>
     <div style="display:flex;justify-content:space-between;align-items:center;background:#081220;padding:5px 8px;border-radius:6px;margin-bottom:4px;border:1px solid #fbbf24">
       <span style="font-size:.74rem">👑 <b>المدير</b> (<span id="admPinLbl">1234</span>)</span>
       <button class="bh" style="background:#d97706;border-color:#fbbf24" onclick="editSysPin('admin_cfg','المدير')">✏️ PIN</button>
@@ -207,37 +207,55 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
       <button class="bh" style="background:#0284c7;border-color:#38bdf8" onclick="editSysPin('sup_cfg','مشرف التشغيل')">✏️ PIN</button>
     </div>
 
+    <!-- قسم شحن التاجر (يُخصم من كشف التاجر) -->
+    <div style="background:#081220;padding:7px;border-radius:6px;border:1px solid #f59e0b;margin-bottom:8px">
+      <div style="font-size:.75rem;color:#fbbf24;font-weight:700;margin-bottom:5px">🏪 مصاريف شحن التاجر (تُخصم من التاجر):</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:.71rem;margin-bottom:5px;padding-bottom:4px;border-bottom:1px dashed #3b82f6">
+        <span>الشحن الافتراضي للتجار:</span>
+        <div style="display:flex;gap:3px;align-items:center">
+          <input id="defShpIn" type="number" class="in" style="width:55px;padding:3px;text-align:center" value="60">
+          <button class="bh" style="background:#d97706" onclick="saveDefCfg('def_shp_cfg','الشحن الافتراضي','defShpIn')">حفظ</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.3fr .7fr .6fr;gap:4px;margin-bottom:5px">
+        <input id="mShpNm" class="in" placeholder="اسم التاجر (مثلاً Girly)">
+        <input id="mShpVal" type="number" class="in" placeholder="الشحن ج">
+        <button class="bs" style="background:#d97706;padding:5px;font-size:.7rem" onclick="addMerRate('mshp_','mShpNm','mShpVal')">+ حفظ</button>
+      </div>
+      <div id="mShpList" style="max-height:85px;overflow-y:auto;font-size:.72rem"></div>
+    </div>
+
     <!-- قسم عمولات المندوب حسب التاجر -->
     <div style="background:#081220;padding:7px;border-radius:6px;border:1px solid #a855f7;margin-bottom:8px">
-      <div style="font-size:.75rem;color:#d8b4fe;font-weight:700;margin-bottom:5px">💵 عمولة المندوب حسب التاجر:</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:.72rem;margin-bottom:5px;padding-bottom:4px;border-bottom:1px dashed #3b82f6">
-        <span>العمولة الافتراضية (لأي تاجر غير محدد):</span>
+      <div style="font-size:.75rem;color:#d8b4fe;font-weight:700;margin-bottom:5px">🚴 عمولة المندوب حسب التاجر (تُخصم من العهدة):</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:.71rem;margin-bottom:5px;padding-bottom:4px;border-bottom:1px dashed #3b82f6">
+        <span>العمولة الافتراضية للمندوب:</span>
         <div style="display:flex;gap:3px;align-items:center">
           <input id="defComIn" type="number" class="in" style="width:55px;padding:3px;text-align:center" value="40">
-          <button class="bh" style="background:#7c3aed" onclick="saveDefCom()">حفظ</button>
+          <button class="bh" style="background:#7c3aed" onclick="saveDefCfg('def_com_cfg','العمولة الافتراضية','defComIn')">حفظ</button>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1.3fr .7fr .6fr;gap:4px;margin-bottom:5px">
         <input id="mComNm" class="in" placeholder="اسم التاجر (مثلاً Girly)">
         <input id="mComVal" type="number" class="in" placeholder="العمولة ج">
-        <button class="bs" style="background:#7c3aed;padding:5px;font-size:.7rem" onclick="addMerCom()">+ حفظ</button>
+        <button class="bs" style="background:#7c3aed;padding:5px;font-size:.7rem" onclick="addMerRate('mcom_','mComNm','mComVal')">+ حفظ</button>
       </div>
-      <div id="mComList" style="max-height:95px;overflow-y:auto;font-size:.72rem"></div>
+      <div id="mComList" style="max-height:85px;overflow-y:auto;font-size:.72rem"></div>
     </div>
 
-    <div style="font-size:.75rem;color:#93c5fd;font-weight:700;margin-bottom:4px">🚴 المناديب:</div>
+    <div style="font-size:.75rem;color:#93c5fd;font-weight:700;margin-bottom:4px">👥 المناديب:</div>
     <div style="display:grid;grid-template-columns:1.3fr .7fr .6fr;gap:4px;margin-bottom:6px">
       <input id="nCN" class="in" placeholder="اسم المندوب">
       <input id="nCP" class="in" placeholder="PIN" inputmode="numeric">
       <button class="bs" style="background:var(--s);padding:5px;font-size:.7rem" onclick="addC()">+ إضافة</button>
     </div>
-    <div id="cBx" style="max-height:110px;overflow-y:auto;font-size:.76rem"></div>
+    <div id="cBx" style="max-height:100px;overflow-y:auto;font-size:.76rem"></div>
   </div>
 </div>
 
 <div class="m" id="mRep">
   <div class="mb">
-    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📈 جرد العهدة والعمولات والتاجر</b><span onclick="cM('mRep')">✕</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📈 جرد العهدة وكشف حساب التاجر</b><span onclick="cM('mRep')">✕</span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:5px">
       <div><label style="font-size:.64rem;color:var(--m)">من تاريخ:</label><input type="date" id="rFrom" class="in" onchange="cRep()"></div>
       <div><label style="font-size:.64rem;color:var(--m)">إلى تاريخ:</label><input type="date" id="rTo" class="in" onchange="cRep()"></div>
@@ -252,7 +270,7 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
     </div>
     <div id="rSum"></div>
     <div id="supCustodyBox" style="display:none;background:rgba(217,119,6,.15);border:1px solid #f59e0b;border-radius:6px;padding:7px;margin-top:6px;font-size:.76rem"></div>
-    <a id="waMerBtn" href="#" target="_blank" class="bs" style="background:#16a34a;display:block;text-align:center;text-decoration:none;margin-top:6px">💬 إرسال الجرد / التقفيل واتساب</a>
+    <a id="waMerBtn" href="#" target="_blank" class="bs" style="background:#16a34a;display:block;text-align:center;text-decoration:none;margin-top:6px">💬 إرسال الجرد / كشف التاجر واتساب</a>
     <button class="bs" style="background:#2563eb;width:100%;margin-top:5px" onclick="expMo()">📥 تحميل كشف الحساب (Excel)</button>
     <button id="bCleanArch" class="bs" style="background:#7f1d1d;width:100%;margin-top:5px;font-size:.7rem" onclick="cleanArchImgs()">🧹 مسح صور الأرشيف لتوفير المساحة</button>
   </div>
@@ -274,19 +292,26 @@ const BASE='https://difabkjpyypaylnofbcl.supabase.co/rest/v1/',API=BASE+'shipmen
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
 const HDR={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'};
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-let orders=[],snap={},firstLoad=true,cMap={ahmed:{name:'أحمد',pin:'1111'},biko:{name:'بيكو',pin:'2222'},mina:{name:'مينا عبد النور',pin:'3333'}},mComMap={},defCom=40,admPin='1234',supPin='5555',role='admin',myId='',sIdx=-1,tab='p',ar=false,cam=null,tmr=null,tmpPic='';
+let orders=[],snap={},firstLoad=true,cMap={ahmed:{name:'أحمد',pin:'1111'},biko:{name:'بيكو',pin:'2222'},mina:{name:'مينا عبد النور',pin:'3333'}},mComMap={},mShpMap={},defCom=40,defShp=60,admPin='1234',supPin='5555',role='admin',myId='',sIdx=-1,tab='p',ar=false,cam=null,tmr=null,tmpPic='';
 const td=new Date().toISOString().split('T')[0];document.getElementById('cD2').value=td;
 const oM=i=>document.getElementById(i).style.display='flex',cM=i=>document.getElementById(i).style.display='none';
 const cln=s=>String(s||'').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD]/g,'').replace(/["']/g,'').trim();
 const isPk=s=>String(s.tracking_code||'').startsWith('PK-')||s.status==='pickup_done';
 const isStaff=()=>role==='admin'||role==='supervisor';
 
-// حساب عمولة المندوب حسب اسم التاجر
+// 1. عمولة المندوب حسب التاجر (تُخصم من عهدة المندوب)
 function getOrderCom(s){
   if(!['delivered','shipping_only','partial','pickup_done'].includes(s.status))return 0;
   const m=String(s.merchant||'').trim().toLowerCase();
   if(m&&mComMap[m]!==undefined)return Number(mComMap[m]);
   return Number(defCom)||0;
+}
+// 2. مصاريف شحن التاجر (تُخصم من كشف حساب التاجر)
+function getMerShp(s){
+  if(!['delivered','shipping_only','partial','pickup_done'].includes(s.status))return 0;
+  const m=String(s.merchant||'').trim().toLowerCase();
+  if(m&&mShpMap[m]!==undefined)return Number(mShpMap[m]);
+  return Number(defShp)||0;
 }
 
 function beep(){
@@ -381,17 +406,21 @@ function genRangePdf(){
   if(!flt.length)return alert('لا توجد شحنات في هذه الفترة المحددة.');
   cM('mPdfFlt');
   const stN={out_for_delivery:'قيد التنفيذ',delivered:'تم التسليم',shipping_only:'شحن فقط',partial:'جزئي',pickup_done:'تم البيك أب',rescheduled:'مؤجل',returned:'مرتجع'};
-  let tCod=0,tIn=0,tOut=0,tCom=0,rows='';
+  const isMer=mr!=='all';
+  let tCod=0,tIn=0,tOut=0,tFee=0,rows='';
   flt.forEach((s,k)=>{
-    const c=Number(s.cod_amount||0),m=Number(s.collected_amount||0),pk=isPk(s),dt=(s.created_at||'').slice(0,10),cm=getOrderCom(s);
-    tCod+=c;tCom+=cm;if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;
+    const c=Number(s.cod_amount||0),m=Number(s.collected_amount||0),pk=isPk(s),dt=(s.created_at||'').slice(0,10);
+    const fee=isMer?getMerShp(s):getOrderCom(s);
+    tCod+=c;tFee+=fee;if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;
     const rsn=cleanRsn(s)?' ('+cleanRsn(s)+')':'';
-    rows+='<tr><td>'+(k+1)+'</td><td>'+dt+'</td><td>'+(s.tracking_code||'')+'</td><td>'+(s.recipient_name||'')+'<br><small>'+(s.recipient_phone||'')+'</small></td><td>'+(s.delivery_address||'')+'</td><td>'+(stN[s.status]||s.status)+rsn+'</td><td>'+c+'</td><td>'+(pk?'-'+m:m)+'</td><td>'+cm+'</td></tr>';
+    rows+='<tr><td>'+(k+1)+'</td><td>'+dt+'</td><td>'+(s.tracking_code||'')+'</td><td>'+(s.recipient_name||'')+'<br><small>'+(s.recipient_phone||'')+'</small></td><td>'+(s.delivery_address||'')+'</td><td>'+(stN[s.status]||s.status)+rsn+'</td><td>'+c+'</td><td>'+(pk?'-'+m:m)+'</td><td>'+fee+'</td></tr>';
   });
-  const title='كشف أميتشي إكسبريس'+(mr!=='all'?' — التاجر: '+mr:'')+(fr||to?' ('+(fr||'')+' إلى '+(to||'')+')':'');
+  const feeLbl=isMer?'الشحن':'العمولة';
+  const netLbl=isMer?'صافي المستحق للتاجر':'صافي التوريد';
+  const title='كشف حساب أميتشي إكسبريس'+(isMer?' — التاجر: '+mr:'')+(fr||to?' ('+(fr||'')+' إلى '+(to||'')+')':'');
   document.getElementById('lblContent').innerHTML='<div style="display:flex;justify-content:space-between;border-bottom:2px solid #000;padding-bottom:5px;margin-bottom:5px"><b>🚚 '+title+'</b><span>العدد: '+flt.length+'</span></div>'
-    +'<table class="ptbl"><thead><tr><th>#</th><th>التاريخ</th><th>الكود</th><th>العميل</th><th>العنوان</th><th>الحالة</th><th>المطلوب</th><th>المحصل</th><th>العمولة</th></tr></thead><tbody>'+rows+'</tbody>'
-    +'<tfoot><tr style="font-weight:bold;background:#eee"><td colspan="6">تحصيل: '+tIn+'ج | بيك أب: -'+tOut+'ج | عمولات: -'+tCom+'ج</td><td colspan="3">صافي التوريد: '+(tIn-tOut-tCom)+' ج</td></tr></tfoot></table>';
+    +'<table class="ptbl"><thead><tr><th>#</th><th>التاريخ</th><th>الكود</th><th>العميل</th><th>العنوان</th><th>الحالة</th><th>المطلوب</th><th>المحصل</th><th>'+feeLbl+'</th></tr></thead><tbody>'+rows+'</tbody>'
+    +'<tfoot><tr style="font-weight:bold;background:#eee"><td colspan="6">تحصيل: '+tIn+'ج | بيك أب: -'+tOut+'ج | إجمالي '+feeLbl+': -'+tFee+'ج</td><td colspan="3">'+netLbl+': '+(tIn-tOut-tFee)+' ج</td></tr></tfoot></table>';
   oM('mLbl');
 }
 
@@ -468,45 +497,46 @@ async function getC(){
     if(r.ok){
       const d=await r.json();
       if(d.length){
-        cMap={};mComMap={};
+        cMap={};mComMap={};mShpMap={};
+        const rawCom={},rawShp={};
         d.forEach(x=>{
           if(x.id==='admin_cfg')admPin=x.pin||'1234';
           else if(x.id==='sup_cfg')supPin=x.pin||'5555';
           else if(x.id==='def_com_cfg')defCom=Number(x.pin)||40;
-          else if(String(x.id).startsWith('mcom_'))mComMap[String(x.name||'').trim().toLowerCase()]={id:x.id,name:x.name,val:Number(x.pin)||0};
+          else if(x.id==='def_shp_cfg')defShp=Number(x.pin)||60;
+          else if(String(x.id).startsWith('mcom_'))rawCom[String(x.name||'').trim().toLowerCase()]={id:x.id,name:x.name,val:Number(x.pin)||0};
+          else if(String(x.id).startsWith('mshp_'))rawShp[String(x.name||'').trim().toLowerCase()]={id:x.id,name:x.name,val:Number(x.pin)||0};
           else cMap[x.id]={name:x.name,pin:x.pin};
         });
-        // تحويل mComMap لقاموس مزدوج سهل القراءة
-        const raw=Object.assign({},mComMap);mComMap={};
-        let mcHtml='';
-        for(let k in raw){
-          mComMap[k]=raw[k].val;
-          mcHtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #1e3a8a"><span>🏪 <b>'+raw[k].name+'</b>: <b style="color:#4ade80">'+raw[k].val+' ج</b></span><span style="color:#ef4444;cursor:pointer" onclick="delC(\''+raw[k].id+'\')">حذف</span></div>';
-        }
-        document.getElementById('mComList').innerHTML=mcHtml||'<span style="color:#93c5fd">لم تُضف عمولات مخصصة لتجار بعد</span>';
+        let mcHtml='',msHtml='';
+        for(let k in rawCom){mComMap[k]=rawCom[k].val;mcHtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #1e3a8a"><span>🏪 <b>'+rawCom[k].name+'</b>: <b style="color:#d8b4fe">'+rawCom[k].val+' ج</b></span><span style="color:#ef4444;cursor:pointer" onclick="delC(\''+rawCom[k].id+'\')">حذف</span></div>';}
+        for(let k in rawShp){mShpMap[k]=rawShp[k].val;msHtml+='<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid #1e3a8a"><span>🏪 <b>'+rawShp[k].name+'</b>: <b style="color:#fbbf24">'+rawShp[k].val+' ج</b></span><span style="color:#ef4444;cursor:pointer" onclick="delC(\''+rawShp[k].id+'\')">حذف</span></div>';}
+        document.getElementById('mComList').innerHTML=mcHtml||'<span style="color:#93c5fd">لم تُضف عمولات مخصصة بعد</span>';
+        document.getElementById('mShpList').innerHTML=msHtml||'<span style="color:#93c5fd">لم تُضف أسعار شحن مخصصة بعد</span>';
       }
     }
   }catch(e){}
   document.getElementById('admPinLbl').innerText=admPin;
   document.getElementById('supPinLbl').innerText=supPin;
   document.getElementById('defComIn').value=defCom;
+  document.getElementById('defShpIn').value=defShp;
   let oA='<option value="all">كل المناديب</option>',oO='',oR='<option value="admin">👑 المدير</option><option value="supervisor">🛡️ مشرف التشغيل</option>',lH='';
   for(let k in cMap){const c=cMap[k];oA+='<option value="'+k+'">'+c.name+'</option>';oO+='<option value="'+k+'">'+c.name+'</option>';oR+='<option value="'+k+'">🚴 '+c.name+'</option>';lH+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #1e40af"><span>🚴 '+c.name+' (<b>'+c.pin+'</b>)</span><div style="display:flex;gap:8px"><span style="color:#60a5fa;cursor:pointer" onclick="editC(\''+k+'\')">✏️ PIN</span><span style="color:#ef4444;cursor:pointer" onclick="delC(\''+k+'\')">حذف</span></div></div>';}
   const p=document.getElementById('cF').value||'all';
   document.getElementById('cF').innerHTML=oA;document.getElementById('cF').value=role==='courier'?myId:p;
   document.getElementById('rCo').innerHTML=oA;document.getElementById('pCo').innerHTML=oA;document.getElementById('tC').innerHTML=oO;document.getElementById('cC2').innerHTML=oO;document.getElementById('aC').innerHTML=oO;document.getElementById('rSl').innerHTML=oR;document.getElementById('cBx').innerHTML=lH;
 }
-async function saveDefCom(){
-  const v=Number(document.getElementById('defComIn').value)||0;
-  const r=await fetch(COUR,{method:'POST',headers:Object.assign({},HDR,{'Prefer':'resolution=merge-duplicates'}),body:JSON.stringify({id:'def_com_cfg',name:'العمولة الافتراضية',pin:String(v)})});
-  if(r.ok){await getC();ren();alert('تم حفظ العمولة الافتراضية ('+v+' ج.م)!');}
+async function saveDefCfg(cfgId,title,inId){
+  const v=Number(document.getElementById(inId).value)||0;
+  const r=await fetch(COUR,{method:'POST',headers:Object.assign({},HDR,{'Prefer':'resolution=merge-duplicates'}),body:JSON.stringify({id:cfgId,name:title,pin:String(v)})});
+  if(r.ok){await getC();ren();alert('تم حفظ '+title+' ('+v+' ج.م)!');}
 }
-async function addMerCom(){
-  const nm=document.getElementById('mComNm').value.trim(),v=Number(document.getElementById('mComVal').value);
-  if(!nm||isNaN(v))return alert('أدخل اسم التاجر وقيمة العمولة');
-  const id='mcom_'+nm.toLowerCase().replace(/\s+/g,'_');
+async function addMerRate(prefix,nmId,valId){
+  const nm=document.getElementById(nmId).value.trim(),v=Number(document.getElementById(valId).value);
+  if(!nm||isNaN(v))return alert('أدخل اسم التاجر والمبلغ');
+  const id=prefix+nm.toLowerCase().replace(/\s+/g,'_');
   const r=await fetch(COUR,{method:'POST',headers:Object.assign({},HDR,{'Prefer':'resolution=merge-duplicates'}),body:JSON.stringify({id:id,name:nm,pin:String(v)})});
-  if(r.ok){document.getElementById('mComNm').value='';document.getElementById('mComVal').value='';await getC();ren();alert('تم حفظ عمولة تاجر ['+nm+'] بقيمة '+v+' ج.م!');}
+  if(r.ok){document.getElementById(nmId).value='';document.getElementById(valId).value='';await getC();ren();alert('تم حفظ السعر لتاجر ['+nm+'] بقيمة '+v+' ج.م!');}
 }
 async function editSysPin(cfgId,title){
   const cur=cfgId==='admin_cfg'?admPin:supPin;
@@ -678,37 +708,50 @@ function oRep(){
 }
 function cRep(){
   const ls=getMo(),fr=document.getElementById('rFrom').value,to=document.getElementById('rTo').value,mr=document.getElementById('rMr').value,c=document.getElementById('rCo').value;
-  let t=ls.length,d=0,r=0,p=0,tIn=0,tOut=0,tCom=0,sIn=0,sOut=0,sCom=0,sCnt=0;
+  const isMer=mr!=='all';
+  let t=ls.length,d=0,r=0,p=0,tIn=0,tOut=0,tFee=0,sIn=0,sOut=0,sCom=0,sCnt=0;
   ls.forEach(s=>{
-    const mAmt=Number(s.collected_amount||0),stl=getSettle(s),cm=getOrderCom(s);
-    if(s.status==='pickup_done'){d++;tOut+=mAmt;tCom+=cm;if(stl.includes('المشرف')){sOut+=mAmt;sCom+=cm;sCnt++;}}
-    else if(['delivered','shipping_only','partial'].includes(s.status)){d++;tIn+=mAmt;tCom+=cm;if(stl.includes('المشرف')){sIn+=mAmt;sCom+=cm;sCnt++;}}
+    const mAmt=Number(s.collected_amount||0),stl=getSettle(s),cm=getOrderCom(s),sh=getMerShp(s);
+    const fee=isMer?sh:cm;
+    if(s.status==='pickup_done'){d++;tOut+=mAmt;tFee+=fee;if(stl.includes('المشرف')){sOut+=mAmt;sCom+=cm;sCnt++;}}
+    else if(['delivered','shipping_only','partial'].includes(s.status)){d++;tIn+=mAmt;tFee+=fee;if(stl.includes('المشرف')){sIn+=mAmt;sCom+=cm;sCnt++;}}
     else if(['returned','rescheduled'].includes(s.status)){r++;if(stl.includes('المشرف'))sCnt++;}else p++;
   });
   const period=fr===to?(fr||'الكل'):(fr+' إلى '+to);
   const cName=c==='all'?'كل المناديب':(cMap[c]?.name||c);
-  document.getElementById('rSum').innerHTML='<div style="background:#081220;padding:8px;border-radius:6px;font-size:.78rem"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>إجمالي الحركات:</span><b>'+t+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>المنجزة:</span><b>'+d+' ('+(t?Math.round(d/t*100):0)+'%)</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#f87171"><span>تعذر الاستلام:</span><b>'+r+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>إجمالي التحصيل (وارد):</span><b>+'+tIn+' ج.م</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#fbbf24"><span>مدفوعات بيك أب (منصرف):</span><b>-'+tOut+' ج.م</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#c084fc"><span>إجمالي عمولات المندوب:</span><b>-'+tCom+' ج.م</b></div><div style="display:flex;justify-content:space-between;border-top:1px solid #1e40af;padding-top:4px;color:#60a5fa;font-size:.86rem"><span>صافي التوريد بعد العمولات:</span><b>'+(tIn-tOut-tCom)+' ج.م</b></div></div>';
+  const feeTitle=isMer?'مصاريف شحن التاجر (مخصومة):':'إجمالي عمولات المندوب:';
+  const netTitle=isMer?'صافي المستحق للتاجر:':'صافي التوريد بعد العمولات:';
+  const netVal=tIn-tOut-tFee;
+
+  document.getElementById('rSum').innerHTML='<div style="background:#081220;padding:8px;border-radius:6px;font-size:.78rem"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>إجمالي الحركات:</span><b>'+t+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>المنجزة:</span><b>'+d+' ('+(t?Math.round(d/t*100):0)+'%)</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#f87171"><span>تعذر الاستلام:</span><b>'+r+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>إجمالي التحصيل (وارد):</span><b>+'+tIn+' ج.م</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#fbbf24"><span>مدفوعات بيك أب (منصرف):</span><b>-'+tOut+' ج.م</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:'+(isMer?'#fbbf24':'#c084fc')+'"><span>'+feeTitle+'</span><b>-'+tFee+' ج.م</b></div><div style="display:flex;justify-content:space-between;border-top:1px solid #1e40af;padding-top:4px;color:#60a5fa;font-size:.86rem"><span>'+netTitle+'</span><b>'+netVal+' ج.م</b></div></div>';
 
   const supBox=document.getElementById('supCustodyBox');
-  if(sCnt>0){
+  if(sCnt>0&&!isMer){
     const sNet=sIn-sOut-sCom;
     supBox.style.display='block';
     supBox.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#fde68a"><span>🛡️ عهدة مقفلة عند المشرف ('+sCnt+' حركة):</span><b>'+sNet+' ج.م</b></div>'
       +(role==='admin'?'<button class="bs" style="background:#d97706;width:100%;padding:6px;font-size:.72rem" onclick="settleSupCash()">🤝 تأكيد استلام الكاش وتصفية حساب المشرف ✓</button>':'<div style="font-size:.66rem;color:#93c5fd">في انتظار تسليمها للمدير لتصفية الحساب</div>');
   }else supBox.style.display='none';
 
-  const title=mr==='all'?('أميتشي ('+cName+')'):('تاجر: '+mr);
-  const waTxt='📊 *جرد وتقفيل ('+title+')*\n📅 التاريخ: '+period+'\n📦 إجمالي الحركات: '+t+'\n✅ منجزة: '+d+'\n❌ تعذر الاستلام: '+r+'\n💵 تحصيل: +'+tIn+' ج.م\n🔄 بيك أب: -'+tOut+' ج.م\n💼 عمولات المندوب: -'+tCom+' ج.م\n💰 الصافي: *'+(tIn-tOut-tCom)+' ج.م*';
+  const title=isMer?('كشف حساب تاجر: '+mr):('أميتشي ('+cName+')');
+  const waFeeLine=isMer?('🚚 مصاريف الشحن: -'+tFee+' ج.م'):('💼 عمولات المندوب: -'+tCom+' ج.م');
+  const waNetLine=isMer?('💰 صافي المستحق للتاجر: *'+netVal+' ج.م*'):('💰 الصافي: *'+netVal+' ج.م*');
+  const waTxt='📊 *'+title+'*\n📅 الفترة: '+period+'\n📦 إجمالي الحركات: '+t+'\n✅ منجزة: '+d+'\n❌ تعذر الاستلام: '+r+'\n💵 تحصيل: +'+tIn+' ج.م\n🔄 بيك أب: -'+tOut+' ج.م\n'+waFeeLine+'\n'+waNetLine;
   document.getElementById('waMerBtn').href='https://wa.me/?text='+encodeURIComponent(waTxt);
 }
 function expMo(){
   const ls=getMo();if(!ls.length)return alert('لا توجد بيانات');
+  const mr=document.getElementById('rMr').value,fr=document.getElementById('rFrom').value||'all',isMer=mr!=='all';
   const stN={out_for_delivery:'قيد التنفيذ',delivered:'تم التسليم',shipping_only:'شحن فقط',partial:'جزئي',pickup_done:'تم البيك أب',rescheduled:'مؤجل',returned:'تعذر/مرتجع'};
-  let csv='\uFEFFالتاريخ,التاجر,الكود,النوع,العميل,الهاتف,العنوان,المندوب,الحالة,السبب,تسوية العهدة,محاولات الاتصال,المطلوب,العهدة,عمولة المندوب\n',tIn=0,tOut=0,tCom=0;
-  ls.forEach(s=>{const c=Number(s.cod_amount||0),m=Number(s.collected_amount||0),pk=isPk(s),cm=getOrderCom(s);tCom+=cm;if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;csv+=[(s.created_at||'').slice(0,10),s.merchant||'',s.tracking_code,pk?'بيك أب':'توصيل',s.recipient_name,s.recipient_phone,s.delivery_address,cMap[s.courier_id]?.name||s.courier_id,stN[s.status]||s.status,(cleanRsn(s)||'')+(s.rescheduled_date?' '+s.rescheduled_date:''),getSettle(s)||'مفتوحة',s.call_logs||'',c,pk?'-'+m:m,cm].map(v=>'"'+String(v||'').replace(/"/g,'')+'"').join(',')+'\n';});
-  csv+='"الصافي بعد العمولات","","","","","","","","","","","","","'+(tIn-tOut-tCom)+'","'+tCom+'"\n';
-  const mr=document.getElementById('rMr').value,fr=document.getElementById('rFrom').value||'all';
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='كشف_'+(mr==='all'?'أميتشي':mr)+'_'+fr+'.csv';a.click();
+  let csv='\uFEFFالتاريخ,التاجر,الكود,النوع,العميل,الهاتف,العنوان,المندوب,الحالة,السبب,تسوية العهدة,المطلوب,المحصل,شحن التاجر,عمولة المندوب,صافي التاجر\n',tIn=0,tOut=0,tSh=0,tCm=0;
+  ls.forEach(s=>{
+    const c=Number(s.cod_amount||0),m=Number(s.collected_amount||0),pk=isPk(s),sh=getMerShp(s),cm=getOrderCom(s);
+    tSh+=sh;tCm+=cm;if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;
+    const rowNet=(pk?-m:m)-sh;
+    csv+=[(s.created_at||'').slice(0,10),s.merchant||'',s.tracking_code,pk?'بيك أب':'توصيل',s.recipient_name,s.recipient_phone,s.delivery_address,cMap[s.courier_id]?.name||s.courier_id,stN[s.status]||s.status,(cleanRsn(s)||'')+(s.rescheduled_date?' '+s.rescheduled_date:''),getSettle(s)||'مفتوحة',c,pk?'-'+m:m,sh,cm,rowNet].map(v=>'"'+String(v||'').replace(/"/g,'')+'"').join(',')+'\n';
+  });
+  csv+='"الإجمالي","","","","","","","","","","","","'+(tIn-tOut)+'","'+tSh+'","'+tCm+'","'+(tIn-tOut-tSh)+'"\n';
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='كشف_'+(isMer?mr:'أميتشي')+'_'+fr+'.csv';a.click();
 }
 
 async function add1(){
