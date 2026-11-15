@@ -41,6 +41,8 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 .ob{width:100%;text-align:right;background:#081220;border:1px solid var(--b);color:#fff;padding:8px;border-radius:6px;margin-bottom:5px;font-size:.78rem;cursor:pointer}
 .lbl-box{background:#fff;color:#000;padding:10px;border-radius:6px;border:2px solid #000;text-align:right;font-size:.78rem}
 .clog{background:rgba(22,163,74,.15);border:1px solid rgba(34,197,94,.35);color:#86efac;padding:3px 7px;border-radius:4px;font-size:.68rem;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.slog{background:rgba(245,158,11,.15);border:1px solid rgba(245,158,11,.4);color:#fde68a;padding:3px 7px;border-radius:4px;font-size:.67rem;margin-bottom:5px;font-weight:700}
+.slog.adm{background:rgba(59,130,246,.18);border-color:rgba(96,165,250,.45);color:#93c5fd}
 .pbox{background:#081220;padding:6px;border-radius:6px;margin-bottom:6px;border:1px dashed #3b82f6;text-align:center}
 .ptbl{width:100%;border-collapse:collapse;font-size:.72rem;margin-top:6px}
 .ptbl th,.ptbl td{border:1px solid #000;padding:4px;text-align:right}
@@ -90,7 +92,7 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
   </div>
 </header>
 
-<div id="arBn" style="display:none;background:#1e3a8a;color:#dbeafe;text-align:center;padding:4px;font-size:.72rem;font-weight:700">📂 الأرشيف — <span style="text-decoration:underline;cursor:pointer" onclick="tgAr()">العودة للنشط</span></div>
+<div id="arBn" style="display:none;background:#1e3a8a;color:#dbeafe;text-align:center;padding:4px;font-size:.72rem;font-weight:700">📂 الأرشيف (عهد تمت تسويتها) — <span style="text-decoration:underline;cursor:pointer" onclick="tgAr()">العودة للنشط</span></div>
 
 <div class="tabs">
   <button class="tab act" id="tb_p" onclick="sTab('p')">📦 قيد التنفيذ (<span id="cP">0</span>)</button>
@@ -223,6 +225,7 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
       <button class="bh" style="flex:1;justify-content:center" onclick="setRepMonth()">🗓️ الشهر بالكامل</button>
     </div>
     <div id="rSum"></div>
+    <div id="supCustodyBox" style="display:none;background:rgba(217,119,6,.15);border:1px solid #f59e0b;border-radius:6px;padding:7px;margin-top:6px;font-size:.76rem"></div>
     <a id="waMerBtn" href="#" target="_blank" class="bs" style="background:#16a34a;display:block;text-align:center;text-decoration:none;margin-top:6px">💬 إرسال الجرد / التقفيل واتساب</a>
     <button class="bs" style="background:#2563eb;width:100%;margin-top:5px" onclick="expMo()">📥 تحميل كشف الحساب (Excel)</button>
     <button id="bCleanArch" class="bs" style="background:#7f1d1d;width:100%;margin-top:5px;font-size:.7rem" onclick="cleanArchImgs()">🧹 مسح صور الأرشيف لتوفير المساحة</button>
@@ -251,6 +254,11 @@ const oM=i=>document.getElementById(i).style.display='flex',cM=i=>document.getEl
 const cln=s=>String(s||'').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD]/g,'').replace(/["']/g,'').trim();
 const isPk=s=>String(s.tracking_code||'').startsWith('PK-')||s.status==='pickup_done';
 const isStaff=()=>role==='admin'||role==='supervisor';
+
+// استخراج وحفظ ختم التسوية داخل reason بدون حاجة لأعمدة إضافية
+const getSettle=s=>{const m=String(s.reason||'').match(/\[([^\]]+)\]/);return m?m[1]:'';};
+const cleanRsn=s=>String(s.reason||'').replace(/\s*\[[^\]]+\]/g,'').trim();
+const setSettle=(s,tag)=>{const base=cleanRsn(s);return base?(base+' ['+tag+']'):('['+tag+']');};
 
 function setMainToday(){document.getElementById('dF1').value=td;document.getElementById('dF2').value=td;ren();}
 function setMainAll(){document.getElementById('dF1').value='';document.getElementById('dF2').value='';ren();}
@@ -288,7 +296,7 @@ function genRangePdf(){
   flt.forEach((s,k)=>{
     const c=Number(s.cod_amount||0),m=Number(s.collected_amount||0),pk=isPk(s),dt=(s.created_at||'').slice(0,10);
     tCod+=c;if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;
-    const rsn=s.reason?' ('+s.reason+')':'';
+    const rsn=cleanRsn(s)?' ('+cleanRsn(s)+')':'';
     rows+='<tr><td>'+(k+1)+'</td><td>'+dt+'</td><td>'+(s.tracking_code||'')+'</td><td>'+(s.recipient_name||'')+'<br><small>'+(s.recipient_phone||'')+'</small></td><td>'+(s.delivery_address||'')+'</td><td>'+(stN[s.status]||s.status)+rsn+'</td><td>'+c+'</td><td>'+(pk?'-'+m:m)+'</td></tr>';
   });
   const title='كشف أميتشي إكسبريس'+(mr!=='all'?' — التاجر: '+mr:'')+(fr||to?' ('+(fr||'')+' إلى '+(to||'')+')':'');
@@ -427,6 +435,7 @@ async function upd(i,u,lbl){
 }
 async function delS(i){if(role!=='admin')return;const it=orders[i];if(it&&confirm('حذف نهائي؟')){await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'DELETE',headers:HDR});await getS();}}
 
+// تقفيل وأرشفة الحركات المنتهية مع طبع ختم التسوية (باسم المدير أو المشرف)
 async function clsDay(){
   const cid=document.getElementById('cF').value,f1=document.getElementById('dF1').value,f2=document.getElementById('dF2').value;
   if(cid==='all'||!cMap[cid])return;
@@ -438,10 +447,26 @@ async function clsDay(){
   done.forEach(s=>{const m=Number(s.collected_amount||0);if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;});
   const pTxt=(f1||f2)?(' ('+(f1||'...')+' إلى '+(f2||'...')+')'):'';
   if(!confirm('تقفيل وأرشفة المنتهي لـ ['+cMap[cid].name+']'+pTxt+'؟\nالمنتهي: '+done.length+' | سيظل مفتوح: '+open+'\nتحصيل: '+tIn+'ج | بيك أب: -'+tOut+'ج\nصافي العهدة المطلوبة: '+(tIn-tOut)+' ج.م'))return;
-  for(const s of done){await fetch(API+'?id=eq.'+encodeURIComponent(s.id),{method:'PATCH',headers:HDR,body:JSON.stringify({archived:true})});}
-  alert('تم التقفيل بنجاح! وبقيت الحركات المفتوحة ('+open+') ظاهرة للمتابعة.');await getS();
+  const now=new Date(),dtStr=(now.getMonth()+1)+'/'+now.getDate()+' '+now.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+  const stamp=role==='admin'?('تم التوريد للمدير ✓ '+dtStr):('تمت التسوية مع المشرف ⏳ '+dtStr);
+  for(const s of done){await fetch(API+'?id=eq.'+encodeURIComponent(s.id),{method:'PATCH',headers:HDR,body:JSON.stringify({archived:true,reason:setSettle(s,stamp)})});}
+  alert('تم التقفيل وطبع ختم التسوية بنجاح! وبقيت الحركات المفتوحة ('+open+') ظاهرة للمتابعة.');await getS();
 }
-async function unAr(i){const it=orders[i];if(it){await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'PATCH',headers:HDR,body:JSON.stringify({archived:false})});await getS();}}
+async function unAr(i){const it=orders[i];if(it){await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'PATCH',headers:HDR,body:JSON.stringify({archived:false,reason:cleanRsn(it)})});await getS();}}
+
+// تصفية العهدة بين المدير والمشرف
+async function settleSupCash(){
+  if(role!=='admin')return;
+  const ls=getMo().filter(s=>getSettle(s).includes('المشرف'));
+  if(!ls.length)return alert('لا توجد عهدة معلقة عند المشرف في هذه الفترة.');
+  let tIn=0,tOut=0;
+  ls.forEach(s=>{const m=Number(s.collected_amount||0);if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;});
+  if(!confirm('تأكيد استلام صافي عهدة المشرف ('+(tIn-tOut)+' ج.م) عن عدد '+ls.length+' حركة وتصفية حسابه؟'))return;
+  const now=new Date(),dtStr=(now.getMonth()+1)+'/'+now.getDate()+' '+now.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+  const stamp='تم التوريد للمدير من المشرف ✓ '+dtStr;
+  for(const s of ls){await fetch(API+'?id=eq.'+encodeURIComponent(s.id),{method:'PATCH',headers:HDR,body:JSON.stringify({reason:setSettle(s,stamp)})});}
+  alert('تمت تصفية حساب المشرف وتأكيد استلام الكاش بنجاح!');await getS();cRep();
+}
 
 function oDel(i){sIdx=i;tmpPic='';document.getElementById('pAm').value='';document.getElementById('picStP').innerText='';oM('mDel');}
 function okDel(m){cM('mDel');const c=Number(orders[sIdx]?.cod_amount)||0;upd(sIdx,{status:'delivered',collected_amount:c,reason:m},'تم التسليم ('+m+') - '+c+'ج');}
@@ -486,7 +511,7 @@ function ren(){
     if(isD){cD++;const m=Number(s.collected_amount||0);if(st==='pickup_done')tOut+=m;else tIn+=m;}
     if(isI)cI++;
     if((tab==='p'&&!isP)||(tab==='d'&&!isD)||(tab==='i'&&!isI))return;
-    n++;const cod=Number(s.cod_amount||0),col=Number(s.collected_amount||0),rsn=s.reason?' ('+s.reason+')':'';
+    n++;const cod=Number(s.cod_amount||0),col=Number(s.collected_amount||0),pureRsn=cleanRsn(s),rsn=pureRsn?' ('+pureRsn+')':'',stl=getSettle(s);
     const bg=st==='pickup_done'?'تم البيك أب ✓':st==='delivered'?'تم التسليم'+rsn+' ✓':st==='shipping_only'?'شحن فقط ('+col+'ج)':st==='partial'?'جزئي ('+col+'ج)':st==='rescheduled'?'مؤجل: '+(s.rescheduled_date||''):st==='returned'?'تعذر'+rsn+' ✕':(pk?'🔄 بيك أب مطلوب':'قيد التوصيل');
     const cn=cMap[s.courier_id]?cMap[s.courier_id].name:(s.courier_id||''),ph=String(s.recipient_phone||'').replace(/[^0-9]/g,'');
     const wa=ph?'https://wa.me/2'+ph+'?text='+encodeURIComponent('السلام عليكم '+s.recipient_name+'، بخصوص الحركة رقم ('+s.tracking_code+')'):'#';
@@ -495,6 +520,7 @@ function ren(){
     const picBtn=s.proof_img?'<button class="badm" style="background:#d97706" onclick="vwImg('+idx+')">🖼️ صورة</button>':'';
     const calls=s.call_logs?s.call_logs.split(' | '):[];
     const callBar=calls.length?'<div class="clog" onclick="showCalls('+idx+')" style="cursor:pointer"><span>📞 محاولات الاتصال: <b>'+calls.length+'</b> (آخرها: '+calls[calls.length-1]+')</span><span style="text-decoration:underline">السجل</span></div>':'';
+    const settleBar=stl?'<div class="slog '+(stl.includes('للمدير')?'adm':'')+'">💰 '+stl+'</div>':'';
     const canAct=!ar&&(isStaff()||isP);
     const lockMsg=(!ar&&role==='courier'&&!isP)?'<div style="text-align:center;font-size:.7rem;color:#93c5fd;background:rgba(8,18,32,.5);padding:4px;border-radius:4px">🔒 تم تسجيل الحالة (التعديل متاح للإدارة فقط)</div>':'';
 
@@ -509,7 +535,7 @@ function ren(){
     const delBtn=role==='admin'?'<button class="badm" style="background:#b91c1c" onclick="delS('+idx+')">🗑️ حذف</button>':'';
     const staffBar=isStaff()?'<div class="ab">'+picBtn+'<button class="badm" style="background:#475569" onclick="prLbl('+idx+')">🖨️ بوليصة</button>'+(ar?'<button class="badm" style="background:#059669" onclick="unAr('+idx+')">↩️ إعادة</button>':'<button class="badm" style="background:#2563eb" onclick="oTr('+idx+')">🔄 تحويل</button>')+delBtn+'</div>':'';
 
-    h+='<div class="card '+(pk?'pk-card':'')+'"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:3px"><span style="color:'+(pk?'#fbbf24':'#60a5fa')+'">#'+n+' '+(pk?'🔄':'🏷️')+' '+(s.tracking_code||'')+' <small style="color:var(--m)">['+cn+']</small>'+mrTag+'</span><div style="display:flex;gap:3px;align-items:center">'+(isP&&!ar?'<button class="srt" onclick="mv('+idx+',-1)">⬆️</button><button class="srt" onclick="mv('+idx+',1)">⬇️</button>':'')+'<span style="font-size:.66rem;padding:2px 5px;border-radius:4px;background:'+(pk?'#92400e':'#1e3a8a')+'">'+bg+'</span></div></div><div style="display:flex;justify-content:space-between"><span style="font-weight:600">'+(s.recipient_name||'')+'</span><span style="font-size:.64rem;color:var(--m)">📅 '+dt+'</span></div><div style="font-size:.74rem;color:var(--m);margin:2px 0">'+(s.delivery_address||'')+'</div>'+moneyBar+callBar+'<div class="'+(isStaff()?'acts4':'acts3')+'"><a href="tel:'+s.recipient_phone+'" onclick="logCall('+idx+')" class="ba">📞 اتصال</a><a href="'+wa+'" target="_blank" class="ba" style="border-color:#25d366;color:#25d366">💬 واتساب</a>'+qrB+'<a href="https://maps.google.com/?q='+encodeURIComponent(s.delivery_address||'')+'" target="_blank" class="ba">🗺️ خريطة</a></div>'
+    h+='<div class="card '+(pk?'pk-card':'')+'"><div style="display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:3px"><span style="color:'+(pk?'#fbbf24':'#60a5fa')+'">#'+n+' '+(pk?'🔄':'🏷️')+' '+(s.tracking_code||'')+' <small style="color:var(--m)">['+cn+']</small>'+mrTag+'</span><div style="display:flex;gap:3px;align-items:center">'+(isP&&!ar?'<button class="srt" onclick="mv('+idx+',-1)">⬆️</button><button class="srt" onclick="mv('+idx+',1)">⬇️</button>':'')+'<span style="font-size:.66rem;padding:2px 5px;border-radius:4px;background:'+(pk?'#92400e':'#1e3a8a')+'">'+bg+'</span></div></div><div style="display:flex;justify-content:space-between"><span style="font-weight:600">'+(s.recipient_name||'')+'</span><span style="font-size:.64rem;color:var(--m)">📅 '+dt+'</span></div><div style="font-size:.74rem;color:var(--m);margin:2px 0">'+(s.delivery_address||'')+'</div>'+moneyBar+settleBar+callBar+'<div class="'+(isStaff()?'acts4':'acts3')+'"><a href="tel:'+s.recipient_phone+'" onclick="logCall('+idx+')" class="ba">📞 اتصال</a><a href="'+wa+'" target="_blank" class="ba" style="border-color:#25d366;color:#25d366">💬 واتساب</a>'+qrB+'<a href="https://maps.google.com/?q='+encodeURIComponent(s.delivery_address||'')+'" target="_blank" class="ba">🗺️ خريطة</a></div>'
       +(canAct?actBtns:lockMsg)+staffBar+'</div>';
   });
   document.getElementById('cP').innerText=cP;document.getElementById('cD').innerText=cD;document.getElementById('cI').innerText=cI;
@@ -538,16 +564,25 @@ function oRep(){
 }
 function cRep(){
   const ls=getMo(),fr=document.getElementById('rFrom').value,to=document.getElementById('rTo').value,mr=document.getElementById('rMr').value,c=document.getElementById('rCo').value;
-  let t=ls.length,d=0,r=0,p=0,tIn=0,tOut=0;
+  let t=ls.length,d=0,r=0,p=0,tIn=0,tOut=0,sIn=0,sOut=0,sCnt=0;
   ls.forEach(s=>{
-    const mAmt=Number(s.collected_amount||0);
-    if(s.status==='pickup_done'){d++;tOut+=mAmt;}
-    else if(['delivered','shipping_only','partial'].includes(s.status)){d++;tIn+=mAmt;}
-    else if(['returned','rescheduled'].includes(s.status))r++;else p++;
+    const mAmt=Number(s.collected_amount||0),stl=getSettle(s);
+    if(s.status==='pickup_done'){d++;tOut+=mAmt;if(stl.includes('المشرف')){sOut+=mAmt;sCnt++;}}
+    else if(['delivered','shipping_only','partial'].includes(s.status)){d++;tIn+=mAmt;if(stl.includes('المشرف')){sIn+=mAmt;sCnt++;}}
+    else if(['returned','rescheduled'].includes(s.status)){r++;if(stl.includes('المشرف'))sCnt++;}else p++;
   });
   const period=fr===to?(fr||'الكل'):(fr+' إلى '+to);
   const cName=c==='all'?'كل المناديب':(cMap[c]?.name||c);
-  document.getElementById('rSum').innerHTML='<div style="background:#081220;padding:8px;border-radius:6px;font-size:.78rem"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>إجمالي الحركات:</span><b>'+t+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>المنجزة:</span><b>'+d+' ('+(t?Math.round(d/t*100):0)+'%)</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#f87171"><span>تعذر الاستلام:</span><b>'+r+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>إجمالي التحصيل (وارد):</span><b>+'+tIn+' ج.م</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#fbbf24"><span>مدفوعات بيك أب (منصرف):</span><b>-'+tOut+' ج.م</b></div><div style="display:flex;justify-content:space-between;border-top:1px solid #1e40af;padding-top:4px;color:#60a5fa;font-size:.86rem"><span>صافي العهدة المطلوبة:</span><b>'+(tIn-tOut)+' ج.م</b></div></div>';
+  document.getElementById('rSum').innerHTML='<div style="background:#081220;padding:8px;border-radius:6px;font-size:.78rem"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>إجمالي الحركات:</span><b>'+t+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>المنجزة:</span><b>'+d+' ('+(t?Math.round(d/t*100):0)+'%)</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#f87171"><span>تعذر الاستلام:</span><b>'+r+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>إجمالي التحصيل (وارد):</span><b>+'+tIn+' ج.م</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#fbbf24"><span>مدفوعات بيك أب (منصرف):</span><b>-'+tOut+' ج.م</b></div><div style="display:flex;justify-content:space-between;border-top:1px solid #1e40af;padding-top:4px;color:#60a5fa;font-size:.86rem"><span>صافي العهدة:</span><b>'+(tIn-tOut)+' ج.م</b></div></div>';
+
+  // صندوق عهدة المشرف المعلقة للتصفية مع المدير
+  const supBox=document.getElementById('supCustodyBox');
+  if(sCnt>0){
+    supBox.style.display='block';
+    supBox.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#fde68a"><span>🛡️ عهدة مقفلة عند المشرف ('+sCnt+' حركة):</span><b>'+(sIn-sOut)+' ج.م</b></div>'
+      +(role==='admin'?'<button class="bs" style="background:#d97706;width:100%;padding:6px;font-size:.72rem" onclick="settleSupCash()">🤝 تأكيد استلام الكاش وتصفية حساب المشرف ✓</button>':'<div style="font-size:.66rem;color:#93c5fd">في انتظار تسليمها للمدير لتصفية الحساب</div>');
+  }else supBox.style.display='none';
+
   const title=mr==='all'?('أميتشي ('+cName+')'):('تاجر: '+mr);
   const waTxt='📊 *جرد وتقفيل ('+title+')*\n📅 التاريخ: '+period+'\n📦 إجمالي الحركات: '+t+'\n✅ منجزة: '+d+'\n❌ تعذر الاستلام: '+r+'\n💵 تحصيل: +'+tIn+' ج.م\n🔄 بيك أب: -'+tOut+' ج.م\n💰 صافي العهدة: *'+(tIn-tOut)+' ج.م*';
   document.getElementById('waMerBtn').href='https://wa.me/?text='+encodeURIComponent(waTxt);
@@ -555,9 +590,9 @@ function cRep(){
 function expMo(){
   const ls=getMo();if(!ls.length)return alert('لا توجد بيانات');
   const stN={out_for_delivery:'قيد التنفيذ',delivered:'تم التسليم',shipping_only:'شحن فقط',partial:'جزئي',pickup_done:'تم البيك أب',rescheduled:'مؤجل',returned:'تعذر/مرتجع'};
-  let csv='\uFEFFالتاريخ,التاجر,الكود,النوع,العميل,الهاتف,العنوان,المندوب,الحالة,السبب,محاولات الاتصال,المطلوب,العهدة\n',tIn=0,tOut=0;
-  ls.forEach(s=>{const c=Number(s.cod_amount||0),m=Number(s.collected_amount||0),pk=isPk(s);if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;csv+=[(s.created_at||'').slice(0,10),s.merchant||'',s.tracking_code,pk?'بيك أب':'توصيل',s.recipient_name,s.recipient_phone,s.delivery_address,cMap[s.courier_id]?.name||s.courier_id,stN[s.status]||s.status,(s.reason||'')+(s.rescheduled_date?' '+s.rescheduled_date:''),s.call_logs||'',c,pk?'-'+m:m].map(v=>'"'+String(v||'').replace(/"/g,'')+'"').join(',')+'\n';});
-  csv+='"الصافي","","","","","","","","","","","","'+(tIn-tOut)+'"\n';
+  let csv='\uFEFFالتاريخ,التاجر,الكود,النوع,العميل,الهاتف,العنوان,المندوب,الحالة,السبب,تسوية العهدة,محاولات الاتصال,المطلوب,العهدة\n',tIn=0,tOut=0;
+  ls.forEach(s=>{const c=Number(s.cod_amount||0),m=Number(s.collected_amount||0),pk=isPk(s);if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;csv+=[(s.created_at||'').slice(0,10),s.merchant||'',s.tracking_code,pk?'بيك أب':'توصيل',s.recipient_name,s.recipient_phone,s.delivery_address,cMap[s.courier_id]?.name||s.courier_id,stN[s.status]||s.status,(cleanRsn(s)||'')+(s.rescheduled_date?' '+s.rescheduled_date:''),getSettle(s)||'مفتوحة',s.call_logs||'',c,pk?'-'+m:m].map(v=>'"'+String(v||'').replace(/"/g,'')+'"').join(',')+'\n';});
+  csv+='"الصافي","","","","","","","","","","","","","'+(tIn-tOut)+'"\n';
   const mr=document.getElementById('rMr').value,fr=document.getElementById('rFrom').value||'all';
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='كشف_'+(mr==='all'?'أميتشي':mr)+'_'+fr+'.csv';a.click();
 }
