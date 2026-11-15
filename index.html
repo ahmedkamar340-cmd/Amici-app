@@ -93,7 +93,6 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 </div>
 <div id="lst"><p style="text-align:center;color:var(--m);margin-top:30px">جاري التحميل...</p></div>
 
-<!-- نافذة إضافة أوردر أو بيك أب -->
 <div class="m" id="mAdd">
   <div class="mb">
     <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>➕ إضافة حركة جديدة</b><span onclick="cM('mAdd')">✕</span></div>
@@ -111,7 +110,6 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
   </div>
 </div>
 
-<!-- نافذة التسليم (كامل أو جزئي مع تصوير) -->
 <div class="m" id="mDel">
   <div class="mb">
     <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>✅ تأكيد التسليم</b><span onclick="cM('mDel')">✕</span></div>
@@ -132,7 +130,6 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
   </div>
 </div>
 
-<!-- نافذة استلام البيك أب (دفع من العهدة + تصوير) -->
 <div class="m" id="mPk">
   <div class="mb">
     <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🔄 تأكيد استلام البيك أب</b><span onclick="cM('mPk')">✕</span></div>
@@ -146,7 +143,6 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
   </div>
 </div>
 
-<!-- نافذة تعذر الاستلام (مرتجع + تأجيل + تصوير) -->
 <div class="m" id="mRet">
   <div class="mb">
     <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>❌ تعذر الاستلام (مرتجع / تأجيل)</b><span onclick="cM('mRet')">✕</span></div>
@@ -166,9 +162,7 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
   </div>
 </div>
 
-<!-- نافذة دفع شحن فقط -->
 <div class="m" id="mShp"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🚚 استلام مصاريف شحن فقط</b><span onclick="cM('mShp')">✕</span></div><input type="number" id="sAm" class="in" value="75" style="margin-bottom:7px"><button class="bs" style="background:#0d9488;width:100%" onclick="okShp()">تأكيد التحصيل ✓</button></div></div>
-
 <div class="m" id="mLbl"><div class="mb" style="max-width:420px"><div class="no-pr" style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🖨️ معاينة للطباعة أو الحفظ كـ PDF</b><span onclick="cM('mLbl')">✕</span></div><div id="lblContent" class="lbl-box"></div><button class="bs no-pr" style="background:#2563eb;width:100%;margin-top:8px" onclick="window.print()">🖨️ طباعة / حفظ كـ PDF</button></div></div>
 <div class="m" id="mImg"><div class="mb" style="text-align:center"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>🖼️ صورة الإثبات المرفقة</b><span onclick="cM('mImg')">✕</span></div><img id="vImg" src="" style="width:100%;border-radius:6px;border:1px solid var(--b)"></div></div>
 <div class="m" id="mCalls"><div class="mb"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📞 سجل محاولات الاتصال</b><span onclick="cM('mCalls')">✕</span></div><div id="callListBox" style="font-size:.78rem;line-height:1.7"></div></div></div>
@@ -325,15 +319,18 @@ async function upd(i,u,lbl){
 }
 async function delS(i){const it=orders[i];if(it&&confirm('حذف نهائي؟')){await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'DELETE',headers:HDR});await getS();}}
 
+// تقفيل وأرشفة الحركات المنتهية فقط مع ترك الحركات المفتوحة (قيد التنفيذ) ظاهرة لليوم التالي
 async function clsDay(){
   const cid=document.getElementById('cF').value;if(cid==='all'||!cMap[cid])return;
   const act=orders.filter(s=>s.courier_id===cid&&!s.archived);
-  if(!act.length)return alert('لا توجد حركات نشطة.');
+  const done=act.filter(s=>['delivered','shipping_only','partial','pickup_done','returned','rescheduled'].includes(s.status));
+  const open=act.length-done.length;
+  if(!done.length)return alert('لا توجد حركات منتهية لتقفيلها (توجد '+open+' حركة قيد التنفيذ ستظل مفتوحة).');
   let tIn=0,tOut=0;
-  act.forEach(s=>{const m=Number(s.collected_amount||0);if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;});
-  if(!confirm('تقفيل وأرشفة يوم ['+cMap[cid].name+']؟\nتحصيل: '+tIn+'ج | مدفوع بيك أب: -'+tOut+'ج\nصافي العهدة المطلوبة: '+(tIn-tOut)+' ج.م'))return;
-  const r=await fetch(API+'?courier_id=eq.'+encodeURIComponent(cid)+'&archived=eq.false',{method:'PATCH',headers:HDR,body:JSON.stringify({archived:true})});
-  if(r.ok){alert('تم التقفيل والأرشفة!');await getS();}
+  done.forEach(s=>{const m=Number(s.collected_amount||0);if(s.status==='pickup_done')tOut+=m;else if(['delivered','shipping_only','partial'].includes(s.status))tIn+=m;});
+  if(!confirm('تقفيل وأرشفة المنتهي لـ ['+cMap[cid].name+']؟\nالمنتهي: '+done.length+' | سيظل مفتوح: '+open+'\nتحصيل: '+tIn+'ج | بيك أب: -'+tOut+'ج\nصافي العهدة المطلوبة: '+(tIn-tOut)+' ج.م'))return;
+  const r=await fetch(API+'?courier_id=eq.'+encodeURIComponent(cid)+'&archived=eq.false&status=neq.out_for_delivery',{method:'PATCH',headers:HDR,body:JSON.stringify({archived:true})});
+  if(r.ok){alert('تم التقفيل بنجاح! وبقيت الحركات المفتوحة ('+open+') ظاهرة للمتابعة.');await getS();}
 }
 async function unAr(i){const it=orders[i];if(it){await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'PATCH',headers:HDR,body:JSON.stringify({archived:false})});await getS();}}
 
@@ -386,7 +383,6 @@ function ren(){
     const canAct=!ar&&(role==='admin'||isP);
     const lockMsg=(!ar&&role==='courier'&&!isP)?'<div style="text-align:center;font-size:.7rem;color:#93c5fd;background:rgba(8,18,32,.5);padding:4px;border-radius:4px">🔒 تم تسجيل الحالة (التعديل متاح للمدير فقط)</div>':'';
 
-    // أزرار التنفيذ: للبيك أب زر استلام ودفع من العهدة، وللأوردر العادي 3 أزرار مبسطة
     const actBtns=pk
       ?'<div class="sg"><button class="bs" style="background:#d97706" onclick="oPk('+idx+')">🔄 تم استلام البيك أب (دفع عهدة)</button><button class="bs" style="background:var(--d)" onclick="oRet('+idx+')">❌ تعذر الاستلام</button></div>'
       :'<div class="sg"><button class="bs" style="background:var(--s);grid-column:span 2" onclick="oDel('+idx+')">✅ تم التسليم (كامل / جزئي)</button><button class="bs" style="background:#0d9488" onclick="oShp('+idx+')">🚚 دفع شحن فقط</button><button class="bs" style="background:var(--d)" onclick="oRet('+idx+')">❌ تعذر الاستلام</button></div>';
