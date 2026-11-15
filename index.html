@@ -46,17 +46,20 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 .pbox{background:#081220;padding:6px;border-radius:6px;margin-bottom:6px;border:1px dashed #3b82f6;text-align:center}
 .ptbl{width:100%;border-collapse:collapse;font-size:.72rem;margin-top:6px}
 .ptbl th,.ptbl td{border:1px solid #000;padding:4px;text-align:right}
+#toast{display:none;position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#1e3a8a;border:2px solid #38bdf8;color:#fff;padding:9px 14px;border-radius:8px;z-index:9998;font-size:.78rem;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.6);max-width:92%;text-align:center}
 @media print{body *{visibility:hidden}#mLbl,#mLbl *{visibility:visible}#mLbl{position:fixed;inset:0;background:#fff;padding:0;display:block;overflow:visible}#mLbl .mb{max-width:100%;border:none;background:#fff}#mLbl .no-pr{display:none}}
 </style>
 </head>
 <body>
 
 <div id="splash" onclick="this.style.display='none'"><div style="font-size:2.6rem">🚚</div><div style="font-size:1.5rem;font-weight:900">أميتشي</div><div style="font-size:.75rem;color:#60a5fa;font-weight:700">AMICI EXPRESS</div></div>
+<div id="toast" onclick="this.style.display='none'"></div>
 
 <header>
   <div class="top">
     <h1 style="font-size:.84rem;color:#60a5fa">🚚 أميتشي <span id="st" style="font-size:.58rem;color:#eab308">⏳...</span></h1>
     <div class="btns">
+      <button class="bh" id="bNotif" style="background:#0f172a;border-color:#eab308;color:#fde047" onclick="enNotif()">🔔 تفعيل</button>
       <button class="bh" style="background:#0284c7" onclick="oQrSc()">📷 QR</button>
       <button class="bh" style="background:#2563eb" id="bAO" onclick="oM('mAdd')">+ إضافة</button>
       <button class="bh" style="background:#059669" id="bX" onclick="oM('mX')">📁 ملف/PDF</button>
@@ -248,14 +251,70 @@ const BASE='https://difabkjpyypaylnofbcl.supabase.co/rest/v1/',API=BASE+'shipmen
 const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
 const HDR={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json','Prefer':'return=representation'};
 if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-let orders=[],cMap={ahmed:{name:'أحمد',pin:'1111'},biko:{name:'بيكو',pin:'2222'},mina:{name:'مينا عبد النور',pin:'3333'}},admPin='1234',supPin='5555',role='admin',myId='',sIdx=-1,tab='p',ar=false,cam=null,tmr=null,tmpPic='';
+let orders=[],snap={},firstLoad=true,cMap={ahmed:{name:'أحمد',pin:'1111'},biko:{name:'بيكو',pin:'2222'},mina:{name:'مينا عبد النور',pin:'3333'}},admPin='1234',supPin='5555',role='admin',myId='',sIdx=-1,tab='p',ar=false,cam=null,tmr=null,tmpPic='';
 const td=new Date().toISOString().split('T')[0];document.getElementById('cD2').value=td;
 const oM=i=>document.getElementById(i).style.display='flex',cM=i=>document.getElementById(i).style.display='none';
 const cln=s=>String(s||'').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD]/g,'').replace(/["']/g,'').trim();
 const isPk=s=>String(s.tracking_code||'').startsWith('PK-')||s.status==='pickup_done';
 const isStaff=()=>role==='admin'||role==='supervisor';
 
-// استخراج وحفظ ختم التسوية داخل reason بدون حاجة لأعمدة إضافية
+// نظام الصوت والإشعارات الفورية عند حدوث أي تغيير
+function beep(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)(),o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sine';o.frequency.setValueAtTime(880,ctx.currentTime);o.frequency.setValueAtTime(1174,ctx.currentTime+0.12);
+    g.gain.setValueAtTime(0.18,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.35);
+    o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+0.35);
+  }catch(e){}
+}
+function fireNotif(title,body){
+  beep();
+  const t=document.getElementById('toast');
+  t.innerHTML='🔔 '+title+'<br><span style="font-weight:400;font-size:.72rem">'+body+'</span>';
+  t.style.display='block';
+  clearTimeout(window._tTmr);window._tTmr=setTimeout(()=>t.style.display='none',6000);
+  if('Notification' in window&&Notification.permission==='granted'){
+    try{new Notification(title,{body:body});}catch(e){}
+  }
+}
+async function enNotif(){
+  beep();
+  if(!('Notification' in window))return alert('تم تفعيل التنبيهات الصوتية داخل التطبيق!');
+  const p=await Notification.requestPermission();
+  updNotifBtn();
+  if(p==='granted')fireNotif('أميتشي إكسبريس','تم تفعيل الإشعارات الفورية بنجاح!');
+  else alert('تم تفعيل التنبيهات داخل التطبيق (لإشعارات الخلفية اسمح بالإشعارات من إعدادات المتصفح).');
+}
+function updNotifBtn(){
+  const b=document.getElementById('bNotif');if(!b)return;
+  if('Notification' in window&&Notification.permission==='granted'){b.innerText='🔔 مفعّل';b.style.background='#065f46';b.style.borderColor='#10b981';b.style.color='#6ee7b7';}
+}
+function checkChanges(list){
+  const cur={};
+  const stN={out_for_delivery:'قيد التنفيذ',delivered:'تم التسليم ✅',shipping_only:'شحن فقط 🚚',partial:'تسليم جزئي 📦',pickup_done:'تم البيك أب 🔄',rescheduled:'مؤجل 📅',returned:'تعذر الاستلام ❌'};
+  if(!firstLoad){
+    let alerts=[];
+    list.forEach(s=>{
+      const id=String(s.id),sig=(s.status||'')+'|'+(s.courier_id||'')+'|'+(s.archived?'1':'0'),prev=snap[id];
+      const cn=cMap[s.courier_id]?.name||s.courier_id||'';
+      if(!prev){
+        if(role==='courier'&&s.courier_id===myId&&!s.archived)alerts.push('أوردر جديد #'+(s.tracking_code||'')+' ('+(s.recipient_name||'')+')');
+        else if(isStaff()&&!s.archived)alerts.push('إضافة شحنة #'+(s.tracking_code||'')+' ['+cn+']');
+      }else if(prev!==sig){
+        const pParts=prev.split('|');
+        if(role==='courier'&&s.courier_id===myId&&pParts[1]!==s.courier_id&&!s.archived)alerts.push('تم تحويل شحنة إليك #'+(s.tracking_code||''));
+        else if(isStaff()&&pParts[0]!==s.status)alerts.push('#'+(s.tracking_code||'')+' ['+cn+']: '+(stN[s.status]||s.status));
+      }
+    });
+    if(alerts.length){
+      const msg=alerts.length===1?alerts[0]:(alerts[0]+' (+'+(alerts.length-1)+' تحديثات أخرى)');
+      fireNotif('تحديث جديد في أميتشي',msg);
+    }
+  }
+  list.forEach(s=>{cur[String(s.id)]=(s.status||'')+'|'+(s.courier_id||'')+'|'+(s.archived?'1':'0');});
+  snap=cur;firstLoad=false;
+}
+
 const getSettle=s=>{const m=String(s.reason||'').match(/\[([^\]]+)\]/);return m?m[1]:'';};
 const cleanRsn=s=>String(s.reason||'').replace(/\s*\[[^\]]+\]/g,'').trim();
 const setSettle=(s,tag)=>{const base=cleanRsn(s);return base?(base+' ['+tag+']'):('['+tag+']');};
@@ -407,11 +466,12 @@ async function addC(){const n=document.getElementById('nCN').value.trim(),p=docu
 async function editC(id){const c=cMap[id];if(!c)return;const np=prompt('أدخل الباسورد (PIN) الجديد للمندوب ['+c.name+']:',c.pin);if(!np||!np.trim())return;const r=await fetch(COUR+'?id=eq.'+id,{method:'PATCH',headers:HDR,body:JSON.stringify({pin:np.trim()})});if(r.ok){await getC();alert('تم تغيير الباسورد بنجاح!');}}
 async function delC(id){if(confirm('حذف؟')){await fetch(COUR+'?id=eq.'+id,{method:'DELETE',headers:HDR});await getC();}}
 
-async function getS(){
-  const st=document.getElementById('st');st.style.color='#eab308';st.innerText='⏳...';
+async function getS(silent){
+  const st=document.getElementById('st');if(!silent){st.style.color='#eab308';st.innerText='⏳...';}
   try{const r=await fetch(API+'?select=*',{headers:HDR});if(!r.ok)throw 0;const d=await r.json(),sv=JSON.parse(localStorage.getItem('am_sort')||'[]');
+  checkChanges(d);
   orders=sv.length?d.sort((a,b)=>{const ia=sv.indexOf(String(a.id)),ib=sv.indexOf(String(b.id));return(ia<0?999:ia)-(ib<0?999:ib);}):d;
-  st.style.color='#22c55e';st.innerText='● متصل';ren();}catch(e){st.style.color='#ef4444';st.innerText='❌ خطأ';}
+  st.style.color='#22c55e';st.innerText='● متصل';ren();}catch(e){if(!silent){st.style.color='#ef4444';st.innerText='❌ خطأ';}}
 }
 async function fAll(){await getC();await getS();}
 
@@ -435,7 +495,6 @@ async function upd(i,u,lbl){
 }
 async function delS(i){if(role!=='admin')return;const it=orders[i];if(it&&confirm('حذف نهائي؟')){await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'DELETE',headers:HDR});await getS();}}
 
-// تقفيل وأرشفة الحركات المنتهية مع طبع ختم التسوية (باسم المدير أو المشرف)
 async function clsDay(){
   const cid=document.getElementById('cF').value,f1=document.getElementById('dF1').value,f2=document.getElementById('dF2').value;
   if(cid==='all'||!cMap[cid])return;
@@ -454,7 +513,6 @@ async function clsDay(){
 }
 async function unAr(i){const it=orders[i];if(it){await fetch(API+'?id=eq.'+encodeURIComponent(it.id),{method:'PATCH',headers:HDR,body:JSON.stringify({archived:false,reason:cleanRsn(it)})});await getS();}}
 
-// تصفية العهدة بين المدير والمشرف
 async function settleSupCash(){
   if(role!=='admin')return;
   const ls=getMo().filter(s=>getSettle(s).includes('المشرف'));
@@ -575,7 +633,6 @@ function cRep(){
   const cName=c==='all'?'كل المناديب':(cMap[c]?.name||c);
   document.getElementById('rSum').innerHTML='<div style="background:#081220;padding:8px;border-radius:6px;font-size:.78rem"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>إجمالي الحركات:</span><b>'+t+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>المنجزة:</span><b>'+d+' ('+(t?Math.round(d/t*100):0)+'%)</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#f87171"><span>تعذر الاستلام:</span><b>'+r+'</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#4ade80"><span>إجمالي التحصيل (وارد):</span><b>+'+tIn+' ج.م</b></div><div style="display:flex;justify-content:space-between;margin-bottom:4px;color:#fbbf24"><span>مدفوعات بيك أب (منصرف):</span><b>-'+tOut+' ج.م</b></div><div style="display:flex;justify-content:space-between;border-top:1px solid #1e40af;padding-top:4px;color:#60a5fa;font-size:.86rem"><span>صافي العهدة:</span><b>'+(tIn-tOut)+' ج.م</b></div></div>';
 
-  // صندوق عهدة المشرف المعلقة للتصفية مع المدير
   const supBox=document.getElementById('supCustodyBox');
   if(sCnt>0){
     supBox.style.display='block';
@@ -643,8 +700,8 @@ function login(){
   localStorage.setItem('am_role',r);document.getElementById('pIn').value='';cM('mL');sSess(r);
 }
 
-(async()=>{await getC();const s=localStorage.getItem('am_role');if(s&&(s==='admin'||s==='supervisor'||cMap[s]))sSess(s);await getS();})();
-setInterval(()=>{if(role==='courier'&&myId)sLoc(myId);},30000);
+(async()=>{await getC();const s=localStorage.getItem('am_role');if(s&&(s==='admin'||s==='supervisor'||cMap[s]))sSess(s);updNotifBtn();await getS();})();
+setInterval(()=>{getS(true);if(role==='courier'&&myId)sLoc(myId);},15000);
 </script>
 </body>
 </html>
