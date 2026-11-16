@@ -58,15 +58,16 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 <div id="splash" onclick="this.style.display='none'"><div style="font-size:2.8rem">📦</div><div style="font-size:1.6rem;font-weight:900">مراسيل</div><div style="font-size:.75rem;color:#dbeafe;font-weight:700">MARASEEL EXPRESS</div></div>
 <div id="toast" onclick="this.style.display='none'"></div>
 
-<!-- شاشة القفل الإجبارية قبل عرض أي بيانات -->
+<!-- شاشة القفل الإجبارية (PIN أو البصمة) -->
 <div id="lockScreen">
   <div style="background:#ffffff;border:1px solid #cbd5e1;border-radius:14px;width:100%;max-width:340px;padding:20px;text-align:center;box-shadow:0 10px 25px rgba(15,23,42,.1)">
     <div style="font-size:2.6rem;margin-bottom:4px">📦</div>
     <h2 style="font-size:1.25rem;color:#1d4ed8;margin-bottom:2px">مراسيل</h2>
-    <p style="font-size:.74rem;color:#64748b;margin-bottom:14px">يرجى اختيار الحساب وإدخال الرقم السري للدخول</p>
+    <p style="font-size:.74rem;color:#64748b;margin-bottom:14px">يرجى اختيار الحساب والدخول بالبصمة أو الرقم السري</p>
     <select id="rSl" class="in" style="margin-bottom:8px;padding:8px;font-size:.82rem"><option>جاري تحميل الحسابات...</option></select>
-    <input type="password" id="pIn" class="in" placeholder="أدخل الرقم السري (PIN)" inputmode="numeric" style="margin-bottom:12px;padding:8px;font-size:.86rem;text-align:center" onkeydown="if(event.key==='Enter')login()">
-    <button class="bs" style="background:#2563eb;width:100%;padding:10px;font-size:.85rem" onclick="login()">🔐 تسجيل الدخول</button>
+    <input type="password" id="pIn" class="in" placeholder="أدخل الرقم السري (PIN)" inputmode="numeric" style="margin-bottom:10px;padding:8px;font-size:.86rem;text-align:center" onkeydown="if(event.key==='Enter')login()">
+    <button class="bs" style="background:#2563eb;width:100%;padding:10px;font-size:.85rem;margin-bottom:7px" onclick="login()">🔐 تسجيل الدخول</button>
+    <button id="bBioLogin" class="bs" style="display:none;background:#059669;width:100%;padding:10px;font-size:.85rem" onclick="bioLogin()">👆 الدخول بالبصمة</button>
   </div>
 </div>
 
@@ -76,12 +77,13 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
     <h1 style="font-size:.9rem;color:#1d4ed8">📦 مراسيل <span id="st" style="font-size:.58rem;color:#d97706">⏳...</span></h1>
     <div class="btns">
       <button class="bh" style="background:#db2777;border-color:#be185d" onclick="oScanM()">📦 جرد/باركود</button>
+      <button class="bh" id="bBioReg" style="background:#ecfdf5;border-color:#10b981;color:#047857" onclick="regBio()">👆 البصمة</button>
       <button class="bh" id="bNotif" style="background:#fef3c7;border-color:#f59e0b;color:#92400e" onclick="enNotif()">🔔 تفعيل</button>
       <button class="bh" style="background:#2563eb" id="bAO" onclick="oM('mAdd')">+ إضافة</button>
-      <button class="bh" style="background:#059669;border-color:#047857" id="bX" onclick="oM('mX')">📁 ملف/PDF</button>
-      <button class="bh" style="background:#d97706;border-color:#b45309" id="bPdf" onclick="oPdfM()">🖨️ كشف PDF</button>
-      <button class="bh" style="background:#7c3aed;border-color:#6d28d9" id="bRep" onclick="oRep()">📈 تقارير</button>
-      <button class="bh" style="background:#0284c7;border-color:#0369a1" id="bLoc" onclick="oLocs()">📍 المواقع</button>
+      <button class="bh" style="background:#059669" id="bX" onclick="oM('mX')">📁 ملف/PDF</button>
+      <button class="bh" style="background:#d97706" id="bPdf" onclick="oPdfM()">🖨️ كشف PDF</button>
+      <button class="bh" style="background:#7c3aed" id="bRep" onclick="oRep()">📈 تقارير</button>
+      <button class="bh" style="background:#0284c7" id="bLoc" onclick="oLocs()">📍 المواقع</button>
       <button class="bh" id="bAC" onclick="oM('mC')">👥 مناديب</button>
       <button class="bh" style="background:#e2e8f0;border-color:#cbd5e1;color:#0f172a" onclick="fAll()">🔄</button>
       <button class="bh" style="background:#dc2626;border-color:#b91c1c" onclick="logout()">🚪 خروج</button>
@@ -127,7 +129,6 @@ header{background:var(--c);padding:9px;border-bottom:1px solid var(--b);position
 <div id="lst"><p style="text-align:center;color:var(--m);margin-top:30px">جاري التحميل...</p></div>
 </div>
 
-<!-- نافذة الجرد والاستلام الفعلي بالباركود -->
 <div class="m" id="mScan">
   <div class="mb" style="max-width:390px">
     <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b>📦 الاستلام الفعلي وجرد الباركود</b><span style="cursor:pointer" onclick="stSc()">✕</span></div>
@@ -333,6 +334,66 @@ const oM=i=>document.getElementById(i).style.display='flex',cM=i=>document.getEl
 const cln=s=>String(s||'').replace(/[\u0000-\u001F\u007F-\u009F\uFFFD]/g,'').replace(/["']/g,'').trim();
 const isPk=s=>String(s.tracking_code||'').startsWith('PK-')||s.status==='pickup_done';
 const isStaff=()=>role==='admin'||role==='supervisor';
+
+// نظام المصادقة بالبصمة (WebAuthn Biometric Authentication)
+const b64ToBuf=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+const bufToB64=b=>btoa(String.fromCharCode(...new Uint8Array(b)));
+
+function updBioUI(){
+  const bio=JSON.parse(localStorage.getItem('mar_bio')||'null');
+  const btnL=document.getElementById('bBioLogin');
+  if(btnL){
+    if(bio&&bio.role){
+      const nm=bio.role==='admin'?'المدير':bio.role==='supervisor'?'المشرف':(cMap[bio.role]?.name||bio.role);
+      btnL.style.display='block';
+      btnL.innerText='👆 الدخول بالبصمة ('+nm+')';
+    }else btnL.style.display='none';
+  }
+  const btnR=document.getElementById('bBioReg');
+  if(btnR){
+    const curRole=role==='courier'?myId:role;
+    if(bio&&bio.role===curRole){btnR.innerText='👆 البصمة مفعّلة';btnR.style.background='#dcfce7';btnR.style.borderColor='#22c55e';btnR.style.color='#166534';}
+    else{btnR.innerText='👆 تفعيل البصمة';btnR.style.background='#ecfdf5';btnR.style.borderColor='#10b981';btnR.style.color='#047857';}
+  }
+}
+
+async function regBio(){
+  if(!window.PublicKeyCredential)return alert('متصفح هذا الجهاز لا يدعم البصمة.');
+  const curRole=role==='courier'?myId:role;
+  const uTitle=role==='admin'?'المدير':role==='supervisor'?'المشرف':(cMap[myId]?.name||myId);
+  try{
+    const cred=await navigator.credentials.create({
+      publicKey:{
+        challenge:crypto.getRandomValues(new Uint8Array(32)),
+        rp:{name:'مراسيل للشحن'},
+        user:{id:new TextEncoder().encode('mar_'+curRole),name:uTitle,displayName:uTitle},
+        pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+        authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},
+        timeout:60000
+      }
+    });
+    localStorage.setItem('mar_bio',JSON.stringify({role:curRole,id:bufToB64(cred.rawId)}));
+    updBioUI();
+    alert('✅ تم ربط حساب ['+uTitle+'] ببصمة الجهاز بنجاح!');
+  }catch(e){alert('تعذر تفعيل البصمة (تأكد أن الجهاز محمي ببصمة إصبع أو وجه).');}
+}
+
+async function bioLogin(){
+  const bio=JSON.parse(localStorage.getItem('mar_bio')||'null');
+  if(!bio||!bio.id)return alert('البصمة غير مفعّلة على هذا الجهاز بعد.');
+  try{
+    await navigator.credentials.get({
+      publicKey:{
+        challenge:crypto.getRandomValues(new Uint8Array(32)),
+        allowCredentials:[{type:'public-key',id:b64ToBuf(bio.id)}],
+        userVerification:'required',
+        timeout:60000
+      }
+    });
+    localStorage.setItem('am_role',bio.role);
+    sSess(bio.role);getS();
+  }catch(e){alert('لم يتم التحقق من البصمة، يمكنك الدخول بالرقم السري.');}
+}
 
 function getOrderCom(s){
   if(!['delivered','shipping_only','partial','pickup_done'].includes(s.status))return 0;
@@ -632,6 +693,7 @@ async function getC(){
   const p=document.getElementById('cF').value||'all';
   document.getElementById('cF').innerHTML=oA;document.getElementById('cF').value=role==='courier'?myId:p;
   document.getElementById('rCo').innerHTML=oA;document.getElementById('pCo').innerHTML=oA;document.getElementById('tC').innerHTML=oO;document.getElementById('cC2').innerHTML=oO;document.getElementById('aC').innerHTML=oO;document.getElementById('scCourSel').innerHTML=oO;document.getElementById('rSl').innerHTML=oR;document.getElementById('cBx').innerHTML=lH;
+  updBioUI();
 }
 async function saveDefCfg(cfgId,title,inId){
   const v=Number(document.getElementById(inId).value)||0;
@@ -909,7 +971,7 @@ function sSess(r){
   if(r==='admin'){role='admin';myId='';document.getElementById('uN').innerText='👑 المدير';cf.value='all';cf.disabled=false;staffIds.forEach(i=>document.getElementById(i).style.display='inline-flex');document.getElementById('bAC').style.display='inline-flex';}
   else if(r==='supervisor'){role='supervisor';myId='';document.getElementById('uN').innerText='🛡️ المشرف';cf.value='all';cf.disabled=false;staffIds.forEach(i=>document.getElementById(i).style.display='inline-flex');document.getElementById('bAC').style.display='none';}
   else if(cMap[r]){role='courier';myId=r;ar=false;document.getElementById('arBn').style.display='none';document.getElementById('uN').innerText='🚴 '+cMap[r].name;cf.value=r;cf.disabled=true;staffIds.forEach(i=>document.getElementById(i).style.display='none');document.getElementById('bAC').style.display='none';sLoc(r);}
-  ren();
+  updBioUI();ren();
 }
 function login(){
   const r=document.getElementById('rSl').value,p=document.getElementById('pIn').value.trim();
@@ -923,6 +985,7 @@ function logout(){
   localStorage.removeItem('am_role');
   document.getElementById('appWrap').style.display='none';
   document.getElementById('lockScreen').style.display='flex';
+  updBioUI();
 }
 
 (async()=>{await getC();const s=localStorage.getItem('am_role');if(s&&(s==='admin'||s==='supervisor'||cMap[s])){sSess(s);updNotifBtn();await getS();}})();
