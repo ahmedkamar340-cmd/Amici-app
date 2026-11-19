@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#2563eb">
+<title>تتبع شحنتك — مراسيل</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}
+body{background:#f1f5f9;color:#0f172a;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:18px 12px}
+.box{background:#ffffff;border:1px solid #cbd5e1;border-radius:16px;width:100%;max-width:420px;padding:22px;box-shadow:0 10px 25px rgba(15,23,42,.08);text-align:center}
+.logo{font-size:2.6rem;margin-bottom:4px}
+h1{font-size:1.35rem;color:#1d4ed8;margin-bottom:4px}
+.sub{font-size:.78rem;color:#64748b;margin-bottom:16px}
+.inp{width:100%;background:#f8fafc;border:1.5px solid #cbd5e1;border-radius:10px;padding:12px;font-size:.95rem;text-align:center;font-weight:700;color:#0f172a;outline:none;margin-bottom:10px}
+.inp:focus{border-color:#2563eb;background:#fff}
+.btn{width:100%;background:#2563eb;color:#fff;border:none;border-radius:10px;padding:12px;font-size:.92rem;font-weight:700;cursor:pointer;transition:.2s}
+.btn:active{transform:scale(.98)}
+.res{display:none;margin-top:18px;text-align:right;border-top:1px dashed #cbd5e1;padding-top:16px}
+.st-badge{display:block;text-align:center;padding:10px;border-radius:10px;font-weight:800;font-size:.92rem;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:.82rem}
+.row span{color:#64748b}
+.row b{color:#0f172a;text-align:left;max-width:65%}
+.steps{display:flex;justify-content:space-between;margin:14px 0;position:relative}
+.steps::before{content:'';position:absolute;top:12px;left:10%;right:10%;height:3px;background:#e2e8f0;z-index:1}
+.step{position:relative;z-index:2;text-align:center;width:33.3%}
+.dot{width:26px;height:26px;border-radius:50%;background:#e2e8f0;color:#64748b;display:inline-flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;margin-bottom:4px}
+.step.on .dot{background:#2563eb;color:#fff}
+.step.ok .dot{background:#16a34a;color:#fff}
+.step p{font-size:.68rem;color:#475569;font-weight:700}
+.wa{display:block;text-align:center;background:#16a34a;color:#fff;text-decoration:none;padding:10px;border-radius:10px;font-weight:700;font-size:.84rem;margin-top:14px}
+.foot{margin-top:18px;font-size:.72rem;color:#64748b}
+</style>
+</head>
+<body>
+
+<div class="box">
+  <div class="logo">📦</div>
+  <h1>مراسيل للشحن والتوصيل</h1>
+  <p class="sub">أدخل رقم الشحنة أو البوليصة لمتابعة حالتها لحظة بلحظة</p>
+
+  <input id="trkIn" class="inp" placeholder="مثال: 8113 أو VAM01" onkeydown="if(event.key==='Enter')findTrk()">
+  <button class="btn" id="btnTrk" onclick="findTrk()">🔍 تتبع الشحنة الآن</button>
+
+  <div id="msg" style="margin-top:12px;font-size:.82rem;font-weight:700;color:#dc2626"></div>
+
+  <div id="resBox" class="res">
+    <div id="stBadge" class="st-badge"></div>
+
+    <div class="steps">
+      <div class="step on" id="s1"><div class="dot">1</div><p>تم التسجيل</p></div>
+      <div class="step" id="s2"><div class="dot">2</div><p>قيد التوصيل</p></div>
+      <div class="step" id="s3"><div class="dot">3</div><p>تم التسليم</p></div>
+    </div>
+
+    <div class="row"><span>رقم الشحنة:</span><b id="rCode"></b></div>
+    <div class="row"><span>اسم المستلم:</span><b id="rName"></b></div>
+    <div class="row"><span>العنوان:</span><b id="rAddr"></b></div>
+    <div class="row"><span>المبلغ المطلوب:</span><b id="rCod" style="color:#16a34a"></b></div>
+    <div class="row" id="rNoteRow" style="display:none"><span>ملاحظات الحالة:</span><b id="rNote" style="color:#d97706"></b></div>
+    <div class="row"><span>تاريخ الحركة:</span><b id="rDate"></b></div>
+
+    <a id="waHelp" href="https://wa.me/201278833360" target="_blank" class="wa">💬 تواصل مع خدمة عملاء مراسيل</a>
+  </div>
+</div>
+
+<div class="foot">© 2026 مراسيل — خدمة العملاء: 01278833360</div>
+
+<script>
+const API='https://difabkjpyypaylnofbcl.supabase.co/rest/v1/shipments';
+const KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRpZmFia2pweXlwYXlsbm9mYmNsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5NzY1OTksImV4cCI6MjEwOTU1MjU5OX0.THAtRh72IfpKvbXxaRK6X9mlWDlkLFjKG6O5DdROZEQ';
+
+async function findTrk(){
+  const raw=document.getElementById('trkIn').value.trim().replace(/^#/,'');
+  const msg=document.getElementById('msg'),res=document.getElementById('resBox'),btn=document.getElementById('btnTrk');
+  msg.innerText='';res.style.display='none';
+  if(!raw){msg.innerText='يرجى إدخال رقم الشحنة أولاً.';return;}
+
+  btn.innerText='⏳ جاري البحث...';btn.disabled=true;
+  try{
+    const r=await fetch(API+'?tracking_code=ilike.'+encodeURIComponent(raw)+'&select=tracking_code,recipient_name,delivery_address,cod_amount,status,reason,rescheduled_date,created_at&order=created_at.desc&limit=1',{
+      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}
+    });
+    const d=await r.json();
+    if(!d||!d.length){
+      msg.innerText='❌ لم يتم العثور على شحنة بهذا الرقم ('+raw+')، تأكد من الرقم وحاول مرة أخرى.';
+    }else{
+      showRes(d[0]);
+    }
+  }catch(e){
+    msg.innerText='⚠️ تعذر الاتصال بالسيرفر، حاول مرة أخرى.';
+  }
+  btn.innerText='🔍 تتبع الشحنة الآن';btn.disabled=false;
+}
+
+function showRes(s){
+  const st=s.status||'out_for_delivery';
+  const cleanRsn=String(s.reason||'').replace(/\s*\[[^\]]+\]/g,'').replace(/تحقق QR ✓/g,'').trim();
+  const badge=document.getElementById('stBadge');
+  const s1=document.getElementById('s1'),s2=document.getElementById('s2'),s3=document.getElementById('s3');
+  s1.className='step on';s2.className='step';s3.className='step';
+
+  const map={
+    pending_office:{t:'⏳ تم تسجيل الشحنة وبانتظار استلامها بالمكتب',bg:'#fce7f3',c:'#be185d',step:1},
+    out_for_delivery:{t:'🚴 الشحنة مع المندوب وجاري التوصيل إليك اليوم',bg:'#dbeafe',c:'#1e40af',step:2},
+    delivered:{t:'✅ تم تسليم الشحنة بنجاح',bg:'#dcfce7',c:'#166534',step:3},
+    shipping_only:{t:'🚚 تم تحصيل مصاريف الشحن',bg:'#dcfce7',c:'#166534',step:3},
+    partial:{t:'📦 تم التسليم الجزئي للشحنة',bg:'#f3e8ff',c:'#6d28d9',step:3},
+    pickup_done:{t:'🔄 تم استلام طرد البيك أب بنجاح',bg:'#fef3c7',c:'#92400e',step:3},
+    rescheduled:{t:'📅 تم تأجيل موعد التسليم'+(s.rescheduled_date?' إلى '+s.rescheduled_date:''),bg:'#fef3c7',c:'#92400e',step:2},
+    returned:{t:'❌ تعذر تسليم الشحنة',bg:'#fee2e2',c:'#dc2626',step:2}
+  };
+  const info=map[st]||{t:'📦 قيد المتابعة',bg:'#e2e8f0',c:'#334155',step:1};
+  badge.innerText=info.t;badge.style.background=info.bg;badge.style.color=info.c;
+
+  if(info.step>=2)s2.className='step on';
+  if(info.step>=3){s1.className='step ok';s2.className='step ok';s3.className='step ok';}
+
+  document.getElementById('rCode').innerText='#'+(s.tracking_code||'');
+  document.getElementById('rName').innerText=s.recipient_name||'';
+  document.getElementById('rAddr').innerText=s.delivery_address||'';
+  document.getElementById('rCod').innerText=(Number(s.cod_amount)||0)+' ج.م';
+  document.getElementById('rDate').innerText=(s.created_at||'').slice(0,10);
+
+  const nRow=document.getElementById('rNoteRow');
+  if(cleanRsn&&!['كاش','إنستاباي / محفظة','بالفرع'].includes(cleanRsn)){
+    nRow.style.display='flex';document.getElementById('rNote').innerText=cleanRsn;
+  }else nRow.style.display='none';
+
+  const waTxt='مرحباً مراسيل، أستفسر عن الشحنة رقم #'+(s.tracking_code||'')+' باسم '+(s.recipient_name||'');
+  document.getElementById('waHelp').href='https://wa.me/201278833360?text='+encodeURIComponent(waTxt);
+  document.getElementById('resBox').style.display='block';
+}
+
+// دعم فتح الرابط برقم الشحنة مباشرة مثل: track.html?code=8113
+const pCode=new URLSearchParams(location.search).get('code');
+if(pCode){document.getElementById('trkIn').value=pCode;findTrk();}
+</script>
+</body>
+</html>
